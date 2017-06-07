@@ -8,5 +8,6 @@ public
 temp
 jest
 .aws
+dist
 
 config/production.json

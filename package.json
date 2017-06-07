@@ -4,16 +4,53 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "watch": "gulp"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/debug": "^0.0.29",
+    "@types/jest": "^19.2.4",
+    "@types/koa": "^2.0.39",
+    "@types/koa-router": "^7.0.22",
+    "@types/node": "^7.0.28",
+    "@types/shortid": "^0.0.29",
     "eslint": "^3.12.2",
     "eslint-config-airbnb": "^13.0.0",
     "eslint-plugin-import": "2.1.0",
     "eslint-plugin-jsx-a11y": "2.2.3",
     "eslint-plugin-react": "^6.8.0",
+    "gulp": "3.9.1",
+    "gulp-typescript": "3.1.1",
+    "jest": "^20.0.4",
+    "ts-jest": "^20.0.5",
     "typescript": "^2.3.2"
+  },
+  "dependencies": {
+    "axios": "^0.16.2",
+    "debug": "^2.6.8",
+    "koa": "^2.2.0",
+    "koa-router": "^7.2.0",
+    "pacote": "^2.7.31",
+    "shortid": "^2.2.8"
+  },
+  "jest": {
+    "transform": {
+      ".(ts|tsx)": "<rootDir>/node_modules/ts-jest/preprocessor.js"
+    },
+    "testEnvironment": "node",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "json"
+    ],
+    "testPathIgnorePatterns": [
+      "<rootDir>/node_modules/",
+      "<rootDir>/dist/"
+    ],
+    "testRegex": "(/__tests__/.*|\\.(test|spec))\\.(ts|tsx|js)$"
   }
 }
