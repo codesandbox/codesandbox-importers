@@ -1,6 +1,9 @@
 import { Context } from 'koa';
 
+import { decamelizeKeys } from 'humps';
+
 import extractGitRepository from './extract';
+import { fetchLastCommitSha } from './api';
 import createSandbox from './create-sandbox';
 
 /**
@@ -12,6 +15,8 @@ import createSandbox from './create-sandbox';
 export default async (ctx: Context, next: () => Promise<any>) => {
   const { username, repo, branch, path } = ctx.params;
 
+  const commitSha = await fetchLastCommitSha(username, repo, branch, path);
+
   const { directories, files } = await extractGitRepository(
     username,
     repo,
@@ -19,7 +24,7 @@ export default async (ctx: Context, next: () => Promise<any>) => {
     path,
   );
 
-  const sandbox = await createSandbox(files, directories);
+  const sandboxParams = await createSandbox(files, directories);
 
-  ctx.body = sandbox;
+  ctx.body = decamelizeKeys(sandboxParams);
 };

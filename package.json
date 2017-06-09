@@ -12,6 +12,7 @@
   "license": "ISC",
   "devDependencies": {
     "@types/debug": "^0.0.29",
+    "@types/humps": "^1.1.2",
     "@types/jest": "^19.2.4",
     "@types/koa": "^2.0.39",
     "@types/koa-router": "^7.0.22",
@@ -23,6 +24,7 @@
     "eslint-plugin-jsx-a11y": "2.2.3",
     "eslint-plugin-react": "^6.8.0",
     "gulp": "3.9.1",
+    "gulp-sourcemaps": "^2.6.0",
     "gulp-typescript": "3.1.1",
     "jest": "^20.0.4",
     "ts-jest": "^20.0.5",
@@ -31,6 +33,7 @@
   "dependencies": {
     "axios": "^0.16.2",
     "debug": "^2.6.8",
+    "humps": "CompuIves/humps",
     "koa": "^2.2.0",
     "koa-router": "^7.2.0",
     "pacote": "^2.7.31",

@@ -31,12 +31,14 @@ type NormalizedDownloadedDirectory = {
 type SandboxFile = {
   title: string;
   code: string;
-  directoryShortid: string;
+  shortid: string;
+  directoryShortid: string | undefined;
 };
 
 type SandboxDirectory = {
   shortid: string;
   title: string;
+  directoryShortid: string | undefined;
 };
 
 type Dependencies = { [key: string]: string };

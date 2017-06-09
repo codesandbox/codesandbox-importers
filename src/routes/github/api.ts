@@ -5,13 +5,36 @@ const BASE_URL = 'https://api.github.com/repos';
 const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID;
 const GITHUB_CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET;
 
+function buildApiUrl(username: string, repo: string) {
+  return `${BASE_URL}/${username}/${repo}`;
+}
+
+function buildSecretParams() {
+  return `?client_id=${GITHUB_CLIENT_ID}&client_secret=${GITHUB_CLIENT_SECRET}`;
+}
+
 function buildContentsUrl(
   username: string,
   repo: string,
   branch: string,
   path: string,
 ) {
-  return `${BASE_URL}/${username}/${repo}/contents/${path}?client_id=${GITHUB_CLIENT_ID}&client_secret=${GITHUB_CLIENT_SECRET}&ref=${branch}`;
+  return `${buildApiUrl(
+    username,
+    repo,
+  )}/contents/${path}${buildSecretParams()}&ref=${branch}`;
+}
+
+function buildCommitsUrl(
+  username: string,
+  repo: string,
+  branch: string,
+  path: string,
+) {
+  return `${buildApiUrl(
+    username,
+    repo,
+  )}/commits/${branch}${buildSecretParams()}&path=${path}`;
 }
 
 type Response = Array<Module>;
@@ -65,4 +88,14 @@ export async function fetchCode(file: Module): Promise<string> {
   });
 
   return response.data;
+}
+
+export async function fetchLastCommitSha(
+  username: string,
+  repo: string,
+  branch: string = 'master',
+  path: string,
+) {
+  const response = await axios(buildCommitsUrl(username, repo, branch, path));
+  return response.data.sha;
 }

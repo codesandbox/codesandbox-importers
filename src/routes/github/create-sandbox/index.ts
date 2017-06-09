@@ -14,9 +14,10 @@ async function downloadFiles(
 ): Promise<NormalizedDownloadedDirectory> {
   const downloadedFiles = await Promise.all(
     directory.files.map(async (file): Promise<DownloadedFile> => {
+      const code = await fetchCode(file);
       return {
         ...file,
-        code: await fetchCode(file),
+        code,
       };
     }),
   );
@@ -37,16 +38,31 @@ async function downloadFiles(
 function flattenDirectories(
   directory: NormalizedDownloadedDirectory,
 ): NormalizedDownloadedDirectory[] {
-  return [
-    directory,
-    ...directory.directories.reduce(
-      (directories: NormalizedDownloadedDirectory[], directory) => [
-        ...directories,
-        ...flattenDirectories(directory),
-      ],
-      [],
-    ),
-  ];
+  return directory.directories.reduce(
+    (
+      directories: NormalizedDownloadedDirectory[],
+      directory: NormalizedDownloadedDirectory,
+    ) => {
+      return [...directories, directory, ...flattenDirectories(directory)];
+    },
+    [],
+  );
+}
+
+/**
+ * Converts a downloaded file to a SandboxFile
+ */
+function createFile(
+  file: DownloadedFile,
+  directoryShortid?: string,
+): SandboxFile {
+  const shortid = generateShortid();
+  return {
+    title: file.name,
+    code: file.code,
+    directoryShortid,
+    shortid,
+  };
 }
 
 /**
@@ -57,39 +73,38 @@ function flattenDirectories(
  */
 function mapModulesToSandboxStructure(
   directory: NormalizedDownloadedDirectory,
+  directoryShortid?: string,
 ): {
-  files: Array<SandboxFile>;
-  directories: Array<SandboxDirectory>;
+  files: SandboxFile[];
+  directories: SandboxDirectory[];
 } {
-  const shortid = generateShortid();
-  const flattenedDirectories = flattenDirectories(directory);
-
-  const sandboxDirectories = flattenedDirectories.map(directory => {
-    const shortid = generateShortid();
-    return {
-      directory: {
-        title: directory.name,
-        shortid,
-      },
-      files: directory.files.map(file => ({
-        title: file.name,
-        code: file.code,
-        directoryShortid: shortid,
-      })),
-    };
-  });
-
-  return sandboxDirectories.reduce(
+  return directory.directories.reduce(
     (
-      normalizedModules: {
+      result: {
         files: SandboxFile[];
         directories: SandboxDirectory[];
       },
-      directory: { directory: SandboxDirectory; files: SandboxFile[] },
-    ) => ({
-      directories: [...normalizedModules.directories, directory.directory],
-      files: [...normalizedModules.files, ...directory.files],
-    }),
+      directory: NormalizedDownloadedDirectory,
+    ) => {
+      const shortid = generateShortid();
+      const children = mapModulesToSandboxStructure(directory, shortid);
+      return {
+        files: [
+          ...result.files,
+          ...children.files,
+          ...directory.files.map(f => createFile(f, shortid)),
+        ],
+        directories: [
+          ...result.directories,
+          ...children.directories,
+          {
+            title: directory.name,
+            shortid,
+            directoryShortid,
+          },
+        ],
+      };
+    },
     { files: [], directories: [] },
   );
 }
@@ -132,12 +147,12 @@ export default async function createSandbox(
   const packageJsonPackage = JSON.parse(packageJsonCode);
 
   const dependencies = await getDependencies(packageJsonPackage);
-
   const modules = mapModulesToSandboxStructure(downloadedSrc);
 
   return {
     title: packageJsonPackage.title,
-    modules: modules.files,
+    // TODO make this better
+    modules: [...modules.files, ...downloadedSrc.files.map(f => createFile(f))],
     directories: modules.directories,
     npmDependencies: dependencies,
   };
