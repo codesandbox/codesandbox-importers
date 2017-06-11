@@ -71,7 +71,7 @@ function createFile(
  * @param {NormalizedDownloadedDirectory} directory
  * @returns {SandboxDirectory}
  */
-function mapModulesToSandboxStructure(
+function mapDirectoryToSandboxStructure(
   directory: NormalizedDownloadedDirectory,
   directoryShortid?: string,
 ): {
@@ -87,7 +87,7 @@ function mapModulesToSandboxStructure(
       directory: NormalizedDownloadedDirectory,
     ) => {
       const shortid = generateShortid();
-      const children = mapModulesToSandboxStructure(directory, shortid);
+      const children = mapDirectoryToSandboxStructure(directory, shortid);
       return {
         files: [
           ...result.files,
@@ -141,18 +141,19 @@ export default async function createSandbox(
   if (!packageJson) throw new Error('Could not find package.json');
   if (!srcFolder) throw new Error('Could not find src directory');
 
-  const downloadedSrc = await downloadFiles(srcFolder);
+  const downloadedSrcFilter = await downloadFiles(srcFolder);
 
   const packageJsonCode = await fetchCode(packageJson);
   const packageJsonPackage = JSON.parse(packageJsonCode);
 
   const dependencies = await getDependencies(packageJsonPackage);
-  const modules = mapModulesToSandboxStructure(downloadedSrc);
+  const modules = mapDirectoryToSandboxStructure(downloadedSrcFilter);
+  const sourceFiles = downloadedSrcFilter.files.map(f => createFile(f));
 
   return {
     title: packageJsonPackage.title,
     // TODO make this better
-    modules: [...modules.files, ...downloadedSrc.files.map(f => createFile(f))],
+    modules: [...modules.files, ...sourceFiles],
     directories: modules.directories,
     npmDependencies: dependencies,
   };

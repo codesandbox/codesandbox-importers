@@ -1,9 +1,14 @@
 import axios from 'axios';
 
+import log from '../../utils/log';
+
 const BASE_URL = 'https://api.github.com/repos';
 
 const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID;
 const GITHUB_CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET;
+
+const NOT_FOUND_MESSAGE =
+  'Could not find the specified repository or directory';
 
 function buildApiUrl(username: string, repo: string) {
   return `${BASE_URL}/${username}/${repo}`;
@@ -62,7 +67,7 @@ export async function fetchContents(
     return response.data;
   } catch (e) {
     if (e.response && e.response.status === 404) {
-      throw new Error('Could not find the specified repository or directory');
+      e.message = NOT_FOUND_MESSAGE;
     }
 
     throw e;
@@ -90,12 +95,49 @@ export async function fetchCode(file: Module): Promise<string> {
   return response.data;
 }
 
-export async function fetchLastCommitSha(
+type CommitResponse = {
+  commitSha: string;
+  username: string;
+  repo: string;
+  branch: string;
+  path: string;
+};
+export async function fetchRepoInfo(
   username: string,
   repo: string,
   branch: string = 'master',
-  path: string,
-) {
-  const response = await axios(buildCommitsUrl(username, repo, branch, path));
-  return response.data.sha;
+  path: string = '',
+): Promise<CommitResponse> {
+  try {
+    const url = buildCommitsUrl(username, repo, branch, path);
+    const response = await axios(url);
+    return {
+      commitSha: response.data.sha,
+      username,
+      repo,
+      branch,
+      path,
+    };
+  } catch (e) {
+    // There is a chance that the branch contains slashes, we try to fix this
+    // by requesting again with the first part of the path appended to the branch
+    // when a request fails (404)
+    if (e.response && e.response.status === 404) {
+      const [branchAddition, ...newPath] = path.split('/');
+      const newBranch = `${branch}/${branchAddition}`;
+
+      if (branchAddition !== '') {
+        return await fetchRepoInfo(
+          username,
+          repo,
+          newBranch,
+          newPath.join('/'),
+        );
+      }
+
+      e.message = NOT_FOUND_MESSAGE;
+    }
+
+    throw e;
+  }
 }

@@ -65,7 +65,7 @@ function verifyFiles(modules: Array<Module>) {
   }
 
   if (!modules.some(m => m.name === 'src')) {
-    throw new Error('THe project should include a src folder');
+    throw new Error('The project should include a src folder');
   }
 }
 

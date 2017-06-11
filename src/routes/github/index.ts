@@ -1,22 +1,15 @@
 import { Context } from 'koa';
 
-import { decamelizeKeys } from 'humps';
-
 import extractGitRepository from './extract';
-import { fetchLastCommitSha } from './api';
+import { fetchRepoInfo } from './api';
 import createSandbox from './create-sandbox';
 
-/**
- * This route will take a github path and create a sandbox from it.
- *
- * If the sandbox for the specified checkout tag already exists it will just return
- * that repository
- */
-export default async (ctx: Context, next: () => Promise<any>) => {
-  const { username, repo, branch, path } = ctx.params;
-
-  const commitSha = await fetchLastCommitSha(username, repo, branch, path);
-
+async function getGitRepository(
+  username: string,
+  repo: string,
+  branch: string,
+  path: string,
+) {
   const { directories, files } = await extractGitRepository(
     username,
     repo,
@@ -26,5 +19,30 @@ export default async (ctx: Context, next: () => Promise<any>) => {
 
   const sandboxParams = await createSandbox(files, directories);
 
-  ctx.body = decamelizeKeys(sandboxParams);
+  return sandboxParams;
+}
+
+export const info = async (ctx: Context, next: () => Promise<any>) => {
+  const response = await fetchRepoInfo(
+    ctx.params.username,
+    ctx.params.repo,
+    ctx.params.branch,
+    ctx.params.path,
+  );
+
+  ctx.body = response;
+};
+
+/**
+ * This route will take a github path and return sandbox data for it
+ *
+ * Data contains all files, directories and package.json info
+ */
+export const data = async (ctx: Context, next: () => Promise<any>) => {
+  // We get branch, etc from here because there could be slashes in a branch name,
+  // we can retrieve if this is the case from this method
+  const { commitSha, username, repo, branch, path } = ctx.params;
+
+  const sandboxParams = await getGitRepository(username, repo, branch, path);
+  ctx.body = sandboxParams;
 };
