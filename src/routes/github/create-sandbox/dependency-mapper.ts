@@ -7,6 +7,7 @@ const BLACKLISTED_DEPENDENCIES = [
   'json-loader',
   'markdown-loader',
   'raw-loader',
+  'flow-bin',
 ];
 
 /**
