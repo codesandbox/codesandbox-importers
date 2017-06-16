@@ -74,7 +74,7 @@ export async function fetchContents(
   }
 }
 
-const FILE_LOADER_REGEX = /\.(ico|jpg|png|gif|eot|otf|webp|svg|ttf|woff|woff2)(\?.*)?$/;
+const FILE_LOADER_REGEX = /\.(ico|jpg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm)(\?.*)?$/;
 const MAX_FILE_SIZE = 64000;
 
 /**
