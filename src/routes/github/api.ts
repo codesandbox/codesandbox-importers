@@ -74,6 +74,9 @@ export async function fetchContents(
   }
 }
 
+const FILE_LOADER_REGEX = /\.(ico|jpg|png|gif|eot|otf|webp|svg|ttf|woff|woff2)(\?.*)?$/;
+const MAX_FILE_SIZE = 64000;
+
 /**
  * Download the code of a github file
  *
@@ -82,17 +85,21 @@ export async function fetchContents(
  * @returns {Promise<string>}
  */
 export async function fetchCode(file: Module): Promise<string> {
-  const response = await axios({
-    url: file.download_url,
-    responseType: 'text',
-    headers: {
-      Accept: 'text/plain',
-    },
-    // We need to tell axios not to do anything (don't parse)
-    transformResponse: [d => d],
-  });
-
-  return response.data;
+  // Check if this is a file_loader case, return url if this is the case
+  if (FILE_LOADER_REGEX.test(file.name) || file.size > MAX_FILE_SIZE) {
+    return file.download_url;
+  } else {
+    const response = await axios({
+      url: file.download_url,
+      responseType: 'text',
+      headers: {
+        Accept: 'text/plain',
+      },
+      // We need to tell axios not to do anything (don't parse)
+      transformResponse: [d => d],
+    });
+    return response.data;
+  }
 }
 
 type CommitResponse = {
