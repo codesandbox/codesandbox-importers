@@ -69,12 +69,10 @@ function verifyFiles(modules: Array<Module>) {
   }
 }
 
-function countFiles(
-  directory: {
-    files: Array<Module>;
-    directories: Array<NormalizedDirectory>;
-  },
-): number {
+function countFiles(directory: {
+  files: Array<Module>;
+  directories: Array<NormalizedDirectory>;
+}): number {
   return (
     directory.files.length +
     directory.directories.reduce((count, dir) => {
@@ -112,7 +110,9 @@ export default async function extract(
   // Directories in src
   const directories = await Promise.all(
     rootContent
-      .filter(m => m.type === 'dir' && m.name === 'src')
+      .filter(
+        m => m.type === 'dir' && (m.name === 'src' || m.name === 'public'),
+      )
       .map(async dir => {
         return await extractDirectory(username, repository, branch, dir);
       }),
