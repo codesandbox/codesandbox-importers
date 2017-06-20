@@ -23,7 +23,8 @@ app.use(notFound);
 
 router
   .get('/git/github/data/:username/:repo/:branch/path/:path*', githubData)
-  .get('/git/github/info/:username/:repo/tree/:branch/:path*', githubInfo)
+  .get('/git/github/info/:username/:repo/tree/:branch/:path*', githubInfo) // allow tree urls
+  .get('/git/github/info/:username/:repo/blob/:branch/:path*', githubInfo) // allow blob urls
   .get('/git/github/info/:username/:repo', githubInfo); // For when tree isn't in path (root path)
 
 app.use(router.routes()).use(router.allowedMethods());
