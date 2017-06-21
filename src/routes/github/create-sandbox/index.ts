@@ -181,6 +181,8 @@ export default async function createSandbox(
 
   if (!packageJson) throw new Error('Could not find package.json');
   if (!srcFolder) throw new Error('Could not find src directory');
+  if (!srcFolder.files.find(file => file.name === 'index.js'))
+    throw new Error('The src folder should have an index.js');
 
   const downloadedSrcFiles = await downloadFiles(srcFolder);
 
