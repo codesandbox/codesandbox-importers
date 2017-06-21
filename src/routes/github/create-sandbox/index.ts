@@ -139,7 +139,6 @@ async function getIndexHTML(
   directories: Array<NormalizedDirectory>,
 ): Promise<SandboxFile | undefined> {
   const publicFolder = directories.find(m => m.name === 'public');
-
   if (!publicFolder) return;
 
   const indexHtml = publicFolder.files.find(m => m.name === 'index.html');

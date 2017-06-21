@@ -20,7 +20,9 @@ async function extractDirectory(
   requests: number = 0,
 ): Promise<NormalizedDirectory> {
   if (requests > 10) {
-    throw new Error('Too many directories, more than 10');
+    throw new Error(
+      'This project is too big, it has more than 10 directories.',
+    );
   }
 
   log(`Unpacking ${directory.path}`);
@@ -87,7 +89,7 @@ function verifyFileCount(directory: NormalizedDirectory) {
 
   if (fileCount > MAX_FILE_COUNT) {
     throw new Error(
-      `This repository contains too many files, more than ${MAX_FILE_COUNT}`,
+      `This repository more than ${MAX_FILE_COUNT} files, it's too big.`,
     );
   }
 }
