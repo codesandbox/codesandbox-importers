@@ -78,6 +78,17 @@ const FILE_LOADER_REGEX = /\.(ico|jpg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp
 const MAX_FILE_SIZE = 64000;
 
 /**
+ * We use https://rawgit.com/ as urls, since they change the content-type corresponding
+ * to the file. Github always uses text/plain
+ * @param downloadLink link to transform
+ */
+const rawGitUrl = (downloadLink: string) =>
+  downloadLink.replace(
+    'https://raw.githubusercontent.com/',
+    'https://rawgit.com/',
+  );
+
+/**
  * Download the code of a github file
  *
  * @export
@@ -87,7 +98,7 @@ const MAX_FILE_SIZE = 64000;
 export async function fetchCode(file: Module): Promise<string> {
   // Check if this is a file_loader case, return url if this is the case
   if (FILE_LOADER_REGEX.test(file.name) || file.size > MAX_FILE_SIZE) {
-    return file.download_url;
+    return rawGitUrl(file.download_url);
   } else {
     const response = await axios({
       url: file.download_url,
