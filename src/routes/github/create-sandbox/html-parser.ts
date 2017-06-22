@@ -13,8 +13,25 @@ function isValidResource(resource: string) {
  * @returns {(string | undefined)}
  */
 function getCssResource(line: string): string | undefined {
-  const cssRegex = /<link[^]href="(.*\.css)"/;
+  const cssRegex = /<link[^]*href="(.*\.css)"/;
   const match = line.match(cssRegex);
+  if (match && match[1]) {
+    const resource = match[1];
+    if (!isValidResource(resource)) return;
+
+    return resource;
+  }
+}
+
+/**
+ * Checks line for js resource, returns if resource exist
+ *
+ * @param {string} line  line to check
+ * @returns {(string | undefined)}
+ */
+function getJsResource(line: string): string | undefined {
+  const jsRegex = /<script[^]*src="(.*)"/;
+  const match = line.match(jsRegex);
   if (match && match[1]) {
     const resource = match[1];
     if (!isValidResource(resource)) return;
@@ -30,7 +47,10 @@ function getCssResource(line: string): string | undefined {
  * @param {string} html
  */
 function getExternalResources(html: string) {
-  return html.split('\n').map(getCssResource).filter(x => x);
+  return html
+    .split('\n')
+    .map(line => getCssResource(line) || getJsResource(line))
+    .filter(x => x);
 }
 
 /**
