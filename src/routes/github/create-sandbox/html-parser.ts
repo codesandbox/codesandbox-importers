@@ -17,7 +17,9 @@ function getCssResource(line: string): string | undefined {
   const match = line.match(cssRegex);
   if (match && match[1]) {
     const resource = match[1];
-    if (!isValidResource(resource)) return;
+    if (!isValidResource(resource)) {
+      return;
+    }
 
     return resource;
   }
@@ -34,7 +36,9 @@ function getJsResource(line: string): string | undefined {
   const match = line.match(jsRegex);
   if (match && match[1]) {
     const resource = match[1];
-    if (!isValidResource(resource)) return;
+    if (!isValidResource(resource)) {
+      return;
+    }
 
     return resource;
   }
@@ -63,7 +67,9 @@ function getBodyContent(html: string): string | undefined {
 
   const match = html.match(bodyRegex);
 
-  if (match) return match[1];
+  if (match) {
+    return match[1];
+  }
 }
 
 /**
@@ -77,7 +83,7 @@ export default function parseHTML(html: string) {
   const bodyContent = getBodyContent(html);
 
   return {
+    body: bodyContent || '<div id="root"></div>',
     externalResources,
-    body: bodyContent,
   };
 }
