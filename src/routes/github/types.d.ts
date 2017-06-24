@@ -40,5 +40,3 @@ type SandboxDirectory = {
   title: string;
   directoryShortid: string | undefined;
 };
-
-type Dependencies = { [key: string]: string };

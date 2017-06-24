@@ -10,13 +10,17 @@ const BLACKLISTED_DEPENDENCIES = [
   'flow-bin',
 ];
 
+interface IDependencies {
+  [name: string]: string;
+}
+
 /**
  * Filters dependencies that are not needed
  *
- * @param {Dependencies} dependencies
+ * @param {IDependencies} dependencies
  * @returns
  */
-function filterDependences(dependencies: Dependencies) {
+function filterDependences(dependencies: IDependencies) {
   return Object.keys(dependencies).reduce((deps, depName) => {
     if (BLACKLISTED_DEPENDENCIES.indexOf(depName) === -1) {
       return { ...deps, [depName]: dependencies[depName] };
@@ -29,15 +33,15 @@ function filterDependences(dependencies: Dependencies) {
 /**
  * Gets the absolute versions of all dependencies
  *
- * @param {Dependencies} dependencies
+ * @param {IDependencies} dependencies
  * @returns
  */
-async function getAbsoluteVersions(dependencies: Dependencies) {
-  const absoluteDependencies: Dependencies = {};
+async function getAbsoluteVersions(dependencies: IDependencies) {
+  const absoluteDependencies: IDependencies = {};
 
   const dependencyNames = Object.keys(dependencies);
-  for (let i = 0; i < dependencyNames.length; i++) {
-    const depName = dependencyNames[i];
+
+  for (const depName of dependencyNames) {
     const depString = `${depName}@${dependencies[depName]}`;
     try {
       const manifest = await pacote.manifest(depString);
@@ -58,7 +62,7 @@ async function getAbsoluteVersions(dependencies: Dependencies) {
  * @export
  * @param {object} dependencies
  */
-export default async function mapDependencies(dependencies: Dependencies) {
+export default async function mapDependencies(dependencies: IDependencies) {
   const filteredDependencies = filterDependences(dependencies);
   const absoluteDependencies = await getAbsoluteVersions(filteredDependencies);
 
