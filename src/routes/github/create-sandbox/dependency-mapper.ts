@@ -37,22 +37,30 @@ function filterDependences(dependencies: IDependencies) {
  * @returns
  */
 async function getAbsoluteVersions(dependencies: IDependencies) {
-  const absoluteDependencies: IDependencies = {};
-
   const dependencyNames = Object.keys(dependencies);
 
-  for (const depName of dependencyNames) {
-    const depString = `${depName}@${dependencies[depName]}`;
-    try {
-      const manifest = await pacote.manifest(depString);
+  // First build an array with name and absolute version, allows parallel
+  // fetching of version numbers
+  const absoluteDependencies = await Promise.all(
+    dependencyNames.map(async depName => {
+      const depString = `${depName}@${dependencies[depName]}`;
 
-      absoluteDependencies[depName] = manifest.version;
-    } catch (e) {
-      throw new Error(`Could not fetch version for ${depString}: ${e.message}`);
-    }
-  }
+      try {
+        const manifest = await pacote.manifest(depString);
+        const absoluteVersion = manifest.version;
 
-  return absoluteDependencies;
+        return { name: depName, version: absoluteVersion };
+      } catch (e) {
+        e.message = `Could not fetch version for ${depString}: ${e.message}`;
+        throw e;
+      }
+    }),
+  );
+
+  return absoluteDependencies.reduce((total: IDependencies, next) => {
+    total[next.name] = next.version;
+    return total;
+  }, {});
 }
 
 /**

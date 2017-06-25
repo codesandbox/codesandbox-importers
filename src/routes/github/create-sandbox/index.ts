@@ -117,7 +117,9 @@ function mapDirectoryToSandboxStructure(
 /**
  * Download package.json and format dependencies
  */
-async function getDependencies(packageJSON: { dependencies: Dependencies }) {
+async function getDependencies(packageJSON: {
+  dependencies: { [key: string]: string };
+}) {
   const { dependencies } = packageJSON;
 
   if (!dependencies)
