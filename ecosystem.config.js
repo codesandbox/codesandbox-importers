@@ -8,6 +8,7 @@ module.exports = {
     {
       name: 'Git Extractor',
       script: 'dist/index.js',
+      instances: 0,
       env_production: {
         NODE_ENV: 'production',
       },

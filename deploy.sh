@@ -1,1 +1,1 @@
-pm2 deploy ecosystem.config.js production start -i max
+pm2 deploy ecosystem.config.js production
