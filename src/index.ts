@@ -1,25 +1,33 @@
-import * as cluster from 'cluster';
-import * as os from 'os';
+import * as Koa from 'koa';
+import * as Router from 'koa-router';
 
-import server from './server';
+import log from './utils/log';
+
+// MIDDLEWARE
+import logger from './middleware/logger';
+import errorHandler from './middleware/error-handler';
+import decamelize from './middleware/decamelize';
+import notFound from './middleware/not-found';
+
+// ROUTES
+import { info as githubInfo, data as githubData } from './routes/github';
 
 const DEFAULT_PORT = process.env.PORT || 2000;
-const numCPUs = os.cpus().length;
+const app = new Koa();
+const router = new Router();
 
-if (cluster.isMaster) {
-  console.log(`Master ${process.pid} is running`);
+app.use(logger);
+app.use(errorHandler);
+app.use(decamelize);
+app.use(notFound);
 
-  // Fork workers
-  for (let i = 0; i < numCPUs; i++) {
-    cluster.fork();
-  }
+router
+  .get('/git/github/data/:username/:repo/:branch/path/:path*', githubData)
+  .get('/git/github/info/:username/:repo/tree/:branch/:path*', githubInfo) // allow tree urls
+  .get('/git/github/info/:username/:repo/blob/:branch/:path*', githubInfo) // allow blob urls
+  .get('/git/github/info/:username/:repo', githubInfo); // For when tree isn't in path (root path)
 
-  cluster.on('exit', (worker, code, signal) => {
-    console.log(`Worker ${worker.process.pid} died`);
-    cluster.fork();
-  });
-} else {
-  server.listen(DEFAULT_PORT);
+app.use(router.routes()).use(router.allowedMethods());
 
-  console.log(`Worker ${process.pid} started`);
-}
+log(`Listening on ${DEFAULT_PORT}`);
+app.listen(DEFAULT_PORT);
