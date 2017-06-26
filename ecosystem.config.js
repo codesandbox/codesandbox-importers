@@ -24,7 +24,7 @@ module.exports = {
       host: 'ssh.codesandbox.io',
       ref: 'origin/master',
       repo: 'git@github.com:CompuIves/codesandbox-git-extractor.git',
-      path: '/home/git-extractor',
+      path: '/home/bundler',
       'post-deploy':
         'yarn && npm run build && pm2 startOrRestart ecosystem.config.js --env production',
     },
