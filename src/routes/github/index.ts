@@ -43,8 +43,11 @@ export const data = async (ctx: Context, next: () => Promise<any>) => {
   // we can retrieve if this is the case from this method
   const { commitSha, username, repo, branch, path } = ctx.params;
 
-  const splittedPath = path.split('/');
-  const title = `${username}/${repo}: ${splittedPath[splittedPath.length - 1]}`;
+  let title = `${username}/${repo}`;
+  if (path) {
+    const splittedPath = path.split('/');
+    title = title + `: ${splittedPath[splittedPath.length - 1]}`;
+  }
 
   const sandboxParams = await getGitRepository(username, repo, branch, path);
   ctx.body = {
