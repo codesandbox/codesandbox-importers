@@ -43,6 +43,13 @@ export const data = async (ctx: Context, next: () => Promise<any>) => {
   // we can retrieve if this is the case from this method
   const { commitSha, username, repo, branch, path } = ctx.params;
 
+  const splittedPath = path.split('/');
+  const title = `${username}/${repo}: ${splittedPath[splittedPath.length - 1]}`;
+
   const sandboxParams = await getGitRepository(username, repo, branch, path);
-  ctx.body = sandboxParams;
+  ctx.body = {
+    ...sandboxParams,
+    // If no title is set in package.json, go for this one
+    title: sandboxParams.title || title,
+  };
 };
