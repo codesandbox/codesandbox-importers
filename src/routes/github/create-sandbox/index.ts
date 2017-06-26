@@ -4,11 +4,29 @@ import { fetchCode } from '../api';
 import mapDependencies from './dependency-mapper';
 import parseHTML from './html-parser';
 
+const FILE_LOADER_REGEX = /\.(ico|jpg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm)(\?.*)?$/;
+const MAX_FILE_SIZE = 64000;
+
+/**
+ * We use https://rawgit.com/ as urls, since they change the content-type corresponding
+ * to the file. Github always uses text/plain
+ * @param downloadLink link to transform
+ */
+const rawGitUrl = (downloadLink: string) =>
+  downloadLink.replace(
+    'https://raw.githubusercontent.com/',
+    'https://rawgit.com/',
+  );
+
 async function downloadFile(file: Module): Promise<DownloadedFile> {
-  const code = await fetchCode(file);
+  // Check if this is a file_loader case, return url if this is the case
+  const isBinary =
+    FILE_LOADER_REGEX.test(file.name) || file.size > MAX_FILE_SIZE;
+  const code = isBinary ? rawGitUrl(file.download_url) : await fetchCode(file);
   return {
     ...file,
     code,
+    isBinary: isBinary,
   };
 }
 
@@ -65,6 +83,7 @@ function createFile(
   return {
     title: file.name,
     code: file.code,
+    isBinary: file.isBinary,
     directoryShortid,
     shortid,
   };

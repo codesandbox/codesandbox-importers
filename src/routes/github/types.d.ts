@@ -22,6 +22,7 @@ type NormalizedDirectory = Module & {
 
 type DownloadedFile = Module & {
   code: string;
+  isBinary: boolean;
 };
 
 type NormalizedDownloadedDirectory = {
@@ -32,6 +33,7 @@ type SandboxFile = {
   title: string;
   code: string;
   shortid: string;
+  isBinary: boolean;
   directoryShortid: string | undefined;
 };
 
