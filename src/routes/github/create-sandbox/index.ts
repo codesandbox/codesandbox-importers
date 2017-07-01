@@ -135,7 +135,7 @@ function mapDirectoryToSandboxStructure(
 }
 
 function getDependencyRequiresFromFiles(files: SandboxFile[]) {
-  const dependencyRegex = /import .* from ["|']([\w|@].*)["|']|require\(["|']([\w|@].*)["|']\)'/;
+  const dependencyRegex = /import\s.*[from]?["|']([\w|@].*)["|']|require\(["|']([\w|@].*)["|']\)''/;
 
   // Get all dependencies called in sandbox
   return files.reduce((depList: string[], file: SandboxFile) => {
