@@ -10,10 +10,6 @@ const BLACKLISTED_DEPENDENCIES = [
   'flow-bin',
 ];
 
-interface IDependencies {
-  [name: string]: string;
-}
-
 /**
  * Filters dependencies that are not needed
  *

@@ -98,6 +98,16 @@
     "@types/koa-compose" "*"
     "@types/node" "*"
 
+"@types/lodash.pickby@^4.6.2":
+  version "4.6.2"
+  resolved "https://registry.yarnpkg.com/@types/lodash.pickby/-/lodash.pickby-4.6.2.tgz#4bc769c90dc308ecc0c1fae7453def340d660dd9"
+  dependencies:
+    "@types/lodash" "*"
+
+"@types/lodash@*":
+  version "4.14.68"
+  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.68.tgz#754fbab68bd2bbb69547dc8ce7574f7012eed7f6"
+
 "@types/minimatch@*":
   version "2.0.29"
   resolved "https://registry.yarnpkg.com/@types/minimatch/-/minimatch-2.0.29.tgz#5002e14f75e2d71e564281df0431c8c1b4a2a36a"
@@ -2812,6 +2822,10 @@ lodash.mapvalues@^4.4.0:
 lodash.pick@^4.2.1:
   version "4.4.0"
   resolved "https://registry.yarnpkg.com/lodash.pick/-/lodash.pick-4.4.0.tgz#52f05610fff9ded422611441ed1fc123a03001b3"
+
+lodash.pickby@^4.6.0:
+  version "4.6.0"
+  resolved "https://registry.yarnpkg.com/lodash.pickby/-/lodash.pickby-4.6.0.tgz#7dea21d8c18d7703a27c704c15d3b84a67e33aff"
 
 lodash.restparam@^3.0.0:
   version "3.6.1"

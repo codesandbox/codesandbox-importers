@@ -1,4 +1,5 @@
 import { generate as generateShortid } from 'shortid';
+import { pickBy } from 'lodash';
 
 import { fetchCode } from '../api';
 import mapDependencies from './dependency-mapper';
@@ -133,19 +134,54 @@ function mapDirectoryToSandboxStructure(
   );
 }
 
+function getDependencyRequiresFromFiles(files: SandboxFile[]) {
+  const dependencyRegex = /import .* from '([\w|@].*)'|require\('([\w|@].*)'\)'/;
+
+  // Get all dependencies called in sandbox
+  return files.reduce((depList: string[], file: SandboxFile) => {
+    const dependenciesInFile = file.code
+      .split('\n')
+      .map((line: string) => {
+        const depMatch = line.match(dependencyRegex);
+
+        if (depMatch && (depMatch[1] || depMatch[2])) {
+          return depMatch[1] || depMatch[2];
+        }
+      })
+      .filter(x => x) as string[];
+
+    return [...depList, ...dependenciesInFile];
+  }, []) as string[];
+}
+
 /**
- * Download package.json and format dependencies
+ * Get which dependencies are needed and map them to the latest version, needs
+ * files to determine which devDependencies are used in the code.
+ *
+ * @param packageJSON PackageJSON containing all dependencies
+ * @param files files with code about which dependencies are used
  */
-async function getDependencies(packageJSON: {
-  dependencies: { [key: string]: string };
-}) {
-  const { dependencies } = packageJSON;
+async function getDependencies(
+  packageJSON: {
+    dependencies: { [key: string]: string };
+    devDependencies: { [key: string]: string };
+  },
+  files: SandboxFile[],
+) {
+  const { dependencies, devDependencies } = packageJSON;
 
   if (!dependencies)
     throw new Error('There are no dependencies in package.json');
 
+  const dependenciesInFiles = getDependencyRequiresFromFiles(files);
+
+  const depsToMatch = pickBy(
+    { ...dependencies, ...devDependencies },
+    (_, key) => dependenciesInFiles.some(dep => dep.startsWith(key)),
+  ) as IDependencies;
+
   // Exclude some dependencies that are not needed in CodeSandbox
-  const alteredDependencies = await mapDependencies(dependencies);
+  const alteredDependencies = await mapDependencies(depsToMatch);
   return alteredDependencies;
 }
 
@@ -214,14 +250,25 @@ export default async function createSandbox(
   const indexHTML = await getIndexHTML(directories);
   const htmlInfo = getHTMLInfo(indexHTML);
 
-  const dependencies = await getDependencies(packageJsonPackage);
   const modules = mapDirectoryToSandboxStructure(downloadedSrcFiles);
   const sourceFiles = downloadedSrcFiles.files.map(f => createFile(f));
 
+  const sandboxModules = [
+    ...modules.files,
+    ...sourceFiles,
+    htmlInfo.file,
+  ].filter(x => x) as SandboxFile[];
+
+  // Give the sandboxModules to getDependencies to fetch which devDependencies
+  // are used in the code
+  const dependencies = await getDependencies(
+    packageJsonPackage,
+    sandboxModules,
+  );
+
   return {
     title: packageJsonPackage.title,
-    // TODO make this better
-    modules: [...modules.files, ...sourceFiles, htmlInfo.file].filter(x => x),
+    modules: sandboxModules,
     directories: modules.directories,
     npmDependencies: dependencies,
     externalResources: htmlInfo.externalResources,
