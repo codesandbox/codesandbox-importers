@@ -1,0 +1,38 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`dependency-analyzer can detect dependencies in the code 1`] = `
+Array [
+  "react",
+  "react-dom",
+  "mobx-react",
+  "mobx",
+  "mobx-state-tree",
+  "todomvc-app-css/index.css",
+  "singlquote",
+  "test",
+  "remotedev",
+]
+`;
+
+exports[`dependency-analyzer can detect from multiple files 1`] = `
+Array [
+  "react",
+  "react-dom",
+  "mobx-react",
+  "mobx",
+  "mobx-state-tree",
+  "todomvc-app-css/index.css",
+  "singlquote",
+  "test",
+  "remotedev",
+  "react",
+  "react-dom",
+  "mobx-react",
+  "mobx",
+  "mobx-state-tree",
+  "todomvc-app-css/index.css",
+  "singlquote",
+  "test",
+  "remotedev",
+]
+`;
