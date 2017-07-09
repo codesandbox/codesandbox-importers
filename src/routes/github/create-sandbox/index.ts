@@ -249,6 +249,7 @@ export default async function createSandbox(
 
   return {
     title: packageJsonPackage.title,
+    description: packageJsonPackage.description,
     modules: sandboxModules,
     directories: modules.directories,
     npmDependencies: dependencies,
