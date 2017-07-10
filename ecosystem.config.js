@@ -1,3 +1,5 @@
+const productionVars = require('./config/production.json');
+
 module.exports = {
   /**
    * Application configuration section
@@ -12,6 +14,8 @@ module.exports = {
       exec_mode: 'cluster',
       env_production: {
         NODE_ENV: 'production',
+        GITHUB_CLIENT_ID: productionVars.GITHUB_CLIENT_ID,
+        GITHUB_CLIENT_SECRET: productionVars.GITHUB_CLIENT_SECRET,
       },
     },
   ],
