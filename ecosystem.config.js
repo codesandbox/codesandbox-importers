@@ -31,6 +31,8 @@ module.exports = {
       ref: 'origin/master',
       repo: 'git@github.com:CompuIves/codesandbox-git-extractor.git',
       path: '/home/bundler',
+      'pre-deploy-local':
+        'scp config/production.json bundler@ssh.codesandbox.io:./source/config/production.json',
       'post-deploy':
         'yarn && npm run build && pm2 startOrRestart ecosystem.config.js --env production',
     },
