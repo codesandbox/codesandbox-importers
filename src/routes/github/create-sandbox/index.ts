@@ -250,6 +250,7 @@ export default async function createSandbox(
   return {
     title: packageJsonPackage.title,
     description: packageJsonPackage.description,
+    tags: packageJsonPackage.keywords || [],
     modules: sandboxModules,
     directories: modules.directories,
     npmDependencies: dependencies,
