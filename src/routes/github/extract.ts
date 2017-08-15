@@ -19,9 +19,9 @@ async function extractDirectory(
   directory: Module,
   requests: number = 0,
 ): Promise<NormalizedDirectory> {
-  if (requests > 10) {
+  if (requests > 40) {
     throw new Error(
-      'This project is too big, it has more than 10 directories.',
+      'This project is too big, it has more than 40 directories.',
     );
   }
 
