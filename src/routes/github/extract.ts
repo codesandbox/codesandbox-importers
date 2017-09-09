@@ -83,7 +83,7 @@ function countFiles(directory: {
   );
 }
 
-const MAX_FILE_COUNT = 45;
+const MAX_FILE_COUNT = 90;
 function verifyFileCount(directory: NormalizedDirectory) {
   const fileCount = countFiles(directory);
 
