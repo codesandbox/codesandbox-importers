@@ -17,11 +17,11 @@ async function extractDirectory(
   repo: string,
   branch: string,
   directory: Module,
-  requests: number = 0,
+  requests: number = 0
 ): Promise<NormalizedDirectory> {
   if (requests > 40) {
     throw new Error(
-      'This project is too big, it has more than 40 directories.',
+      'This project is too big, it has more than 40 directories.'
     );
   }
 
@@ -31,7 +31,7 @@ async function extractDirectory(
     username,
     repo,
     branch,
-    directory.path,
+    directory.path
   );
 
   const files = contents.filter(m => m.type === 'file');
@@ -43,9 +43,9 @@ async function extractDirectory(
         repo,
         branch,
         dir,
-        requests + directories.length,
+        requests + directories.length
       );
-    }),
+    })
   );
 
   return {
@@ -89,7 +89,7 @@ function verifyFileCount(directory: NormalizedDirectory) {
 
   if (fileCount > MAX_FILE_COUNT) {
     throw new Error(
-      `This repository more than ${MAX_FILE_COUNT} files, it's too big.`,
+      `This repository more than ${MAX_FILE_COUNT} files, it's too big.`
     );
   }
 }
@@ -98,13 +98,13 @@ export default async function extract(
   username: string,
   repository: string,
   branch: string,
-  path: string,
+  path: string
 ) {
   const rootContent = await api.fetchContents(
     username,
     repository,
     branch,
-    path,
+    path
   );
   verifyFiles(rootContent);
 
@@ -113,11 +113,13 @@ export default async function extract(
   const directories = await Promise.all(
     rootContent
       .filter(
-        m => m.type === 'dir' && (m.name === 'src' || m.name === 'public'),
+        m =>
+          m.type === 'dir' &&
+          (m.name === 'src' || m.name === 'public' || m.name === 'static')
       )
       .map(async dir => {
         return await extractDirectory(username, repository, branch, dir);
-      }),
+      })
   );
 
   const contents = { files, directories };

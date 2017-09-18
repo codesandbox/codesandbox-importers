@@ -6,6 +6,8 @@ import mapDependencies from './dependency-mapper';
 import getDependencyRequiresFromFiles from './dependency-analyzer';
 import parseHTML from './html-parser';
 
+import { alterFilesForTemplate, getTemplate } from './templates';
+
 const FILE_LOADER_REGEX = /\.(ico|jpg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm)(\?.*)?$/;
 const MAX_FILE_SIZE = 64000;
 
@@ -17,7 +19,7 @@ const MAX_FILE_SIZE = 64000;
 const rawGitUrl = (downloadLink: string) =>
   downloadLink.replace(
     'https://raw.githubusercontent.com/',
-    'https://rawgit.com/',
+    'https://rawgit.com/'
   );
 
 async function downloadFile(file: Module): Promise<DownloadedFile> {
@@ -39,18 +41,18 @@ async function downloadFile(file: Module): Promise<DownloadedFile> {
  * @returns {Promise<NormalizedDirectory>}
  */
 async function downloadFiles(
-  directory: NormalizedDirectory,
+  directory: NormalizedDirectory
 ): Promise<NormalizedDownloadedDirectory> {
   const downloadedFiles = await Promise.all(
     directory.files.map(async (file): Promise<DownloadedFile> => {
       return await downloadFile(file);
-    }),
+    })
   );
 
   const downloadedDirectories = await Promise.all(
     directory.directories.map(async dir => {
       return await downloadFiles(dir);
-    }),
+    })
   );
 
   return {
@@ -61,16 +63,16 @@ async function downloadFiles(
 }
 
 function flattenDirectories(
-  directory: NormalizedDownloadedDirectory,
+  directory: NormalizedDownloadedDirectory
 ): NormalizedDownloadedDirectory[] {
   return directory.directories.reduce(
     (
       directories: NormalizedDownloadedDirectory[],
-      directory: NormalizedDownloadedDirectory,
+      directory: NormalizedDownloadedDirectory
     ) => {
       return [...directories, directory, ...flattenDirectories(directory)];
     },
-    [],
+    []
   );
 }
 
@@ -79,7 +81,7 @@ function flattenDirectories(
  */
 function createFile(
   file: DownloadedFile,
-  directoryShortid?: string,
+  directoryShortid?: string
 ): SandboxFile {
   const shortid = generateShortid();
   return {
@@ -99,7 +101,7 @@ function createFile(
  */
 function mapDirectoryToSandboxStructure(
   directory: NormalizedDownloadedDirectory,
-  directoryShortid?: string,
+  directoryShortid?: string
 ): {
   files: SandboxFile[];
   directories: SandboxDirectory[];
@@ -110,7 +112,7 @@ function mapDirectoryToSandboxStructure(
         files: SandboxFile[];
         directories: SandboxDirectory[];
       },
-      directory: NormalizedDownloadedDirectory,
+      directory: NormalizedDownloadedDirectory
     ) => {
       const shortid = generateShortid();
       const children = mapDirectoryToSandboxStructure(directory, shortid);
@@ -131,7 +133,7 @@ function mapDirectoryToSandboxStructure(
         ],
       };
     },
-    { files: [], directories: [] },
+    { files: [], directories: [] }
   );
 }
 
@@ -147,7 +149,7 @@ async function getDependencies(
     dependencies: { [key: string]: string };
     devDependencies: { [key: string]: string };
   },
-  files: SandboxFile[],
+  files: SandboxFile[]
 ) {
   const { dependencies, devDependencies } = packageJSON;
 
@@ -158,7 +160,7 @@ async function getDependencies(
 
   const depsToMatch = pickBy(
     { ...dependencies, ...devDependencies },
-    (_, key) => dependenciesInFiles.some(dep => dep.startsWith(key)),
+    (_, key) => dependenciesInFiles.some(dep => dep.startsWith(key))
   ) as IDependencies;
 
   // Exclude some dependencies that are not needed in CodeSandbox
@@ -174,9 +176,14 @@ async function getDependencies(
  * @param directories All directories of the app
  */
 async function getIndexHTML(
-  directories: Array<NormalizedDirectory>,
+  directories: Array<NormalizedDirectory>
 ): Promise<SandboxFile | undefined> {
-  const publicFolder = directories.find(m => m.name === 'public');
+  let publicFolder = directories.find(m => m.name === 'public');
+
+  if (!publicFolder) {
+    publicFolder = directories.find(m => m.name === 'static');
+  }
+
   if (!publicFolder) return;
 
   const indexHtml = publicFolder.files.find(m => m.name === 'index.html');
@@ -211,7 +218,7 @@ function getHTMLInfo(html: SandboxFile | undefined) {
  */
 export default async function createSandbox(
   files: Array<Module>,
-  directories: Array<NormalizedDirectory>,
+  directories: Array<NormalizedDirectory>
 ) {
   const packageJson = files.find(m => m.name === 'package.json');
   const srcFolder = directories.find(m => m.name === 'src');
@@ -244,16 +251,22 @@ export default async function createSandbox(
   // are used in the code
   const dependencies = await getDependencies(
     packageJsonPackage,
-    sandboxModules,
+    sandboxModules
   );
+
+  const template = getTemplate(packageJsonPackage, sandboxModules);
+  const templateFiles = alterFilesForTemplate(template, sandboxModules);
+
+  console.log('Creating sandbox with template ' + template);
 
   return {
     title: packageJsonPackage.title,
     description: packageJsonPackage.description,
     tags: packageJsonPackage.keywords || [],
-    modules: sandboxModules,
+    modules: templateFiles,
     directories: modules.directories,
     npmDependencies: dependencies,
     externalResources: htmlInfo.externalResources,
+    template,
   };
 }
