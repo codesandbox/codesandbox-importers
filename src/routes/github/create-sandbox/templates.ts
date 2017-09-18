@@ -2,7 +2,7 @@ type Template =
   | 'vue-cli'
   | 'preact-cli'
   | 'svelte'
-  | 'react-scripts-ts'
+  | 'create-react-typescript-app'
   | 'create-react-app';
 
 export function alterFilesForTemplate(
