@@ -176,7 +176,8 @@ async function getDependencies(
  * @param directories All directories of the app
  */
 async function getIndexHTML(
-  directories: Array<NormalizedDirectory>
+  directories: Array<NormalizedDirectory>,
+  modules: Module[]
 ): Promise<SandboxFile | undefined> {
   let publicFolder = directories.find(m => m.name === 'public');
 
@@ -186,7 +187,9 @@ async function getIndexHTML(
 
   if (!publicFolder) return;
 
-  const indexHtml = publicFolder.files.find(m => m.name === 'index.html');
+  const indexHtml =
+    publicFolder.files.find(m => m.name === 'index.html') ||
+    modules.find(m => m.name === 'index.html');
   if (!indexHtml) return;
 
   const downloadedIndexHtml = await downloadFile(indexHtml);
@@ -239,7 +242,7 @@ export default async function createSandbox(
 
   // Fetch index html seperately, we need to extract external resources and
   // the body from it
-  const indexHTML = await getIndexHTML(directories);
+  const indexHTML = await getIndexHTML(directories, files);
   const htmlInfo = getHTMLInfo(indexHTML);
 
   const modules = mapDirectoryToSandboxStructure(downloadedSrcFiles);
