@@ -41,20 +41,22 @@ export function getTemplate(
     return 'vue-cli';
   }
 
-  const dependencies = [
-    ...Object.keys(packageJSONPackage.dependencies),
-    ...Object.keys(packageJSONPackage.devDependencies),
+  const { dependencies = {}, devDependencies = {} } = packageJSONPackage;
+
+  const totalDependencies = [
+    ...Object.keys(dependencies),
+    ...Object.keys(devDependencies),
   ];
 
-  if (dependencies.indexOf('preact-cli') > -1) {
+  if (totalDependencies.indexOf('preact-cli') > -1) {
     return 'preact-cli';
   }
 
-  if (dependencies.indexOf('svelte') > -1) {
+  if (totalDependencies.indexOf('svelte') > -1) {
     return 'svelte';
   }
 
-  if (dependencies.indexOf('react-scripts-ts') > -1) {
+  if (totalDependencies.indexOf('react-scripts-ts') > -1) {
     return 'create-react-typescript-app';
   }
 
