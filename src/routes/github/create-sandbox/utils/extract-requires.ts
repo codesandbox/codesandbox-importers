@@ -3,6 +3,8 @@ import { ImportDeclaration, CallExpression, Literal } from 'estree';
 const walk = require('acorn/dist/walk');
 
 require('acorn-dynamic-import/lib/inject').default(acorn);
+require('acorn-jsx/inject')(acorn);
+require('acorn-object-spread/inject')(acorn);
 
 const ECMA_VERSION = 2017;
 
@@ -21,6 +23,8 @@ export default function exportRequires(code: string) {
     sourceType: 'module',
     plugins: {
       dynamicImport: true,
+      jsx: true,
+      objectSpread: true,
     },
   });
 
@@ -57,6 +61,9 @@ export default function exportRequires(code: string) {
       Import: function(node: any, st: any, c: any) {
         // Do nothing
       },
+      ObjectExpression: () => {},
+      ObjectPattern: () => {},
+      JSXElement: () => {},
     }
   );
 

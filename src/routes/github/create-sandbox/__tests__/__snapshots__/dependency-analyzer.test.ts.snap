@@ -38,3 +38,14 @@ Array [
   "react-stockcharts",
 ]
 `;
+
+exports[`dependency-analyzer works with big files 1`] = `
+Array [
+  "react",
+  "prop-types",
+  "d3-format",
+  "d3-time-format",
+  "react-bootstrap",
+  "react-stockcharts",
+]
+`;

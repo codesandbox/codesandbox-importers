@@ -189,6 +189,18 @@ acorn-jsx@^3.0.0:
   dependencies:
     acorn "^3.0.4"
 
+acorn-jsx@^4.0.1:
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/acorn-jsx/-/acorn-jsx-4.0.1.tgz#ada5a01573727a237774ce625564d079ec9de12a"
+  dependencies:
+    acorn "^5.0.3"
+
+acorn-object-spread@LivelyKernel/acorn-object-spread:
+  version "2.0.0"
+  resolved "https://codeload.github.com/LivelyKernel/acorn-object-spread/tar.gz/0da45682c3b3d5409730c5f49b2d6b390603f4ed"
+  dependencies:
+    acorn "^4.0.3"
+
 acorn@4.X, acorn@^4.0.3, acorn@^4.0.4:
   version "4.0.13"
   resolved "https://registry.yarnpkg.com/acorn/-/acorn-4.0.13.tgz#105495ae5361d697bd195c825192e1ad7f253787"
