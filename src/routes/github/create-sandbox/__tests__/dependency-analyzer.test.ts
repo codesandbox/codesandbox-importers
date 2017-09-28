@@ -7,7 +7,6 @@ import { Provider } from "mobx-react"
 import { observable, reaction } from "mobx"
 import { onSnapshot, onAction, onPatch, applySnapshot, applyAction, applyPatch, getSnapshot } from "mobx-state-tree"
 import "todomvc-app-css/index.css"
-importoijaa from 'dawpoefk';
 import createRouter from "./utils/router"
 import App from "./components/App"
 import SingleQuote from 'singlquote'
@@ -35,5 +34,46 @@ describe('dependency-analyzer', () => {
       code: CODE,
     };
     expect(getDependencies([file, file])).toMatchSnapshot();
+  });
+
+  it('can detect multiline dependencies', () => {
+    const file = {
+      title: '',
+      code: `
+      import React from "react";
+      import PropTypes from "prop-types";
+
+      import { format } from "d3-format";
+      import { timeFormat } from "d3-time-format";
+
+      import {
+        Modal,
+        Button,
+        FormGroup,
+        ControlLabel,
+        FormControl,
+      } from "react-bootstrap";
+
+      import { CandlestickSeries, BarSeries, MACDSeries } from "react-stockcharts/lib/series";
+      import { XAxis, YAxis } from "react-stockcharts/lib/axes";
+      import {
+        CrossHairCursor,
+        EdgeIndicator,
+        MouseCoordinateY,
+        MouseCoordinateX
+      } from "react-stockcharts/lib/coordinates";
+
+      import { discontinuousTimeScaleProvider } from "react-stockcharts/lib/scale";
+      import { OHLCTooltip, MACDTooltip } from "react-stockcharts/lib/tooltip";
+      import { macd } from "react-stockcharts/lib/indicator";
+
+      import { fitWidth } from "react-stockcharts/lib/helper";
+      import { InteractiveText, DrawingObjectSelector } from "react-stockcharts/lib/interactive";
+      import { getMorePropsForChart } from "react-stockcharts/lib/interactive/utils";
+      import { head, last, toObject } from "react-stockcharts/lib/utils";
+
+      `,
+    };
+    expect(getDependencies([file])).toMatchSnapshot();
   });
 });

@@ -13,6 +13,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/acorn": "^4.0.2",
     "@types/debug": "^0.0.29",
     "@types/humps": "^1.1.2",
     "@types/jest": "^19.2.4",
@@ -35,6 +36,8 @@
     "typescript": "^2.3.2"
   },
   "dependencies": {
+    "acorn": "^5.1.2",
+    "acorn-dynamic-import": "^2.0.2",
     "axios": "^0.16.2",
     "debug": "^2.6.8",
     "humps": "CompuIves/humps",

@@ -1,19 +1,31 @@
+import extractRequires from './utils/extract-requires';
+import { uniq } from 'lodash';
+
+/**
+ * This finds all dependencies that are called in a sandbox, it's important to
+ * do this check so we know what dependencies to include from the devDependencies
+ *
+ * @export
+ * @param {SandboxFile[]} files
+ * @returns
+ */
 export default function getDependencyRequiresFromFiles(files: SandboxFile[]) {
-  const dependencyRegex = /import\s.*[from]?["|']([\w|@].*)["|']|require\(["|']([\w|@].*)["|']\)/;
-
   // Get all dependencies called in sandbox
-  return files.reduce((depList: string[], file: SandboxFile) => {
-    const dependenciesInFile = file.code
-      .split('\n')
-      .map((line: string) => {
-        const depMatch = line.match(dependencyRegex);
+  const dependencies = files.reduce((depList: string[], file: SandboxFile) => {
+    const dependenciesInFile = extractRequires(file.code)
+      .filter(req => /^\w|@\w/.test(req))
+      .map(dep => {
+        const parts = dep.split('/');
 
-        if (depMatch && (depMatch[1] || depMatch[2])) {
-          return depMatch[1] || depMatch[2];
+        if (dep.startsWith('@')) {
+          return `${parts[0]}/${parts[1]}`;
+        } else {
+          return parts[0];
         }
-      })
-      .filter(x => x) as string[];
+      });
 
     return [...depList, ...dependenciesInFile];
   }, []) as string[];
+
+  return uniq(dependencies);
 }
