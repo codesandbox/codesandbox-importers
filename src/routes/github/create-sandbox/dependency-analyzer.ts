@@ -24,13 +24,12 @@ export default function getDependencyRequiresFromFiles(files: SandboxFile[]) {
             return parts[0];
           }
         });
+      return [...depList, ...dependenciesInFile];
     } catch (e) {
       console.error(e);
 
       return depList;
     }
-
-    return [...depList, ...dependenciesInFile];
   }, []) as string[];
 
   return uniq(dependencies);
