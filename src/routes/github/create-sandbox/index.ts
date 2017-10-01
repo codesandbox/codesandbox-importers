@@ -158,13 +158,16 @@ async function getDependencies(
 
   const dependenciesInFiles = getDependencyRequiresFromFiles(files);
 
-  const depsToMatch = pickBy(
-    { ...dependencies, ...devDependencies },
-    (_, key) => dependenciesInFiles.some(dep => dep.startsWith(key))
+  // Filter the devDependencies that are actually used in files
+  const depsToMatch = pickBy(devDependencies, (_, key) =>
+    dependenciesInFiles.some(dep => dep.startsWith(key))
   ) as IDependencies;
 
   // Exclude some dependencies that are not needed in CodeSandbox
-  const alteredDependencies = await mapDependencies(depsToMatch);
+  const alteredDependencies = await mapDependencies({
+    ...dependencies,
+    ...depsToMatch,
+  });
   return alteredDependencies;
 }
 
