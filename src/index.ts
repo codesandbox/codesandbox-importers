@@ -12,7 +12,7 @@ import notFound from './middleware/not-found';
 // ROUTES
 import { info as githubInfo, data as githubData } from './routes/github';
 
-const DEFAULT_PORT = process.env.PORT || 2000;
+const DEFAULT_PORT = process.env.PORT || 2020;
 const app = new Koa();
 const router = new Router();
 

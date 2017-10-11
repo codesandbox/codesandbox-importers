@@ -1,4 +1,6 @@
 import * as acorn from 'acorn';
+import * as babel from 'babel-core';
+import traverse from 'babel-traverse';
 import { ImportDeclaration, CallExpression, Literal } from 'estree';
 const walk = require('acorn/dist/walk');
 
@@ -8,64 +10,37 @@ require('acorn-object-spread/inject')(acorn);
 
 const ECMA_VERSION = 2017;
 
-type NewCallExpression = CallExpression & {
-  callee: {
-    type: 'Import';
-    name: string;
-  };
+const config = {
+  presets: [require('babel-preset-env'), require('babel-preset-react')],
+  plugins: [
+    require('babel-plugin-transform-async-to-generator'),
+    require('babel-plugin-transform-object-rest-spread'),
+    require('babel-plugin-transform-class-properties'),
+    require('babel-plugin-transform-decorators-legacy').default,
+    require('babel-plugin-dynamic-import-node').default,
+  ],
 };
 
 export default function exportRequires(code: string) {
   const requires: string[] = [];
   try {
-    const ast = acorn.parse(code, {
-      ranges: true,
-      locations: true,
-      ecmaVersion: ECMA_VERSION,
-      sourceType: 'module',
-      plugins: {
-        dynamicImport: true,
-        jsx: true,
-        objectSpread: true,
-      },
-    });
+    const { ast } = babel.transform(code, config);
 
-    walk.simple(
-      ast,
-      {
-        ImportDeclaration(node: ImportDeclaration) {
-          if (typeof node.source.value === 'string') {
-            requires.push(node.source.value);
-          }
-        },
-        CallExpression(node: NewCallExpression) {
+    if (ast) {
+      traverse(ast, {
+        enter(path: any) {
           if (
-            (node.callee.type === 'Identifier' &&
-              node.callee.name === 'require') ||
-            node.callee.type === 'Import'
+            path.node.type === 'CallExpression' &&
+            path.node.callee.name === 'require' &&
+            path.node.arguments[0]
           ) {
-            if (
-              node.arguments.length === 1 &&
-              node.arguments[0].type === 'Literal'
-            ) {
-              const literalArgument = <Literal>node.arguments[0];
-              if (typeof literalArgument.value === 'string') {
-                requires.push(literalArgument.value);
-              }
+            if (path.node.arguments[0].type === 'StringLiteral') {
+              requires.push(path.node.arguments[0].value);
             }
           }
         },
-      },
-      {
-        ...walk.base,
-        Import: function(node: any, st: any, c: any) {
-          // Do nothing
-        },
-        ObjectExpression: () => {},
-        ObjectPattern: () => {},
-        JSXElement: () => {},
-      }
-    );
+      });
+    }
   } catch (e) {
     console.error(e);
   }
