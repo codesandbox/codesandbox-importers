@@ -16,56 +16,59 @@ type NewCallExpression = CallExpression & {
 };
 
 export default function exportRequires(code: string) {
-  const ast = acorn.parse(code, {
-    ranges: true,
-    locations: true,
-    ecmaVersion: ECMA_VERSION,
-    sourceType: 'module',
-    plugins: {
-      dynamicImport: true,
-      jsx: true,
-      objectSpread: true,
-    },
-  });
-
   const requires: string[] = [];
-
-  walk.simple(
-    ast,
-    {
-      ImportDeclaration(node: ImportDeclaration) {
-        if (typeof node.source.value === 'string') {
-          requires.push(node.source.value);
-        }
+  try {
+    const ast = acorn.parse(code, {
+      ranges: true,
+      locations: true,
+      ecmaVersion: ECMA_VERSION,
+      sourceType: 'module',
+      plugins: {
+        dynamicImport: true,
+        jsx: true,
+        objectSpread: true,
       },
-      CallExpression(node: NewCallExpression) {
-        if (
-          (node.callee.type === 'Identifier' &&
-            node.callee.name === 'require') ||
-          node.callee.type === 'Import'
-        ) {
+    });
+
+    walk.simple(
+      ast,
+      {
+        ImportDeclaration(node: ImportDeclaration) {
+          if (typeof node.source.value === 'string') {
+            requires.push(node.source.value);
+          }
+        },
+        CallExpression(node: NewCallExpression) {
           if (
-            node.arguments.length === 1 &&
-            node.arguments[0].type === 'Literal'
+            (node.callee.type === 'Identifier' &&
+              node.callee.name === 'require') ||
+            node.callee.type === 'Import'
           ) {
-            const literalArgument = <Literal>node.arguments[0];
-            if (typeof literalArgument.value === 'string') {
-              requires.push(literalArgument.value);
+            if (
+              node.arguments.length === 1 &&
+              node.arguments[0].type === 'Literal'
+            ) {
+              const literalArgument = <Literal>node.arguments[0];
+              if (typeof literalArgument.value === 'string') {
+                requires.push(literalArgument.value);
+              }
             }
           }
-        }
+        },
       },
-    },
-    {
-      ...walk.base,
-      Import: function(node: any, st: any, c: any) {
-        // Do nothing
-      },
-      ObjectExpression: () => {},
-      ObjectPattern: () => {},
-      JSXElement: () => {},
-    }
-  );
+      {
+        ...walk.base,
+        Import: function(node: any, st: any, c: any) {
+          // Do nothing
+        },
+        ObjectExpression: () => {},
+        ObjectPattern: () => {},
+        JSXElement: () => {},
+      }
+    );
+  } catch (e) {
+    console.error(e);
+  }
 
   return requires;
 }
