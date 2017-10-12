@@ -27,12 +27,12 @@ async function extractDirectory(
 
   log(`Unpacking ${directory.path}`);
 
-  const contents = await api.fetchContents(
+  const contents = (await api.fetchContents(
     username,
     repo,
     branch,
     directory.path
-  );
+  )) as Array<Module>;
 
   const files = contents.filter(m => m.type === 'file');
   const directories = contents.filter(m => m.type === 'dir');
@@ -62,12 +62,8 @@ async function extractDirectory(
  * @param {Array<Module>} modules
  */
 function verifyFiles(modules: Array<Module>) {
-  if (!modules.some(m => m.name === 'package.json')) {
+  if (!modules.some(m => m.type === 'file' && m.name === 'package.json')) {
     throw new Error("The path doesn't contain a package.json");
-  }
-
-  if (!modules.some(m => m.name === 'src')) {
-    throw new Error('The project should include a src folder');
   }
 }
 
@@ -98,14 +94,15 @@ export default async function extract(
   username: string,
   repository: string,
   branch: string,
-  path: string
+  path: string,
+  skipSource = false
 ) {
-  const rootContent = await api.fetchContents(
+  const rootContent = (await api.fetchContents(
     username,
     repository,
     branch,
     path
-  );
+  )) as Array<Module>;
   verifyFiles(rootContent);
 
   const files = rootContent.filter(m => m.type === 'file');
@@ -115,7 +112,9 @@ export default async function extract(
       .filter(
         m =>
           m.type === 'dir' &&
-          (m.name === 'src' || m.name === 'public' || m.name === 'static')
+          ((m.name === 'src' && !skipSource) ||
+            m.name === 'public' ||
+            m.name === 'static')
       )
       .map(async dir => {
         return await extractDirectory(username, repository, branch, dir);
@@ -124,10 +123,14 @@ export default async function extract(
 
   const contents = { files, directories };
 
-  const sourceDir = contents.directories.find(m => m.name === 'src');
-  if (!sourceDir) throw new Error('Should include a src directory');
+  if (!skipSource) {
+    const sourceDir = contents.directories.find(m => m.name === 'src');
+    if (!sourceDir) {
+      throw new Error('The project should include a src folder.');
+    }
 
-  verifyFileCount(sourceDir);
+    verifyFileCount(sourceDir);
+  }
 
   return contents;
 }

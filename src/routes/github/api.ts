@@ -22,11 +22,11 @@ function buildContentsUrl(
   username: string,
   repo: string,
   branch: string,
-  path: string,
+  path: string
 ) {
   return `${buildApiUrl(
     username,
-    repo,
+    repo
   )}/contents/${path}${buildSecretParams()}&ref=${branch}`;
 }
 
@@ -34,11 +34,11 @@ function buildCommitsUrl(
   username: string,
   repo: string,
   branch: string,
-  path: string,
+  path: string
 ) {
   return `${buildApiUrl(
     username,
-    repo,
+    repo
   )}/commits/${branch}${buildSecretParams()}&path=${path}`;
 }
 
@@ -58,8 +58,8 @@ export async function fetchContents(
   username: string,
   repo: string,
   branch: string = 'master',
-  path: string = '',
-): Promise<Response> {
+  path: string = ''
+): Promise<Response | Module> {
   try {
     const url = buildContentsUrl(username, repo, branch, path);
     const response = await axios.get(url);
@@ -105,7 +105,7 @@ export async function fetchRepoInfo(
   username: string,
   repo: string,
   branch: string = 'master',
-  path: string = '',
+  path: string = ''
 ): Promise<CommitResponse> {
   try {
     const url = buildCommitsUrl(username, repo, branch, path);
@@ -130,7 +130,7 @@ export async function fetchRepoInfo(
           username,
           repo,
           newBranch,
-          newPath.join('/'),
+          newPath.join('/')
         );
       }
 
