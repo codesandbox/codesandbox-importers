@@ -88,7 +88,7 @@ export const data = async (ctx: Context, next: () => Promise<any>) => {
     title = title + `: ${splittedPath[splittedPath.length - 1]}`;
   }
 
-  const pathIsFile = !!extname(path);
+  const pathIsFile = path && !!extname(path);
 
   const { directories, files } = await (pathIsFile
     ? extractGitRepoWithCustomIndex
