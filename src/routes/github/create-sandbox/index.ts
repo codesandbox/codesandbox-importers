@@ -270,7 +270,7 @@ export default async function createSandbox(
   console.log('Creating sandbox with template ' + template);
 
   return {
-    title: packageJsonPackage.title,
+    title: packageJsonPackage.title || packageJsonPackage.name,
     description: packageJsonPackage.description,
     tags: packageJsonPackage.keywords || [],
     modules: templateFiles,
