@@ -1,5 +1,5 @@
 import { Context } from 'koa';
-import { extname, join } from 'path';
+import { extname, basename, join } from 'path';
 
 import extractGitRepository from './extract';
 import { fetchRepoInfo, fetchContents } from './api';
@@ -96,9 +96,15 @@ export const data = async (ctx: Context, next: () => Promise<any>) => {
 
   const sandboxParams = await createSandbox(files, directories);
 
+  let finalTitle = sandboxParams.title || title;
+
+  if (pathIsFile) {
+    finalTitle = finalTitle + '/' + basename(path);
+  }
+
   ctx.body = {
     ...sandboxParams,
     // If no title is set in package.json, go for this one
-    title: sandboxParams.title || title,
+    title: finalTitle,
   };
 };
