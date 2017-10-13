@@ -83,11 +83,28 @@ export async function fetchContents(
  * @returns {Promise<string>}
  */
 export async function fetchCode(file: Module): Promise<string> {
-  const response = await axios({
-    url: file.git_url,
+  const response: { data: any } = await axios({
+    url: file.download_url,
+    responseType: 'text',
+    headers: {
+      Accept: 'text/plain',
+    },
+    // We need to tell axios not to do anything (don't parse)
+    transformResponse: [d => d],
+  }).catch(e => {
+    if (e.response && e.response.status === 404) {
+      // Maybe it is not yet added to github api, let's try the raw git object
+      return axios({
+        url: file.git_url + buildSecretParams(),
+      }).then(res => ({
+        data: new Buffer(res.data.content, 'base64').toString(),
+      }));
+    }
+
+    throw e;
   });
-  const content = new Buffer(response.data.content, 'base64').toString();
-  return content;
+
+  return response.data;
 }
 
 interface CommitResponse {
