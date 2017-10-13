@@ -83,15 +83,10 @@ export async function fetchContents(
  */
 export async function fetchCode(file: Module): Promise<string> {
   const response = await axios({
-    url: file.download_url,
-    responseType: 'text',
-    headers: {
-      Accept: 'text/plain',
-    },
-    // We need to tell axios not to do anything (don't parse)
-    transformResponse: [d => d],
+    url: file.git_url,
   });
-  return response.data;
+  const content = new Buffer(response.data.content, 'base64').toString();
+  return content;
 }
 
 type CommitResponse = {
