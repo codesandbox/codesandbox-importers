@@ -111,10 +111,11 @@ export async function fetchRepoInfo(
 ): Promise<CommitResponse> {
   try {
     const cacheId = username + repo + branch + path;
+    // We cache the latest retrieved sha for 3 minutes, so we don't spam the
+    // GitHub API for every request
     let latestSha = shaCache.get(cacheId) as string;
 
     if (!latestSha) {
-      console.log('getting');
       const url = buildCommitsUrl(username, repo, branch, path);
       const response = await axios(url);
       latestSha = response.data.sha as string;
