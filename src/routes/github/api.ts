@@ -1,4 +1,5 @@
 import axios from 'axios';
+import * as LRU from 'lru-cache';
 
 import log from '../../utils/log';
 
@@ -89,13 +90,19 @@ export async function fetchCode(file: Module): Promise<string> {
   return content;
 }
 
-type CommitResponse = {
+interface CommitResponse {
   commitSha: string;
   username: string;
   repo: string;
   branch: string;
   path: string;
-};
+}
+
+const shaCache = LRU({
+  max: 500,
+  maxAge: 1000 * 60 * 3, // 3 minutes
+});
+
 export async function fetchRepoInfo(
   username: string,
   repo: string,
@@ -103,10 +110,20 @@ export async function fetchRepoInfo(
   path: string = ''
 ): Promise<CommitResponse> {
   try {
-    const url = buildCommitsUrl(username, repo, branch, path);
-    const response = await axios(url);
+    const cacheId = username + repo + branch + path;
+    let latestSha = shaCache.get(cacheId) as string;
+
+    if (!latestSha) {
+      console.log('getting');
+      const url = buildCommitsUrl(username, repo, branch, path);
+      const response = await axios(url);
+      latestSha = response.data.sha as string;
+
+      shaCache.set(cacheId, latestSha);
+    }
+
     return {
-      commitSha: response.data.sha,
+      commitSha: latestSha,
       username,
       repo,
       branch,
