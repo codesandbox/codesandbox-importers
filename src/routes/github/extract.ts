@@ -93,6 +93,10 @@ function verifyFileCount(directory: NormalizedDirectory) {
   }
 }
 
+/**
+ * Extract the git repository to a list of files and directories with contents.
+ * The sourceFolder is used to define which directory to use as source root
+ */
 export default async function extract(
   username: string,
   repository: string,

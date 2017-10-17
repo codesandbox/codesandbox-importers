@@ -117,12 +117,13 @@ export const data = async (ctx: Context, next: () => Promise<any>) => {
     ? extractGitRepoWithCustomIndex
     : extractGitRepository)(username, repo, branch, path);
 
-  const sandboxParams = await createSandbox(files, directories, isFilePath);
+  const sandboxParams = await createSandbox(files, directories);
 
   let finalTitle = sandboxParams.title || title;
 
   if (isFilePath) {
-    finalTitle = finalTitle + '/' + basename(path);
+    const relativePath = path.split('src/').pop();
+    finalTitle = finalTitle + '/' + relativePath;
   }
 
   ctx.body = {
