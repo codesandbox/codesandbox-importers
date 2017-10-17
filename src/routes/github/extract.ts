@@ -135,7 +135,7 @@ export default async function extract(
     );
 
     srcDir.name = 'src';
-    srcDir.path = absolutePath;
+    srcDir.path = 'src';
 
     const contents = { files, directories: [...directories, srcDir] };
 

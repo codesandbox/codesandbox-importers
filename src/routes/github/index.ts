@@ -60,13 +60,6 @@ async function extractGitRepoWithCustomIndex(
       sourceDirectory
     );
 
-    const fetchedDirectory = (await fetchContents(
-      username,
-      repo,
-      branch,
-      sourceDirectory
-    )) as Module;
-
     return { directories, files };
   } else {
     // Okay, random file (eg. src/koe/test.js), then we change the scenario to be
