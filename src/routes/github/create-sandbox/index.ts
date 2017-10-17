@@ -221,10 +221,12 @@ function getHTMLInfo(html: SandboxFile | undefined) {
  * @export SandboxObject
  * @param {Array<Module>} files
  * @param {Array<Module>} directories
+ * @param {boolean} isFilePath Defines whether this is a request to a direct file
  */
 export default async function createSandbox(
   files: Array<Module>,
-  directories: Array<NormalizedDirectory>
+  directories: Array<NormalizedDirectory>,
+  isFilePath: boolean
 ) {
   const packageJson = files.find(m => m.name === 'package.json');
   const srcFolder = directories.find(m => m.name === 'src');
@@ -278,5 +280,6 @@ export default async function createSandbox(
     npmDependencies: dependencies,
     externalResources: htmlInfo.externalResources,
     template,
+    isFilePath,
   };
 }

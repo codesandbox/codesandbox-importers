@@ -10,7 +10,9 @@ type Module = {
   type: 'file' | 'dir';
 };
 
-type NormalizedDirectory = Module & {
+type NormalizedDirectory = {
+  path: string;
+  name: string;
   files: Array<Module>;
   directories: Array<NormalizedDirectory>;
 };
