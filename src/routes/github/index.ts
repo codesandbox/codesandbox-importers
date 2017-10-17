@@ -36,10 +36,14 @@ async function extractGitRepoWithCustomIndex(
   const splittedPath = path.split(`src/`);
 
   const filePath = splittedPath.pop();
-  const rootPath = splittedPath[splittedPath.length - 1];
+  let rootPath = splittedPath[splittedPath.length - 1];
 
   if (rootPath == null) {
     throw new Error("The given path doesn't include a 'src' folder.");
+  }
+
+  if (rootPath.endsWith('/')) {
+    rootPath = rootPath.slice(0, -1);
   }
 
   let sourceDirectory;
