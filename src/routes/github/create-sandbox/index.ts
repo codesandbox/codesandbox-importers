@@ -151,10 +151,7 @@ async function getDependencies(
   },
   files: SandboxFile[]
 ) {
-  const { dependencies, devDependencies } = packageJSON;
-
-  if (!dependencies)
-    throw new Error('There are no dependencies in package.json');
+  const { dependencies = {}, devDependencies = {} } = packageJSON;
 
   const dependenciesInFiles = getDependencyRequiresFromFiles(files);
 
