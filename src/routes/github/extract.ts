@@ -1,3 +1,5 @@
+import { basename, join } from 'path';
+
 import * as api from './api';
 import log from '../../utils/log';
 
@@ -12,11 +14,11 @@ import log from '../../utils/log';
  * @param {Module} directory
  * @returns {Promise<NormalizedDirectory>}
  */
-async function extractDirectory(
+export async function extractDirectory(
   username: string,
   repo: string,
   branch: string,
-  directory: Module,
+  directoryPath: string,
   requests: number = 0
 ): Promise<NormalizedDirectory> {
   if (requests > 40) {
@@ -25,13 +27,13 @@ async function extractDirectory(
     );
   }
 
-  log(`Unpacking ${directory.path}`);
+  log(`Unpacking ${directoryPath}`);
 
   const contents = (await api.fetchContents(
     username,
     repo,
     branch,
-    directory.path
+    directoryPath
   )) as Array<Module>;
 
   const files = contents.filter(m => m.type === 'file');
@@ -42,14 +44,15 @@ async function extractDirectory(
         username,
         repo,
         branch,
-        dir,
+        dir.path,
         requests + directories.length
       );
     })
   );
 
   return {
-    ...directory,
+    path: directoryPath,
+    name: basename(directoryPath),
     files,
     directories: normalizedDirectories,
   };
@@ -90,12 +93,16 @@ function verifyFileCount(directory: NormalizedDirectory) {
   }
 }
 
+/**
+ * Extract the git repository to a list of files and directories with contents.
+ * The sourceFolder is used to define which directory to use as source root
+ */
 export default async function extract(
   username: string,
   repository: string,
   branch: string,
   path: string,
-  skipSource = false
+  sourceFolder = 'src'
 ) {
   const rootContent = (await api.fetchContents(
     username,
@@ -110,27 +117,39 @@ export default async function extract(
   const directories = await Promise.all(
     rootContent
       .filter(
-        m =>
-          m.type === 'dir' &&
-          ((m.name === 'src' && !skipSource) ||
-            m.name === 'public' ||
-            m.name === 'static')
+        m => m.type === 'dir' && (m.name === 'public' || m.name === 'static')
       )
       .map(async dir => {
-        return await extractDirectory(username, repository, branch, dir);
+        return await extractDirectory(username, repository, branch, dir.path);
       })
   );
 
-  const contents = { files, directories };
+  if (sourceFolder) {
+    const absolutePath = join(path, sourceFolder);
 
-  if (!skipSource) {
-    const sourceDir = contents.directories.find(m => m.name === 'src');
-    if (!sourceDir) {
-      throw new Error('The project should include a src folder.');
+    const srcDir = await extractDirectory(
+      username,
+      repository,
+      branch,
+      absolutePath
+    );
+
+    srcDir.name = 'src';
+    srcDir.path = absolutePath;
+
+    const contents = { files, directories: [...directories, srcDir] };
+
+    if (sourceFolder) {
+      const sourceDir = contents.directories.find(m => m.name === 'src');
+      if (!sourceDir) {
+        throw new Error(`The project should include a src folder.`);
+      }
+
+      verifyFileCount(sourceDir);
     }
 
-    verifyFileCount(sourceDir);
+    return contents;
   }
 
-  return contents;
+  return { files, directories };
 }

@@ -1,7 +1,7 @@
 import { Context } from 'koa';
-import { extname, basename, join } from 'path';
+import { extname, basename, dirname, join } from 'path';
 
-import extractGitRepository from './extract';
+import extractGitRepository, { extractDirectory } from './extract';
 import { fetchRepoInfo, fetchContents } from './api';
 import createSandbox from './create-sandbox';
 
@@ -33,43 +33,66 @@ async function extractGitRepoWithCustomIndex(
   path: string
 ) {
   // Find the root path of the project
-  const splittedPath = path.split(`/src/`);
+  const splittedPath = path.split(`src/`);
 
-  splittedPath.pop();
+  const filePath = splittedPath.pop();
   const rootPath = splittedPath[splittedPath.length - 1];
 
-  const indexFile = (await fetchContents(
-    username,
-    repo,
-    branch,
-    path
-  )) as Module;
+  if (rootPath == null) {
+    throw new Error("The given path doesn't include a 'src' folder.");
+  }
 
-  indexFile.path = join(rootPath, 'src', 'index.js');
+  let sourceDirectory;
+  // It's index.js, so we only change the source folder
+  if (filePath && basename(filePath) === 'index.js') {
+    // Change source folder to according folder
+    const sourceDirectory = join('src', dirname(filePath));
 
-  const { directories, files } = await extractGitRepository(
-    username,
-    repo,
-    branch,
-    rootPath,
-    true
-  );
+    const { directories, files } = await extractGitRepository(
+      username,
+      repo,
+      branch,
+      rootPath,
+      sourceDirectory
+    );
 
-  directories.push({
-    download_url: '',
-    git_url: '',
-    name: 'src',
-    path: join(rootPath, 'src'),
-    files: [indexFile],
-    directories: [],
-    sha: '',
-    size: 0,
-    url: '',
-    html_url: '',
-    type: 'dir',
-  });
+    const fetchedDirectory = (await fetchContents(
+      username,
+      repo,
+      branch,
+      sourceDirectory
+    )) as Module;
 
-  return { directories, files };
+    return { directories, files };
+  } else {
+    // Okay, random file (eg. src/koe/test.js), then we change the scenario to be
+    // src/index.js
+    const indexFile = (await fetchContents(
+      username,
+      repo,
+      branch,
+      path
+    )) as Module;
+
+    indexFile.path = join(rootPath, 'src', 'index.js');
+    indexFile.name = 'index.js';
+
+    const { directories, files } = await extractGitRepository(
+      username,
+      repo,
+      branch,
+      rootPath,
+      ''
+    );
+    directories.push({
+      name: 'src',
+      path: join(rootPath, 'src'),
+      files: [indexFile],
+      directories: [],
+    });
+
+    return { directories, files };
+  }
 }
 
 /**
@@ -88,9 +111,9 @@ export const data = async (ctx: Context, next: () => Promise<any>) => {
     title = title + `: ${splittedPath[splittedPath.length - 1]}`;
   }
 
-  const pathIsFile = path && !!extname(path);
+  const isFilePath = path && !!extname(path);
 
-  const { directories, files } = await (pathIsFile
+  const { directories, files } = await (isFilePath
     ? extractGitRepoWithCustomIndex
     : extractGitRepository)(username, repo, branch, path);
 
@@ -98,8 +121,9 @@ export const data = async (ctx: Context, next: () => Promise<any>) => {
 
   let finalTitle = sandboxParams.title || title;
 
-  if (pathIsFile) {
-    finalTitle = finalTitle + '/' + basename(path);
+  if (isFilePath) {
+    const relativePath = path.split('src/').pop();
+    finalTitle = finalTitle + '/' + relativePath;
   }
 
   ctx.body = {
