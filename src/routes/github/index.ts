@@ -116,16 +116,18 @@ export const data = async (ctx: Context, next: () => Promise<any>) => {
 
   const sandboxParams = await createSandbox(files, directories);
 
-  let finalTitle = sandboxParams.title || title;
-
   if (isFilePath) {
     const relativePath = path.split('src/').pop();
-    finalTitle = finalTitle + '/' + relativePath;
+    if (basename(relativePath) === 'index.js') {
+      title = dirname(relativePath);
+    } else {
+      title = basename(relativePath);
+    }
   }
 
   ctx.body = {
     ...sandboxParams,
     // If no title is set in package.json, go for this one
-    title: finalTitle,
+    title: sandboxParams.title || title,
   };
 };
