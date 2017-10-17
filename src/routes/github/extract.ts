@@ -1,4 +1,4 @@
-import { basename } from 'path';
+import { basename, join } from 'path';
 
 import * as api from './api';
 import log from '../../utils/log';
@@ -121,20 +121,22 @@ export default async function extract(
   );
 
   if (sourceFolder) {
+    const absolutePath = join(path, sourceFolder);
+
     const srcDir = await extractDirectory(
       username,
       repository,
       branch,
-      sourceFolder
+      absolutePath
     );
 
     srcDir.name = 'src';
-    srcDir.path = 'src';
+    srcDir.path = absolutePath;
 
     const contents = { files, directories: [...directories, srcDir] };
 
     if (sourceFolder) {
-      const sourceDir = contents.directories.find(m => m.path === 'src');
+      const sourceDir = contents.directories.find(m => m.name === 'src');
       if (!sourceDir) {
         throw new Error(`The project should include a src folder.`);
       }
