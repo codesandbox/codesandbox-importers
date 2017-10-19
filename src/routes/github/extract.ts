@@ -101,7 +101,7 @@ export default async function extract(
   username: string,
   repository: string,
   branch: string,
-  path: string,
+  path: string = '',
   sourceFolder = 'src'
 ) {
   const rootContent = (await api.fetchContents(
