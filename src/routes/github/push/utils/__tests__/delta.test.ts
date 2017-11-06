@@ -1,5 +1,6 @@
 import getDelta from '../delta';
-import { INormalizedModules, ITree } from '../../';
+import { ITree } from '../../';
+import { INormalizedModules } from '../../../../../utils/sandbox/normalize';
 
 describe('commit', () => {
   describe('delta', () => {
@@ -51,6 +52,7 @@ describe('commit', () => {
   to { transform: rotate(360deg); }
 }
 `,
+        isBinary: false,
       },
       'src/App.js': {
         content: `import React, { Component } from 'react';
@@ -75,6 +77,7 @@ class App extends Component {
 
 export default App;
 `,
+        isBinary: false,
       },
     };
 
@@ -87,7 +90,10 @@ export default App;
     });
 
     it('detects added files', () => {
-      const newModules = { ...SAMPLE_MODULES, 'test.js': { content: 'Hey' } };
+      const newModules = {
+        ...SAMPLE_MODULES,
+        'test.js': { content: 'Hey', isBinary: false },
+      };
 
       expect(getDelta(SAMPLE_TREE, newModules)).toEqual({
         added: ['test.js'],
@@ -99,7 +105,7 @@ export default App;
     it('detects modified files', () => {
       const newModules = {
         ...SAMPLE_MODULES,
-        'src/App.js': { content: 'Hey' },
+        'src/App.js': { content: 'Hey', isBinary: false },
       };
 
       expect(getDelta(SAMPLE_TREE, newModules)).toEqual({

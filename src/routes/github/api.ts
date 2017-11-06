@@ -3,6 +3,8 @@ import * as LRU from 'lru-cache';
 
 import log from '../../utils/log';
 
+import { ITree } from './push';
+
 const BASE_URL = 'https://api.github.com/repos';
 
 const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID;
@@ -73,6 +75,34 @@ export async function fetchContents(
 
     throw e;
   }
+}
+
+interface ITreeResponse {
+  sha: string;
+  tree: ITree;
+  truncated: boolean;
+  url: string;
+}
+
+export async function fetchTree(
+  username: string,
+  repo: string,
+  path: string = '',
+  commitSha: string,
+  recursive: boolean = true
+): Promise<ITreeResponse> {
+  let url = `${buildApiUrl(
+    username,
+    repo
+  )}/git/trees/${commitSha}${buildSecretParams()}&path=${path}`;
+
+  if (recursive) {
+    url += '&recursive=1';
+  }
+
+  const response: { data: ITreeResponse } = await axios({ url });
+
+  return response.data;
 }
 
 /**

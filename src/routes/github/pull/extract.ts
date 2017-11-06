@@ -1,7 +1,13 @@
 import { basename, join } from 'path';
 
-import * as api from './api';
-import log from '../../utils/log';
+import * as api from '../api';
+import log from '../../../utils/log';
+
+import { INormalizedModules } from '../../../utils/sandbox/normalize';
+
+export interface IGitHubFiles {
+  [path: string]: Module;
+}
 
 /**
  * Converts a directory to a normalized directory, this means that it will download
@@ -12,7 +18,7 @@ import log from '../../utils/log';
  * @param {string} repo
  * @param {string} branch
  * @param {Module} directory
- * @returns {Promise<NormalizedDirectory>}
+ * @returns {Promise<INormalizedModules>}
  */
 export async function extractDirectory(
   username: string,
@@ -20,12 +26,14 @@ export async function extractDirectory(
   branch: string,
   directoryPath: string,
   requests: number = 0
-): Promise<NormalizedDirectory> {
+): Promise<IGitHubFiles> {
   if (requests > 40) {
     throw new Error(
       'This project is too big, it has more than 40 directories.'
     );
   }
+
+  const result: IGitHubFiles = {};
 
   log(`Unpacking ${directoryPath}`);
 
@@ -36,26 +44,27 @@ export async function extractDirectory(
     directoryPath
   )) as Array<Module>;
 
-  const files = contents.filter(m => m.type === 'file');
-  const directories = contents.filter(m => m.type === 'dir');
+  const files = contents.filter(m => m.type === 'file').forEach(f => {
+    result[f.path] = f;
+  });
+  const directories = contents.filter(d => d.type === 'dir');
   const normalizedDirectories = await Promise.all(
     directories.map(async dir => {
-      return await extractDirectory(
+      const res = await extractDirectory(
         username,
         repo,
         branch,
         dir.path,
         requests + directories.length
       );
+
+      Object.keys(res).forEach(p => {
+        result[p] = res[p];
+      });
     })
   );
 
-  return {
-    path: directoryPath,
-    name: basename(directoryPath),
-    files,
-    directories: normalizedDirectories,
-  };
+  return result;
 }
 
 /**
@@ -102,54 +111,38 @@ export default async function extract(
   repository: string,
   branch: string,
   path: string = '',
-  sourceFolder = 'src'
-) {
-  const rootContent = (await api.fetchContents(
+  sourceFolder?: string
+): Promise<IGitHubFiles> {
+  const absoluteFiles = await extractDirectory(
     username,
     repository,
     branch,
     path
-  )) as Array<Module>;
-  verifyFiles(rootContent);
-
-  const files = rootContent.filter(m => m.type === 'file');
-  // Directories in src
-  const directories = await Promise.all(
-    rootContent
-      .filter(
-        m => m.type === 'dir' && (m.name === 'public' || m.name === 'static')
-      )
-      .map(async dir => {
-        return await extractDirectory(username, repository, branch, dir.path);
-      })
   );
 
-  if (sourceFolder) {
-    const absolutePath = join(path, sourceFolder);
+  // Rewrite path to make it relative
+  const relativeFiles = Object.keys(absoluteFiles).reduce(
+    (total, next) => ({
+      ...total,
+      [next.replace(path, '')]: absoluteFiles[next],
+    }),
+    {}
+  );
 
-    const srcDir = await extractDirectory(
-      username,
-      repository,
-      branch,
-      absolutePath
-    );
+  // if (sourceFolder) {
+  //   const absolutePath = join(path, sourceFolder);
 
-    srcDir.name = 'src';
-    srcDir.path = 'src';
+  //   const srcDir = directory.directories.find(d => d.path === sourceFolder);
 
-    const contents = { files, directories: [...directories, srcDir] };
+  //   if (!srcDir) {
+  //     throw new Error('Cannot find directory ' + sourceFolder);
+  //   }
 
-    if (sourceFolder) {
-      const sourceDir = contents.directories.find(m => m.name === 'src');
-      if (!sourceDir) {
-        throw new Error(`The project should include a src folder.`);
-      }
+  //   srcDir.name = '';
+  //   srcDir.path = '';
 
-      verifyFileCount(sourceDir);
-    }
+  //   return srcDir;
+  // }
 
-    return contents;
-  }
-
-  return { files, directories };
+  return relativeFiles;
 }

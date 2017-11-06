@@ -1,9 +1,14 @@
 import { Context } from 'koa';
 import { extname, basename, dirname, join } from 'path';
 
-import extractGitRepository, { extractDirectory } from './extract';
+import extractGitRepository, { extractDirectory } from './pull/extract';
+import { downloadExtractedFiles } from './pull/download';
+import createSandbox from './pull/create-sandbox';
 import { fetchRepoInfo, fetchContents } from './api';
-import createSandbox from './create-sandbox';
+
+import * as push from './push';
+
+import normalizeSandbox from '../../utils/sandbox/normalize';
 
 export const info = async (ctx: Context, next: () => Promise<any>) => {
   const response = await fetchRepoInfo(
@@ -15,82 +20,6 @@ export const info = async (ctx: Context, next: () => Promise<any>) => {
 
   ctx.body = response;
 };
-
-/**
- * When a file is given directly we want to use that file as main file for the
- * project it's in
- *
- * @param {string} username
- * @param {string} repo
- * @param {string} branch
- * @param {string} path
- * @returns
- */
-async function extractGitRepoWithCustomIndex(
-  username: string,
-  repo: string,
-  branch: string,
-  path: string
-) {
-  // Find the root path of the project
-  const splittedPath = path.split(`src/`);
-
-  const filePath = splittedPath.pop();
-  let rootPath = splittedPath[splittedPath.length - 1];
-
-  if (rootPath == null) {
-    throw new Error("The given path doesn't include a 'src' folder.");
-  }
-
-  if (rootPath.endsWith('/')) {
-    rootPath = rootPath.slice(0, -1);
-  }
-
-  let sourceDirectory;
-  // It's index.js, so we only change the source folder
-  if (filePath && basename(filePath) === 'index.js') {
-    // Change source folder to according folder
-    const sourceDirectory = join('src', dirname(filePath));
-
-    const { directories, files } = await extractGitRepository(
-      username,
-      repo,
-      branch,
-      rootPath,
-      sourceDirectory
-    );
-
-    return { directories, files };
-  } else {
-    // Okay, random file (eg. src/koe/test.js), then we change the scenario to be
-    // src/index.js
-    const indexFile = (await fetchContents(
-      username,
-      repo,
-      branch,
-      path
-    )) as Module;
-
-    indexFile.path = join(rootPath, 'src', 'index.js');
-    indexFile.name = 'index.js';
-
-    const { directories, files } = await extractGitRepository(
-      username,
-      repo,
-      branch,
-      rootPath,
-      ''
-    );
-    directories.push({
-      name: 'src',
-      path: join(rootPath, 'src'),
-      files: [indexFile],
-      directories: [],
-    });
-
-    return { directories, files };
-  }
-}
 
 /**
  * This route will take a github path and return sandbox data for it
@@ -110,11 +39,10 @@ export const data = async (ctx: Context, next: () => Promise<any>) => {
 
   const isFilePath = path && !!extname(path);
 
-  const { directories, files } = await (isFilePath
-    ? extractGitRepoWithCustomIndex
-    : extractGitRepository)(username, repo, branch, path);
+  const fileData = await extractGitRepository(username, repo, branch, path);
+  const downloadedFiles = await downloadExtractedFiles(fileData);
 
-  const sandboxParams = await createSandbox(files, directories);
+  const sandboxParams = await createSandbox(downloadedFiles);
 
   let finalTitle = sandboxParams.title || title;
 
@@ -135,5 +63,28 @@ export const data = async (ctx: Context, next: () => Promise<any>) => {
     ...sandboxParams,
     // If no title is set in package.json, go for this one
     title: finalTitle,
+  };
+};
+
+export const diff = async (ctx: Context, next: () => Promise<any>) => {
+  const { username, repo, branch, path } = ctx.params;
+  const { modules, directories, commitSha } = ctx.request.body.sandbox;
+  const normalizedFiles = normalizeSandbox(modules, directories);
+
+  const delta = await push.getFileDifferences(
+    '',
+    {
+      user: username,
+      commitSha,
+      repo,
+      branch,
+      path,
+    },
+    normalizedFiles
+  );
+
+  ctx.body = {
+    status: 'ok',
+    delta,
   };
 };

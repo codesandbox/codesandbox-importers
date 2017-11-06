@@ -22,23 +22,32 @@ connectReduxDevtools(require("remotedev"), store)
 describe('dependency-analyzer', () => {
   it('can detect dependencies in the code', () => {
     const file = {
-      title: '',
+      title: 'a.js',
       code: CODE,
+      shortid: 'asdf',
+      isBinary: false,
+      directoryShortid: undefined,
     };
     expect(getDependencies([file])).toMatchSnapshot();
   });
 
   it('can detect from multiple files', () => {
     const file = {
-      title: '',
+      title: 'a.js',
       code: CODE,
+      shortid: 'asdf',
+      isBinary: false,
+      directoryShortid: undefined,
     };
     expect(getDependencies([file, file])).toMatchSnapshot();
   });
 
   it('can detect multiline dependencies', () => {
     const file = {
-      title: '',
+      title: 'a.js',
+      shortid: 'asdf',
+      isBinary: false,
+      directoryShortid: undefined,
       code: `
       import React from "react";
       import PropTypes from "prop-types";
@@ -79,7 +88,10 @@ describe('dependency-analyzer', () => {
 
   it('works with big files', () => {
     const file = {
-      title: '',
+      title: 'a.js',
+      shortid: 'asdf',
+      isBinary: false,
+      directoryShortid: undefined,
       code: `
       import React from "react";
       import PropTypes from "prop-types";

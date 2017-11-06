@@ -1,4 +1,5 @@
-import { INormalizedModules, ITree } from '../index';
+import { ITree } from '../index';
+import { INormalizedModules } from '../../../../utils/sandbox/normalize';
 
 import { createHash } from 'crypto';
 
@@ -21,6 +22,10 @@ export default function getDelta(tree: ITree, modules: INormalizedModules) {
     if (!equivalentModule) {
       deleted.push(file.path);
     } else {
+      if (equivalentModule.isBinary) {
+        return;
+      }
+
       if (getGitSha(equivalentModule.content) !== file.sha) {
         modified.push(file.path);
       }
