@@ -1,5 +1,7 @@
 import axios from 'axios';
 import * as LRU from 'lru-cache';
+import * as zip from 'jszip';
+import fetch from 'node-fetch';
 
 import log from '../../utils/log';
 
@@ -312,9 +314,9 @@ const shaCache = LRU({
 });
 
 export function resetShaCache(gitInfo: IGitInfo) {
-  const { user, repo, branch, path } = gitInfo;
+  const { username, repo, branch, path } = gitInfo;
 
-  return shaCache.del(user + repo + branch + path);
+  return shaCache.del(username + repo + branch + path);
 }
 
 export async function fetchRepoInfo(
@@ -367,4 +369,23 @@ export async function fetchRepoInfo(
 
     throw e;
   }
+}
+
+const ZIP_URL = `https://codeload.github.com`;
+const MAX_ZIP_SIZE = 30 * 1024 * 1024; // 30Mb
+
+export async function downloadZip(gitInfo: IGitInfo) {
+  const buffer = await fetch(
+    `${ZIP_URL}/${gitInfo.username}/${gitInfo.repo}/zip/${gitInfo.branch}`
+  ).then(res => {
+    if (+res.headers.get('Content-Length') > MAX_ZIP_SIZE) {
+      throw new Error('This repo is too big to import');
+    }
+
+    return res.buffer();
+  });
+
+  const loadedZip = await zip.loadAsync(buffer);
+
+  return loadedZip;
 }

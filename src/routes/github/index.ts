@@ -1,8 +1,7 @@
 import { Context } from 'koa';
 import { extname, basename, dirname, join } from 'path';
 
-import extractGitRepository, { extractDirectory } from './pull/extract';
-import { downloadExtractedFiles } from './pull/download';
+import { downloadRepository } from './pull/download';
 import createSandbox from './pull/create-sandbox';
 import {
   fetchRepoInfo,
@@ -45,8 +44,13 @@ export const data = async (ctx: Context, next: () => Promise<any>) => {
 
   const isFilePath = path && !!extname(path);
 
-  const fileData = await extractGitRepository(username, repo, branch, path);
-  const downloadedFiles = await downloadExtractedFiles(fileData);
+  const downloadedFiles = await downloadRepository({
+    commitSha,
+    username,
+    repo,
+    branch,
+    path,
+  });
 
   const sandboxParams = await createSandbox(downloadedFiles);
 
@@ -85,7 +89,7 @@ export const diff = async (ctx: Context, next: () => Promise<any>) => {
 
   const [delta, rights] = await Promise.all([
     push.getFileDifferences(
-      { user: username, commitSha, repo, branch, path },
+      { username, commitSha, repo, branch, path },
       normalizedFiles
     ),
     fetchRights(username, repo, currentUser, token),
@@ -105,7 +109,7 @@ export const commit = async (ctx: Context, next: () => Promise<any>) => {
   const normalizedFiles = normalizeSandbox(modules, directories);
 
   const response = await push.createCommit(
-    { user: username, commitSha, repo, branch, path },
+    { username, commitSha, repo, branch, path },
     normalizedFiles,
     message,
     token
@@ -113,7 +117,7 @@ export const commit = async (ctx: Context, next: () => Promise<any>) => {
 
   // On the client we redirect to the original git sandbox, so we want to
   // reset the cache so the user sees the latest version
-  resetShaCache({ user: username, repo, branch, path, commitSha });
+  resetShaCache({ username, repo, branch, path, commitSha });
 
   ctx.body = {
     url: response.url,

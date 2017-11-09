@@ -13,7 +13,7 @@ import { createBlobs } from './utils/create-blobs';
 import { join } from 'path';
 
 export interface IGitInfo {
-  user: string;
+  username: string;
   repo: string;
   branch: string;
   commitSha: string;
@@ -32,11 +32,11 @@ export interface ITreeFile {
 export type ITree = ITreeFile[];
 
 async function getNormalizedTree(
-  { user, commitSha, repo, branch, path }: IGitInfo,
+  { username, commitSha, repo, branch, path }: IGitInfo,
   makeRelative = true
 ) {
   // 1. Get commit tree from GitHub based on path
-  let { tree, truncated } = await fetchTree(user, repo, path, commitSha);
+  let { tree, truncated } = await fetchTree(username, repo, path, commitSha);
 
   if (truncated) {
     throw new Error('This repository is too big to make a commit.');
@@ -69,7 +69,7 @@ export async function createCommit(
   message: string,
   userToken: string
 ) {
-  const { user, commitSha, repo, branch, path = '' } = gitInfo;
+  const { username, commitSha, repo, branch, path = '' } = gitInfo;
 
   const tree = await getNormalizedTree(gitInfo, false);
   let absoluteSandboxFiles = sandboxFiles;
@@ -101,9 +101,9 @@ export async function createCommit(
     t => delta.deleted.indexOf(t.path) === -1
   );
 
-  const treeResponse = await createTree(user, repo, newTree, userToken);
+  const treeResponse = await createTree(username, repo, newTree, userToken);
   const commit = await createCommitApi(
-    gitInfo.user,
+    gitInfo.username,
     gitInfo.repo,
     treeResponse.sha,
     commitSha,
@@ -111,18 +111,24 @@ export async function createCommit(
     userToken
   );
 
-  const lastInfo = await fetchRepoInfo(user, repo, branch, path, true);
+  const lastInfo = await fetchRepoInfo(username, repo, branch, path, true);
 
   // If we're up to date we just move the head, if that's not the cache we create
   // a merge
   if (lastInfo.commitSha === commitSha) {
     try {
-      return await updateReference(user, repo, branch, commit.sha, userToken);
+      return await updateReference(
+        username,
+        repo,
+        branch,
+        commit.sha,
+        userToken
+      );
     } catch (e) {
       console.error(e);
       /* Let's try to create the merge then */
     }
   }
 
-  return await createMerge(user, repo, branch, commit.sha, userToken);
+  return await createMerge(username, repo, branch, commit.sha, userToken);
 }

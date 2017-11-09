@@ -11,7 +11,7 @@ export async function createBlobs(
   return Promise.all(
     files.map(async path => {
       const result = await createBlob(
-        gitInfo.user,
+        gitInfo.username,
         gitInfo.repo,
         sandboxFiles[path].content,
         token
