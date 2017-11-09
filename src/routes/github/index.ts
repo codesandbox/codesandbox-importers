@@ -4,7 +4,13 @@ import { extname, basename, dirname, join } from 'path';
 import extractGitRepository, { extractDirectory } from './pull/extract';
 import { downloadExtractedFiles } from './pull/download';
 import createSandbox from './pull/create-sandbox';
-import { fetchRepoInfo, fetchContents } from './api';
+import {
+  fetchRepoInfo,
+  fetchContents,
+  fetchRights,
+  fetchCode,
+  resetShaCache,
+} from './api';
 
 import * as push from './push';
 
@@ -68,23 +74,48 @@ export const data = async (ctx: Context, next: () => Promise<any>) => {
 
 export const diff = async (ctx: Context, next: () => Promise<any>) => {
   const { username, repo, branch, path } = ctx.params;
-  const { modules, directories, commitSha } = ctx.request.body.sandbox;
+  const {
+    modules,
+    directories,
+    commitSha,
+    currentUser,
+    token,
+  } = ctx.request.body;
   const normalizedFiles = normalizeSandbox(modules, directories);
 
-  const delta = await push.getFileDifferences(
-    '',
-    {
-      user: username,
-      commitSha,
-      repo,
-      branch,
-      path,
-    },
-    normalizedFiles
-  );
+  const [delta, rights] = await Promise.all([
+    push.getFileDifferences(
+      { user: username, commitSha, repo, branch, path },
+      normalizedFiles
+    ),
+    fetchRights(username, repo, currentUser, token),
+  ]);
 
   ctx.body = {
-    status: 'ok',
-    delta,
+    added: delta.added,
+    modified: delta.modified,
+    deleted: delta.deleted,
+    rights,
+  };
+};
+
+export const commit = async (ctx: Context, next: () => Promise<any>) => {
+  const { username, repo, branch, path } = ctx.params;
+  const { modules, directories, commitSha, message, token } = ctx.request.body;
+  const normalizedFiles = normalizeSandbox(modules, directories);
+
+  const response = await push.createCommit(
+    { user: username, commitSha, repo, branch, path },
+    normalizedFiles,
+    message,
+    token
+  );
+
+  // On the client we redirect to the original git sandbox, so we want to
+  // reset the cache so the user sees the latest version
+  resetShaCache({ user: username, repo, branch, path, commitSha });
+
+  ctx.body = {
+    url: response.url,
   };
 };

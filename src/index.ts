@@ -17,6 +17,7 @@ import {
   info as githubInfo,
   data as githubData,
   diff as githubDiff,
+  commit as githubCommit,
 } from './routes/github';
 
 const DEFAULT_PORT = process.env.PORT || 2000;
@@ -31,12 +32,16 @@ app.use(decamelize);
 app.use(notFound);
 
 router
-  .get('/git/github/data/:username/:repo/:sha/:branch*/path/:path*', githubData)
+  .get('/git/github/data/:username/:repo/:branch*/path/:path*', githubData)
   .get('/git/github/info/:username/:repo/tree/:branch/:path*', githubInfo) // allow tree urls
   .get('/git/github/info/:username/:repo/blob/:branch/:path*', githubInfo) // allow blob urls
   .get('/git/github/info/:username/:repo', githubInfo) // For when tree isn't in path (root path)
   // Push
-  .post('/git/github/diff/:username/:repo/:branch*/path/:path*', githubDiff);
+  .post('/git/github/diff/:username/:repo/:branch*/path/:path*', githubDiff)
+  .post(
+    '/git/github/commit/:username/:repo/:branch*/path/:path*',
+    githubCommit
+  );
 
 app.use(router.routes()).use(router.allowedMethods());
 

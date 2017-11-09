@@ -4,7 +4,7 @@ import { IModule, INormalizedModules } from '../../../utils/sandbox/normalize';
 import { fetchCode } from '../api';
 
 const FILE_LOADER_REGEX = /\.(ico|jpg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm)(\?.*)?$/;
-const MAX_FILE_SIZE = 64000;
+const MAX_FILE_SIZE = 100000;
 
 /**
  * We use https://rawgit.com/ as urls, since they change the content-type corresponding
