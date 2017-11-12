@@ -198,6 +198,9 @@ interface ICreateCommitResponse {
   message: string;
 }
 
+/**
+ * Create a commit from the given tree
+ */
 export async function createCommit(
   username: string,
   repo: string,
@@ -220,6 +223,12 @@ interface ICreateMergeResponse {
   url: string;
 }
 
+/**
+ * Create a merge for the specified commit
+ *
+ * @param branch The branch to merge into
+ * @param commitSha The sha to merge
+ */
 export async function createMerge(
   username: string,
   repo: string,
@@ -236,8 +245,9 @@ export async function createMerge(
 
     return response.data;
   } catch (e) {
+    console.error(e);
     if (e.response) {
-      e.message = `Merging went wrong: '${e.response.message}'`;
+      e.message = `Merging went wrong: '${e.response.data.message}'`;
     }
 
     throw e;
@@ -266,6 +276,73 @@ export async function updateReference(
   );
 
   return response.data;
+}
+
+interface ICreateReferenceResponse {
+  ref: string;
+  url: string;
+  object: {
+    type: string;
+    sha: string;
+    url: string;
+  };
+}
+
+export async function createReference(
+  username: string,
+  repo: string,
+  branch: string,
+  refSha: string,
+  token: string
+) {
+  const response: { data: ICreateReferenceResponse } = await axios.post(
+    `${buildApiUrl(username, repo)}/git/refs${buildSecretParams()}`,
+    { ref: `refs/heads/${branch}`, sha: refSha },
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+
+  return response.data;
+}
+
+interface ICreateForkResponse {
+  name: string;
+  full_name: string;
+  description: string;
+  private: boolean;
+  fork: boolean;
+}
+
+export async function createFork(
+  username: string,
+  repo: string,
+  token: string
+) {
+  const response: { data: ICreateForkResponse } = await axios.post(
+    `${buildApiUrl(username, repo)}/forks${buildSecretParams()}`,
+    {},
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+
+  return response.data;
+}
+
+/**
+ * Check if repository exists
+ */
+export async function doesRepoExist(username: string, repo: string) {
+  try {
+    const response = await axios.get(
+      buildApiUrl(username, repo) + buildSecretParams()
+    );
+
+    return true;
+  } catch (e) {
+    if (e.response && e.response.status === 404) {
+      return false;
+    }
+
+    throw e;
+  }
 }
 
 /**
@@ -310,11 +387,11 @@ interface CommitResponse {
 
 const shaCache = LRU({
   max: 500,
-  maxAge: 1000 * 60 * 3, // 3 minutes
+  maxAge: 1000 * 30, // 30 seconds
 });
 
 export function resetShaCache(gitInfo: IGitInfo) {
-  const { username, repo, branch, path } = gitInfo;
+  const { username, repo, branch = 'master', path = '' } = gitInfo;
 
   return shaCache.del(username + repo + branch + path);
 }
@@ -328,7 +405,7 @@ export async function fetchRepoInfo(
 ): Promise<CommitResponse> {
   try {
     const cacheId = username + repo + branch + path;
-    // We cache the latest retrieved sha for 3 minutes, so we don't spam the
+    // We cache the latest retrieved sha for a limited time, so we don't spam the
     // GitHub API for every request
     let latestSha = shaCache.get(cacheId) as string;
 

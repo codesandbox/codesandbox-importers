@@ -2,7 +2,6 @@ import { generate as generateShortid } from 'shortid';
 import { pickBy } from 'lodash';
 import { join } from 'path';
 
-import { IGitHubFiles } from '../extract';
 import {
   INormalizedModules,
   IModule,
@@ -53,11 +52,7 @@ function getHTMLInfo(html: IModule | undefined) {
     return { externalResources: [], file: null };
   }
 
-  const { body, externalResources } = parseHTML(html.content);
-
-  if (body) {
-    html.content = body;
-  }
+  const { externalResources } = parseHTML(html.content);
 
   return { externalResources, file: html };
 }
@@ -83,11 +78,6 @@ export default async function createSandbox(directory: INormalizedModules) {
     throw new Error(`Cannot find the entry point: '${mainFile}'`);
   }
 
-  // Fetch index html seperately, we need to extract external resources and
-  // the body from it
-  let indexHTML = directory['index.html'] || directory['public/index.html'];
-
-  const htmlInfo = getHTMLInfo(indexHTML);
   const { modules, directories } = denormalize(directory);
 
   // Give the sandboxModules to getDependencies to fetch which devDependencies
@@ -103,7 +93,7 @@ export default async function createSandbox(directory: INormalizedModules) {
     modules,
     directories,
     npmDependencies: dependencies,
-    externalResources: htmlInfo.externalResources,
+    externalResources: [],
     template,
     entry: mainFile,
   };

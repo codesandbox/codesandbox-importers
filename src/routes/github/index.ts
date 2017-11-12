@@ -3,20 +3,15 @@ import { extname, basename, dirname, join } from 'path';
 
 import { downloadRepository } from './pull/download';
 import createSandbox from './pull/create-sandbox';
-import {
-  fetchRepoInfo,
-  fetchContents,
-  fetchRights,
-  fetchCode,
-  resetShaCache,
-} from './api';
 
+import * as api from './api';
 import * as push from './push';
 
 import normalizeSandbox from '../../utils/sandbox/normalize';
+import { IGitInfo } from './push';
 
 export const info = async (ctx: Context, next: () => Promise<any>) => {
-  const response = await fetchRepoInfo(
+  const response = await api.fetchRepoInfo(
     ctx.params.username,
     ctx.params.repo,
     ctx.params.branch,
@@ -34,7 +29,7 @@ export const info = async (ctx: Context, next: () => Promise<any>) => {
 export const data = async (ctx: Context, next: () => Promise<any>) => {
   // We get branch, etc from here because there could be slashes in a branch name,
   // we can retrieve if this is the case from this method
-  const { commitSha, username, repo, branch, path } = ctx.params;
+  const { username, repo, branch, path } = ctx.params;
 
   let title = `${username}/${repo}`;
   if (path) {
@@ -45,7 +40,6 @@ export const data = async (ctx: Context, next: () => Promise<any>) => {
   const isFilePath = path && !!extname(path);
 
   const downloadedFiles = await downloadRepository({
-    commitSha,
     username,
     repo,
     branch,
@@ -77,7 +71,6 @@ export const data = async (ctx: Context, next: () => Promise<any>) => {
 };
 
 export const diff = async (ctx: Context, next: () => Promise<any>) => {
-  const { username, repo, branch, path } = ctx.params;
   const {
     modules,
     directories,
@@ -85,14 +78,26 @@ export const diff = async (ctx: Context, next: () => Promise<any>) => {
     currentUser,
     token,
   } = ctx.request.body;
+
+  const { username, repo, branch, path } = ctx.params;
+
+  const gitInfo = {
+    username,
+    repo,
+    branch,
+    path,
+    commitSha,
+  };
+
   const normalizedFiles = normalizeSandbox(modules, directories);
 
   const [delta, rights] = await Promise.all([
     push.getFileDifferences(
-      { username, commitSha, repo, branch, path },
+      { username, repo, branch, path },
+      commitSha,
       normalizedFiles
     ),
-    fetchRights(username, repo, currentUser, token),
+    api.fetchRights(username, repo, currentUser, token),
   ]);
 
   ctx.body = {
@@ -103,23 +108,128 @@ export const diff = async (ctx: Context, next: () => Promise<any>) => {
   };
 };
 
-export const commit = async (ctx: Context, next: () => Promise<any>) => {
+export const pr = async (ctx: Context, next: () => Promise<any>) => {
+  const {
+    modules,
+    directories,
+    commitSha,
+    message,
+    currentUser,
+    token,
+  } = ctx.request.body;
+  const normalizedFiles = normalizeSandbox(modules, directories);
+
   const { username, repo, branch, path } = ctx.params;
+
+  let gitInfo: IGitInfo = {
+    username,
+    repo,
+    branch,
+    path,
+  };
+
+  const rights = await api.fetchRights(username, repo, currentUser, token);
+
+  if (rights === 'none' || rights === 'read') {
+    // Ah, we need to fork...
+    gitInfo = await push.createFork(gitInfo, currentUser, token);
+  }
+
+  const commit = await push.createCommit(
+    gitInfo,
+    normalizedFiles,
+    commitSha,
+    message,
+    token
+  );
+
+  const res = await push.createBranch(gitInfo, commit.sha, token);
+
+  ctx.body = {
+    url: res.url,
+    newBranch: res.branchName,
+  };
+};
+
+export const commit = async (ctx: Context, next: () => Promise<any>) => {
   const { modules, directories, commitSha, message, token } = ctx.request.body;
   const normalizedFiles = normalizeSandbox(modules, directories);
 
-  const response = await push.createCommit(
-    { username, commitSha, repo, branch, path },
+  const { username, repo, branch, path } = ctx.params;
+
+  const gitInfo: IGitInfo = {
+    username,
+    repo,
+    branch,
+    path,
+  };
+
+  const commit = await push.createCommit(
+    gitInfo,
     normalizedFiles,
+    commitSha,
     message,
     token
   );
 
   // On the client we redirect to the original git sandbox, so we want to
   // reset the cache so the user sees the latest version
-  resetShaCache({ username, repo, branch, path, commitSha });
+  api.resetShaCache({ username, repo, branch, path });
 
-  ctx.body = {
-    url: response.url,
-  };
+  const lastInfo = await api.fetchRepoInfo(username, repo, branch, path, true);
+
+  // If we're up to date we just move the head, if that's not the cache we create
+  // a merge
+  if (lastInfo.commitSha === commitSha) {
+    try {
+      const res = await api.updateReference(
+        username,
+        repo,
+        branch,
+        commit.sha,
+        token
+      );
+
+      ctx.body = {
+        url: res.url,
+        sha: commit.sha,
+        merge: false,
+      };
+      return;
+    } catch (e) {
+      console.error(e);
+      /* Let's try to create the merge then */
+    }
+  }
+
+  try {
+    const res = await api.createMerge(
+      username,
+      repo,
+      branch,
+      commit.sha,
+      token
+    );
+
+    ctx.body = {
+      url: res.url,
+      sha: res.sha,
+      merge: true,
+    };
+    return;
+  } catch (e) {
+    if (e.response && e.response.status === 409) {
+      // Merge conflict, create branch
+      const res = await push.createBranch(gitInfo, commit.sha, token);
+
+      ctx.body = {
+        url: res.url,
+        sha: commit.sha,
+        newBranch: res.branchName,
+      };
+      return;
+    } else {
+      throw e;
+    }
+  }
 };

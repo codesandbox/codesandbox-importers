@@ -6,7 +6,7 @@ import { createHash } from 'crypto';
 function getGitSha(content: string) {
   const hash = createHash('sha1');
 
-  hash.update('blob ' + content.length + '\0' + content);
+  hash.update('blob ' + new Buffer(content).length + '\0' + content);
 
   return hash.digest('hex');
 }

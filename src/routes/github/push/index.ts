@@ -1,22 +1,15 @@
-import {
-  fetchTree,
-  createTree,
-  createCommit as createCommitApi,
-  createMerge,
-  fetchRepoInfo,
-  updateReference,
-} from '../api';
+import * as api from '../api';
 import { INormalizedModules } from '../../../utils/sandbox/normalize';
 
 import getDelta from './utils/delta';
 import { createBlobs } from './utils/create-blobs';
 import { join } from 'path';
+import delay from '../../../utils/delay';
 
 export interface IGitInfo {
   username: string;
   repo: string;
   branch: string;
-  commitSha: string;
   path?: string;
 }
 
@@ -32,11 +25,17 @@ export interface ITreeFile {
 export type ITree = ITreeFile[];
 
 async function getNormalizedTree(
-  { username, commitSha, repo, branch, path }: IGitInfo,
+  { username, repo, branch, path }: IGitInfo,
+  commitSha: string,
   makeRelative = true
 ) {
   // 1. Get commit tree from GitHub based on path
-  let { tree, truncated } = await fetchTree(username, repo, path, commitSha);
+  let { tree, truncated } = await api.fetchTree(
+    username,
+    repo,
+    path,
+    commitSha
+  );
 
   if (truncated) {
     throw new Error('This repository is too big to make a commit.');
@@ -44,7 +43,7 @@ async function getNormalizedTree(
 
   if (path && makeRelative) {
     tree = tree
-      .filter(t => t.path.startsWith(path))
+      .filter(t => t.path.startsWith(path + '/'))
       .map(t => ({ ...t, path: t.path.replace(path + '/', '') }));
   }
 
@@ -56,22 +55,85 @@ async function getNormalizedTree(
 
 export async function getFileDifferences(
   gitInfo: IGitInfo,
+  commitSha: string,
   sandboxFiles: INormalizedModules
 ) {
-  const tree = await getNormalizedTree(gitInfo);
+  const tree = await getNormalizedTree(gitInfo, commitSha);
 
   return getDelta(tree, sandboxFiles);
+}
+
+function generateBranchName() {
+  const id = Math.floor(Math.random() * 1000);
+  return `csb-${id}`;
+}
+
+export async function createBranch(
+  gitInfo: IGitInfo,
+  refSha: string,
+  userToken: string,
+  branchName: string = generateBranchName()
+) {
+  const res = await api.createReference(
+    gitInfo.username,
+    gitInfo.repo,
+    branchName,
+    refSha,
+    userToken
+  );
+
+  return { url: res.url, ref: res.ref, branchName };
+}
+
+export async function createFork(
+  gitInfo: IGitInfo,
+  currentUser: string,
+  userToken: string
+): Promise<IGitInfo> {
+  const forkGitInfo: IGitInfo = { ...gitInfo, username: currentUser };
+
+  const existingRepo = await api.doesRepoExist(
+    forkGitInfo.username,
+    forkGitInfo.repo
+  );
+
+  if (!existingRepo) {
+    await api.createFork(gitInfo.username, gitInfo.repo, userToken);
+
+    // Forking is asynchronous, so we need to poll for when the repo has been created
+    let repoExists = false;
+    let tryCount = 0;
+    while (!repoExists) {
+      tryCount++;
+
+      if (tryCount > 300) {
+        throw new Error(
+          'Forking repo takes longer than 5 minutes, try again later.'
+        );
+      }
+
+      repoExists = await api.doesRepoExist(
+        forkGitInfo.username,
+        forkGitInfo.repo
+      );
+
+      await delay(1000);
+    }
+  }
+
+  return forkGitInfo;
 }
 
 export async function createCommit(
   gitInfo: IGitInfo,
   sandboxFiles: INormalizedModules,
+  commitSha: string,
   message: string,
   userToken: string
 ) {
-  const { username, commitSha, repo, branch, path = '' } = gitInfo;
+  const { username, repo, branch, path = '' } = gitInfo;
 
-  const tree = await getNormalizedTree(gitInfo, false);
+  const tree = await getNormalizedTree(gitInfo, commitSha, false);
   let absoluteSandboxFiles = sandboxFiles;
 
   if (path) {
@@ -101,8 +163,9 @@ export async function createCommit(
     t => delta.deleted.indexOf(t.path) === -1
   );
 
-  const treeResponse = await createTree(username, repo, newTree, userToken);
-  const commit = await createCommitApi(
+  const treeResponse = await api.createTree(username, repo, newTree, userToken);
+
+  return await api.createCommit(
     gitInfo.username,
     gitInfo.repo,
     treeResponse.sha,
@@ -110,25 +173,4 @@ export async function createCommit(
     message,
     userToken
   );
-
-  const lastInfo = await fetchRepoInfo(username, repo, branch, path, true);
-
-  // If we're up to date we just move the head, if that's not the cache we create
-  // a merge
-  if (lastInfo.commitSha === commitSha) {
-    try {
-      return await updateReference(
-        username,
-        repo,
-        branch,
-        commit.sha,
-        userToken
-      );
-    } catch (e) {
-      console.error(e);
-      /* Let's try to create the merge then */
-    }
-  }
-
-  return await createMerge(username, repo, branch, commit.sha, userToken);
 }

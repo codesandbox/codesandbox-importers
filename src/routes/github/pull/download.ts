@@ -10,7 +10,6 @@ const MAX_FILE_SIZE = 200 * 1024;
 /**
  * We use https://rawgit.com/ as urls, since they change the content-type corresponding
  * to the file. Github always uses text/plain
- * @param downloadLink link to transform
  */
 const rawGitUrl = (gitInfo: IGitInfo, filePath: string) => {
   let url = `https://rawgit.com/${gitInfo.username}/${gitInfo.repo}/${gitInfo.branch}/`;
