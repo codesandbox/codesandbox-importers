@@ -14,7 +14,9 @@ import denormalize, {
 import mapDependencies from './dependency-mapper';
 import getDependencyRequiresFromFiles from './dependency-analyzer';
 import parseHTML from './html-parser';
-import { getMainFile, getTemplate } from './templates';
+import { getMainFile, getTemplate, ITemplate } from './templates';
+
+import log from '../../../../utils/log';
 
 /**
  * Get which dependencies are needed and map them to the latest version, needs
@@ -57,6 +59,24 @@ function getHTMLInfo(html: IModule | undefined) {
   return { externalResources, file: html };
 }
 
+function findMainFile(
+  directory: INormalizedModules,
+  mainFile: string,
+  template: ITemplate
+) {
+  if (directory[mainFile]) {
+    return mainFile;
+  }
+  if (directory[getMainFile(template)]) {
+    return getMainFile(template);
+  }
+  if (directory['src/index.js']) {
+    return 'src/index.js';
+  }
+
+  return mainFile || getMainFile(template);
+}
+
 /**
  * Creates all relevant data for create a sandbox, like dependencies and which
  * files are in a sandbox
@@ -72,10 +92,10 @@ export default async function createSandbox(directory: INormalizedModules) {
   const packageJsonPackage = JSON.parse(packageJson.content);
 
   const template = getTemplate(packageJsonPackage, directory);
-  const mainFile = packageJsonPackage.main || getMainFile(template);
+  const mainFile = findMainFile(directory, packageJsonPackage.main, template);
 
   if (!directory[mainFile]) {
-    throw new Error(`Cannot find the entry point: '${mainFile}'`);
+    throw new Error(`Cannot find the specified entry point: '${mainFile}'`);
   }
 
   const { modules, directories } = denormalize(directory);
@@ -84,7 +104,7 @@ export default async function createSandbox(directory: INormalizedModules) {
   // are used in the code
   const dependencies = await getDependencies(packageJsonPackage, modules);
 
-  console.log('Creating sandbox with template ' + template);
+  log('Creating sandbox with template ' + template);
 
   return {
     title: packageJsonPackage.title || packageJsonPackage.name,

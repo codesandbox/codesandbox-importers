@@ -11,8 +11,9 @@ const MAX_FILE_SIZE = 200 * 1024;
  * We use https://rawgit.com/ as urls, since they change the content-type corresponding
  * to the file. Github always uses text/plain
  */
-const rawGitUrl = (gitInfo: IGitInfo, filePath: string) => {
-  let url = `https://rawgit.com/${gitInfo.username}/${gitInfo.repo}/${gitInfo.branch}/`;
+const rawGitUrl = (gitInfo: IGitInfo, filePath: string, commitSha: string) => {
+  let url = `https://rawgit.com/${gitInfo.username}/${gitInfo.repo}/${commitSha ||
+    gitInfo.branch}/`;
   if (gitInfo.path) {
     url += gitInfo.path + '/';
   }
@@ -22,7 +23,8 @@ const rawGitUrl = (gitInfo: IGitInfo, filePath: string) => {
 };
 
 export async function downloadRepository(
-  gitInfo: IGitInfo
+  gitInfo: IGitInfo,
+  commitSha: string
 ): Promise<INormalizedModules> {
   const zip = await downloadZip(gitInfo);
   let folderName = getFolderName(gitInfo.repo, gitInfo.branch);
@@ -47,7 +49,7 @@ export async function downloadRepository(
             contents.length > MAX_FILE_SIZE
           ) {
             result[relativePath] = {
-              content: rawGitUrl(gitInfo, relativePath),
+              content: rawGitUrl(gitInfo, relativePath, commitSha),
               isBinary: true,
             };
           } else {

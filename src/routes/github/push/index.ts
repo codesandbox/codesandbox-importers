@@ -146,7 +146,7 @@ export async function createCommit(
     );
   }
 
-  const delta = getDelta(tree, sandboxFiles);
+  const delta = getDelta(tree, absoluteSandboxFiles);
   // Remove the files from removed that are out of scope
   const relevantRemovedFiles = delta.deleted.filter(p => p.startsWith(path));
 
@@ -160,7 +160,8 @@ export async function createCommit(
 
   // Create new tree with deleted blobs
   const newTree = [...tree, ...createdBlobs].filter(
-    t => delta.deleted.indexOf(t.path) === -1
+    // also all files that are not from this subdirectory
+    t => delta.deleted.indexOf(t.path) === -1 || !t.path.startsWith(path + '/')
   );
 
   const treeResponse = await api.createTree(username, repo, newTree, userToken);

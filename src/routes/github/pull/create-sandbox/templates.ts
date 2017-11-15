@@ -1,13 +1,13 @@
 import { INormalizedModules } from '../../../../utils/sandbox/normalize';
 
-type Template =
+export type ITemplate =
   | 'vue-cli'
   | 'preact-cli'
   | 'svelte'
   | 'create-react-typescript-app'
   | 'create-react-app';
 
-export function getMainFile(template: Template) {
+export function getMainFile(template: ITemplate) {
   if (template === 'vue-cli') {
     return 'src/main.js';
   }
@@ -21,7 +21,7 @@ export function getTemplate(
     devDependencies: { [key: string]: string };
   },
   modules: INormalizedModules
-): Template {
+): ITemplate {
   if (Object.keys(modules).find(m => m.endsWith('.vue'))) {
     return 'vue-cli';
   }

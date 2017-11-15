@@ -29,7 +29,7 @@ export const info = async (ctx: Context, next: () => Promise<any>) => {
 export const data = async (ctx: Context, next: () => Promise<any>) => {
   // We get branch, etc from here because there could be slashes in a branch name,
   // we can retrieve if this is the case from this method
-  const { username, repo, branch, path } = ctx.params;
+  const { username, repo, branch, path, commitSha } = ctx.params;
 
   let title = `${username}/${repo}`;
   if (path) {
@@ -39,12 +39,15 @@ export const data = async (ctx: Context, next: () => Promise<any>) => {
 
   const isFilePath = path && !!extname(path);
 
-  const downloadedFiles = await downloadRepository({
-    username,
-    repo,
-    branch,
-    path,
-  });
+  const downloadedFiles = await downloadRepository(
+    {
+      username,
+      repo,
+      branch,
+      path,
+    },
+    commitSha
+  );
 
   const sandboxParams = await createSandbox(downloadedFiles);
 
