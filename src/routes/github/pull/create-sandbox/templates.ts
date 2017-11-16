@@ -12,6 +12,10 @@ export function getMainFile(template: ITemplate) {
     return 'src/main.js';
   }
 
+  if (template === 'create-react-typescript-app') {
+    return 'src/index.tsx';
+  }
+
   return 'src/index.js';
 }
 
