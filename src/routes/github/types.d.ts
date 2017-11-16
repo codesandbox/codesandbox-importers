@@ -21,21 +21,3 @@ type DownloadedFile = Module & {
   code: string;
   isBinary: boolean;
 };
-
-type NormalizedDownloadedDirectory = {
-  files: Array<DownloadedFile>;
-} & NormalizedDirectory;
-
-type SandboxFile = {
-  title: string;
-  code: string;
-  shortid: string;
-  isBinary: boolean;
-  directoryShortid: string | undefined;
-};
-
-type SandboxDirectory = {
-  shortid: string;
-  title: string;
-  directoryShortid: string | undefined;
-};
