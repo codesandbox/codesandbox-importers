@@ -236,3 +236,16 @@ export const commit = async (ctx: Context, next: () => Promise<any>) => {
     }
   }
 };
+
+export const repo = async (ctx: Context, next: () => Promise<any>) => {
+  const { token, normalizedFiles } = ctx.request.body;
+  const { username, repo } = ctx.params;
+
+  if (!repo) {
+    throw new Error('Repo name cannot be empty');
+  }
+
+  const result = await push.createRepo(username, repo, normalizedFiles, token);
+
+  ctx.body = result;
+};

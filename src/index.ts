@@ -40,7 +40,8 @@ router
     '/git/github/commit/:username/:repo/:branch*/path/:path*',
     github.commit
   )
-  .post('/git/github/pr/:username/:repo/:branch*/path/:path*', github.pr);
+  .post('/git/github/pr/:username/:repo/:branch*/path/:path*', github.pr)
+  .post('/git/github/repo/:username/:repo', github.repo);
 
 app.use(router.routes()).use(router.allowedMethods());
 

@@ -175,3 +175,39 @@ export async function createCommit(
     userToken
   );
 }
+
+export async function createRepo(
+  username: string,
+  name: string,
+  sandboxFiles: INormalizedModules,
+  userToken: string
+) {
+  const data = await api.createRepo(name, userToken);
+
+  const latestData = await api.fetchRepoInfo(username, name);
+
+  const gitInfo: IGitInfo = {
+    username: latestData.username,
+    repo: latestData.repo,
+    branch: latestData.branch,
+    path: latestData.path,
+  };
+
+  const commit = await createCommit(
+    gitInfo,
+    sandboxFiles,
+    latestData.commitSha,
+    'Initial commit',
+    userToken
+  );
+
+  const res = await api.updateReference(
+    username,
+    gitInfo.repo,
+    gitInfo.branch,
+    commit.sha,
+    userToken
+  );
+
+  return gitInfo;
+}

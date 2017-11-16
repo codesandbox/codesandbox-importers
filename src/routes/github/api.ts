@@ -7,7 +7,8 @@ import log from '../../utils/log';
 
 import { ITree, IGitInfo } from './push';
 
-const BASE_URL = 'https://api.github.com/repos';
+const API_URL = 'https://api.github.com';
+const BASE_URL = API_URL + '/repos';
 
 const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID;
 const GITHUB_CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET;
@@ -320,6 +321,25 @@ export async function createFork(
   const response: { data: ICreateForkResponse } = await axios.post(
     `${buildApiUrl(username, repo)}/forks${buildSecretParams()}`,
     {},
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+
+  return response.data;
+}
+
+interface ICreateRepoResponse {
+  name: string;
+  full_name: string;
+  description: string;
+  private: false;
+  fork: false;
+  url: string;
+}
+
+export async function createRepo(repo: string, token: string) {
+  const response: { data: ICreateRepoResponse } = await axios.post(
+    `${API_URL}/user/repos${buildSecretParams()}`,
+    { name: repo, description: 'Created with CodeSandbox', auto_init: true },
     { headers: { Authorization: `Bearer ${token}` } }
   );
 
