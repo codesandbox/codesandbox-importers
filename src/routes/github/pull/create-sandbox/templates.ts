@@ -4,7 +4,7 @@ export type ITemplate =
   | 'vue-cli'
   | 'preact-cli'
   | 'svelte'
-  | 'create-react-typescript-app'
+  | 'create-react-app-typescript'
   | 'create-react-app';
 
 export function getMainFile(template: ITemplate) {
@@ -12,7 +12,7 @@ export function getMainFile(template: ITemplate) {
     return 'src/main.js';
   }
 
-  if (template === 'create-react-typescript-app') {
+  if (template === 'create-react-app-typescript') {
     return 'src/index.tsx';
   }
 
@@ -46,7 +46,7 @@ export function getTemplate(
   }
 
   if (totalDependencies.indexOf('react-scripts-ts') > -1) {
-    return 'create-react-typescript-app';
+    return 'create-react-app-typescript';
   }
 
   if (totalDependencies.indexOf('vue') > -1) {
