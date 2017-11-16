@@ -209,5 +209,7 @@ export async function createRepo(
     userToken
   );
 
+  api.resetShaCache(gitInfo);
+
   return gitInfo;
 }
