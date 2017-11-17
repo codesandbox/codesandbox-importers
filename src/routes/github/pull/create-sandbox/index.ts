@@ -30,7 +30,7 @@ async function getDependencies(
     dependencies: { [key: string]: string };
     devDependencies: { [key: string]: string };
   },
-  files: ISandboxFile[]
+  files: INormalizedModules
 ) {
   const { dependencies = {}, devDependencies = {} } = packageJSON;
 
@@ -97,12 +97,11 @@ export default async function createSandbox(directory: INormalizedModules) {
   if (!directory[mainFile]) {
     throw new Error(`Cannot find the specified entry point: '${mainFile}'`);
   }
-
-  const { modules, directories } = denormalize(directory);
-
   // Give the sandboxModules to getDependencies to fetch which devDependencies
   // are used in the code
-  const dependencies = await getDependencies(packageJsonPackage, modules);
+  const dependencies = await getDependencies(packageJsonPackage, directory);
+
+  const { modules, directories } = denormalize(directory);
 
   log('Creating sandbox with template ' + template);
 

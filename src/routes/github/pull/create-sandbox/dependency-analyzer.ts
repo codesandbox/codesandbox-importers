@@ -2,6 +2,10 @@ import extractRequires from './utils/extract-requires';
 import { uniq } from 'lodash';
 
 import { ISandboxFile } from '../../../../utils/sandbox/denormalize';
+import {
+  INormalizedModules,
+  IModule,
+} from '../../../../utils/sandbox/normalize';
 
 /**
  * This finds all dependencies that are called in a sandbox, it's important to
@@ -11,32 +15,38 @@ import { ISandboxFile } from '../../../../utils/sandbox/denormalize';
  * @param {ISandboxFile[]} files
  * @returns
  */
-export default function getDependencyRequiresFromFiles(files: ISandboxFile[]) {
+export default function getDependencyRequiresFromFiles(
+  files: INormalizedModules
+) {
   // Get all dependencies called in sandbox
-  const dependencies = files.reduce((depList: string[], file: ISandboxFile) => {
-    if (!/\.(j|t)sx?$/.test(file.title)) {
-      return depList;
-    }
+  const dependencies = Object.keys(files)
+    .filter(p => /\.(j|t)sx?$/.test(p) && p.startsWith('src/'))
+    .reduce((depList: string[], filePath: string) => {
+      const file = files[filePath];
 
-    try {
-      const dependenciesInFile = extractRequires(file.code)
-        .filter(req => /^\w|@\w/.test(req))
-        .map(dep => {
-          const parts = dep.split('/');
+      if (file.isBinary) {
+        return depList;
+      }
 
-          if (dep.startsWith('@')) {
-            return `${parts[0]}/${parts[1]}`;
-          } else {
-            return parts[0];
-          }
-        });
-      return [...depList, ...dependenciesInFile];
-    } catch (e) {
-      console.error(e);
+      try {
+        const dependenciesInFile = extractRequires(file.content)
+          .filter(req => /^\w|@\w/.test(req))
+          .map(dep => {
+            const parts = dep.split('/');
 
-      return depList;
-    }
-  }, []) as string[];
+            if (dep.startsWith('@')) {
+              return `${parts[0]}/${parts[1]}`;
+            } else {
+              return parts[0];
+            }
+          });
+        return [...depList, ...dependenciesInFile];
+      } catch (e) {
+        console.error(e);
+
+        return depList;
+      }
+    }, []) as string[];
 
   return uniq(dependencies);
 }
