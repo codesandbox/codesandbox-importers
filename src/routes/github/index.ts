@@ -7,7 +7,10 @@ import createSandbox from './pull/create-sandbox';
 import * as api from './api';
 import * as push from './push';
 
-import normalizeSandbox from '../../utils/sandbox/normalize';
+import normalizeSandbox, {
+  IModule,
+  INormalizedModules,
+} from '../../utils/sandbox/normalize';
 import { IGitInfo } from './push';
 
 export const info = async (ctx: Context, next: () => Promise<any>) => {
@@ -238,8 +241,22 @@ export const commit = async (ctx: Context, next: () => Promise<any>) => {
 };
 
 export const repo = async (ctx: Context, next: () => Promise<any>) => {
-  const { token, normalizedFiles } = ctx.request.body;
+  const {
+    token,
+    normalizedFiles: fileArray,
+  }: {
+    token: string;
+    normalizedFiles: Array<IModule & { path: string }>;
+  } = ctx.request.body;
   const { username, repo } = ctx.params;
+
+  const normalizedFiles: INormalizedModules = fileArray.reduce(
+    (total, file) => ({
+      ...total,
+      [file.path]: file,
+    }),
+    {}
+  );
 
   if (!repo) {
     throw new Error('Repo name cannot be empty');
