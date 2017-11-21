@@ -14,6 +14,7 @@ import notFound from './middleware/not-found';
 
 // ROUTES
 import * as github from './routes/github';
+import * as define from './routes/define';
 
 const DEFAULT_PORT = process.env.PORT || 2000;
 const app = new Koa();
@@ -41,7 +42,8 @@ router
     github.commit
   )
   .post('/git/github/pr/:username/:repo/:branch*/path/:path*', github.pr)
-  .post('/git/github/repo/:username/:repo', github.repo);
+  .post('/git/github/repo/:username/:repo', github.repo)
+  .post('/define', define.define);
 
 app.use(router.routes()).use(router.allowedMethods());
 

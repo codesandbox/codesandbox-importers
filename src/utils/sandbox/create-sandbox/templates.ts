@@ -1,4 +1,4 @@
-import { INormalizedModules } from '../../../../utils/sandbox/normalize';
+import { INormalizedModules } from '../normalize';
 
 export type ITemplate =
   | 'vue-cli'

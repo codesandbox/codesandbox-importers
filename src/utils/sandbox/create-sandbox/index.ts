@@ -2,21 +2,19 @@ import { generate as generateShortid } from 'shortid';
 import { pickBy } from 'lodash';
 import { join } from 'path';
 
-import {
-  INormalizedModules,
-  IModule,
-} from '../../../../utils/sandbox/normalize';
-import denormalize, {
-  ISandboxFile,
-  ISandboxDirectory,
-} from '../../../../utils/sandbox/denormalize';
+import { INormalizedModules, IModule } from '../normalize';
+import denormalize, { ISandboxFile, ISandboxDirectory } from '../denormalize';
 
 import mapDependencies from './dependency-mapper';
 import getDependencyRequiresFromFiles from './dependency-analyzer';
 import parseHTML from './html-parser';
 import { getMainFile, getTemplate, ITemplate } from './templates';
 
-import log from '../../../../utils/log';
+import log from '../../log';
+
+interface IDependencies {
+  [name: string]: string;
+}
 
 /**
  * Get which dependencies are needed and map them to the latest version, needs
@@ -72,6 +70,9 @@ function findMainFile(
   }
   if (directory['src/index.js']) {
     return 'src/index.js';
+  }
+  if (directory['index.js']) {
+    return 'index.js';
   }
 
   return mainFile || getMainFile(template);
