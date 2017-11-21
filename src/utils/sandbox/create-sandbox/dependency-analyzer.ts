@@ -1,11 +1,8 @@
 import extractRequires from './utils/extract-requires';
 import { uniq } from 'lodash';
 
-import { ISandboxFile } from '../../../../utils/sandbox/denormalize';
-import {
-  INormalizedModules,
-  IModule,
-} from '../../../../utils/sandbox/normalize';
+import { ISandboxFile } from '../denormalize';
+import { INormalizedModules, IModule } from '../normalize';
 
 /**
  * This finds all dependencies that are called in a sandbox, it's important to
