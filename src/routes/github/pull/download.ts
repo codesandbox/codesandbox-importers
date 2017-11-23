@@ -1,8 +1,10 @@
+import * as JSZip from 'jszip';
 import { IGitInfo } from '../push/index';
 import { downloadZip } from '../api';
 import { INormalizedModules } from '../../../utils/sandbox/normalize';
 
-const getFolderName = (repo: string, branch: string) => `${repo}-${branch}/`;
+const getFolderName = (zip: JSZip) =>
+  `${Object.keys(zip.files)[0].split('/')[0]}/`;
 
 const FILE_LOADER_REGEX = /\.(ico|jpg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm)(\?.*)?$/;
 const MAX_FILE_SIZE = 200 * 1024;
@@ -27,7 +29,7 @@ export async function downloadRepository(
   commitSha: string
 ): Promise<INormalizedModules> {
   const zip = await downloadZip(gitInfo);
-  let folderName = getFolderName(gitInfo.repo, gitInfo.branch);
+  let folderName = getFolderName(zip);
 
   if (gitInfo.path) {
     folderName += gitInfo.path + '/';
