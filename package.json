@@ -58,6 +58,7 @@
     "babel-traverse": "^6.26.0",
     "babylon": "^6.18.0",
     "debug": "^2.6.8",
+    "gitignore-parser": "^0.0.2",
     "humps": "CompuIves/humps",
     "jszip": "^3.1.4",
     "koa": "^2.2.0",

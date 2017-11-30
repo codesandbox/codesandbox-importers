@@ -160,8 +160,7 @@ export async function createCommit(
 
   // Create new tree with deleted blobs
   const newTree = [...tree, ...createdBlobs].filter(
-    // also all files that are not from this subdirectory
-    t => delta.deleted.indexOf(t.path) === -1 || !t.path.startsWith(path + '/')
+    t => relevantRemovedFiles.indexOf(t.path) === -1
   );
 
   const treeResponse = await api.createTree(username, repo, newTree, userToken);
