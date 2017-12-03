@@ -3,6 +3,19 @@ import { IGitInfo } from '../push/index';
 import { downloadZip } from '../api';
 import { INormalizedModules } from '../../../utils/sandbox/normalize';
 
+const _isText = require('istextorbinary').isText;
+
+const isText = (filename: string, buffer: Buffer) =>
+  new Promise((resolve, reject) => {
+    _isText(filename, buffer, (err: Error, result: boolean) => {
+      if (err) {
+        return reject(err);
+      }
+
+      resolve(result);
+    });
+  });
+
 const getFolderName = (zip: JSZip) =>
   `${Object.keys(zip.files)[0].split('/')[0]}/`;
 
@@ -46,8 +59,12 @@ export async function downloadRepository(
         const file = zip.files[path];
 
         if (!file.dir) {
+          const bufferContents = await file.async('nodebuffer');
+          const text = await isText(file.name, bufferContents);
+
           const contents = await file.async('text');
           if (
+            !text ||
             FILE_LOADER_REGEX.test(relativePath) ||
             contents.length > MAX_FILE_SIZE
           ) {
