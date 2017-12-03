@@ -6,7 +6,7 @@ import { INormalizedModules } from '../../../utils/sandbox/normalize';
 const getFolderName = (zip: JSZip) =>
   `${Object.keys(zip.files)[0].split('/')[0]}/`;
 
-const FILE_LOADER_REGEX = /\.(ico|jpg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm)(\?.*)?$/;
+const FILE_LOADER_REGEX = /\.(ico|jpg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm)(\?.*)?$/i;
 const MAX_FILE_SIZE = 200 * 1024;
 
 /**
@@ -14,8 +14,9 @@ const MAX_FILE_SIZE = 200 * 1024;
  * to the file. Github always uses text/plain
  */
 const rawGitUrl = (gitInfo: IGitInfo, filePath: string, commitSha: string) => {
-  let url = `https://rawgit.com/${gitInfo.username}/${gitInfo.repo}/${commitSha ||
-    gitInfo.branch}/`;
+  let url = `https://rawgit.com/${gitInfo.username}/${
+    gitInfo.repo
+  }/${commitSha || gitInfo.branch}/`;
   if (gitInfo.path) {
     url += gitInfo.path + '/';
   }
