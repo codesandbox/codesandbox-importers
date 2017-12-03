@@ -469,7 +469,7 @@ export async function fetchRepoInfo(
 }
 
 const ZIP_URL = `https://codeload.github.com`;
-const MAX_ZIP_SIZE = 30 * 1024 * 1024; // 30Mb
+const MAX_ZIP_SIZE = 128 * 1024 * 1024; // 128Mb
 
 export async function downloadZip(gitInfo: IGitInfo) {
   const buffer = await fetch(
