@@ -154,6 +154,7 @@ export const pr = async (ctx: Context, next: () => Promise<any>) => {
   ctx.body = {
     url: res.url,
     newBranch: res.branchName,
+    sha: commit.sha,
   };
 };
 
