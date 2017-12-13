@@ -5,8 +5,14 @@ import { INormalizedModules } from '../../../utils/sandbox/normalize';
 
 const _isText = require('istextorbinary').isText;
 
-const isText = (filename: string, buffer: Buffer) =>
-  new Promise((resolve, reject) => {
+const jsRegex = /(t|j)sx?$/i;
+
+const isText = (filename: string, buffer: Buffer) => {
+  if (jsRegex.test(filename)) {
+    return true;
+  }
+
+  return new Promise((resolve, reject) => {
     _isText(filename, buffer, (err: Error, result: boolean) => {
       if (err) {
         return reject(err);
@@ -15,6 +21,7 @@ const isText = (filename: string, buffer: Buffer) =>
       resolve(result);
     });
   });
+};
 
 const getFolderName = (zip: JSZip) =>
   `${Object.keys(zip.files)[0].split('/')[0]}/`;
