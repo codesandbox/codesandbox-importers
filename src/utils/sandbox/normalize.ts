@@ -26,7 +26,7 @@ function findSandboxFiles(
   modulesInDirectory.forEach(m => {
     const newPath = join(path, m.title);
 
-    result[newPath] = { content: m.code, isBinary: m.isBinary };
+    result[newPath] = { content: m.code || '', isBinary: m.isBinary };
   });
 
   const childrenFiles = directories

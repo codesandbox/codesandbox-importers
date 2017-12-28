@@ -155,7 +155,7 @@ export async function createBlob(
 ) {
   const response: { data: IBlobResponse } = await axios.post(
     `${buildApiUrl(username, repo)}/git/blobs${buildSecretParams()}`,
-    { content },
+    { content: content },
     { headers: { Authorization: `Bearer ${token}` } }
   );
 

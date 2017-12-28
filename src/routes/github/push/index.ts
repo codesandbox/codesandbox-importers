@@ -64,7 +64,7 @@ export async function getFileDifferences(
 }
 
 function generateBranchName() {
-  const id = Math.floor(Math.random() * 1000);
+  const id = Date.now();
   return `csb-${id}`;
 }
 
