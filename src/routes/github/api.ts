@@ -336,10 +336,10 @@ interface ICreateRepoResponse {
   url: string;
 }
 
-export async function createRepo(repo: string, token: string) {
+export async function createRepo(username: string, repo: string, token: string) {
   const response: { data: ICreateRepoResponse } = await axios.post(
     `${API_URL}/user/repos${buildSecretParams()}`,
-    { name: repo, description: 'Created with CodeSandbox', auto_init: true },
+    { name: repo, description: 'Created with CodeSandbox', homepage: `https://codesandbox.io/s/github/${username}/${repo}`, auto_init: true },
     { headers: { Authorization: `Bearer ${token}` } }
   );
 

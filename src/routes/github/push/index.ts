@@ -181,7 +181,7 @@ export async function createRepo(
   sandboxFiles: INormalizedModules,
   userToken: string
 ) {
-  const data = await api.createRepo(name, userToken);
+  const data = await api.createRepo(username, name, userToken);
 
   const latestData = await api.fetchRepoInfo(username, name);
 
