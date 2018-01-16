@@ -96,7 +96,9 @@ export default async function createSandbox(directory: INormalizedModules) {
   const mainFile = findMainFile(directory, packageJsonPackage.main, template);
 
   if (!directory[mainFile]) {
-    throw new Error(`Cannot find the specified entry point: '${mainFile}'`);
+    throw new Error(
+      `Cannot find the specified entry point: '${mainFile}'. Please specify one in 'package.json#main' or create a file at the specified entry point.`
+    );
   }
   // Give the sandboxModules to getDependencies to fetch which devDependencies
   // are used in the code
