@@ -6,7 +6,6 @@ import { INormalizedModules, IModule } from '../normalize';
 import denormalize, { ISandboxFile, ISandboxDirectory } from '../denormalize';
 
 import mapDependencies from './dependency-mapper';
-import getDependencyRequiresFromFiles from './dependency-analyzer';
 import parseHTML from './html-parser';
 import { getMainFile, getTemplate, ITemplate } from './templates';
 
@@ -32,17 +31,10 @@ async function getDependencies(
 ) {
   const { dependencies = {}, devDependencies = {} } = packageJSON;
 
-  const dependenciesInFiles = getDependencyRequiresFromFiles(files);
-
-  // Filter the devDependencies that are actually used in files
-  const depsToMatch = pickBy(devDependencies, (_, key) =>
-    dependenciesInFiles.some(dep => dep.startsWith(key))
-  ) as IDependencies;
-
   // Exclude some dependencies that are not needed in CodeSandbox
   const alteredDependencies = await mapDependencies({
     ...dependencies,
-    ...depsToMatch,
+    ...devDependencies,
   });
   return alteredDependencies;
 }
