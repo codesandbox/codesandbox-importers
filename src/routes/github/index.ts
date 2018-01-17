@@ -33,7 +33,7 @@ export const data = async (ctx: Context, next: () => Promise<any>) => {
   // We get branch, etc from here because there could be slashes in a branch name,
   // we can retrieve if this is the case from this method
   const { username, repo, branch, commitSha } = ctx.params;
-  const path = ctx.params.path.replace('+', ' ');
+  const path = ctx.params.path && ctx.params.path.replace('+', ' ');
 
   let title = `${username}/${repo}`;
   if (path) {
