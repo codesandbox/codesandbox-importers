@@ -5,11 +5,16 @@ export type ITemplate =
   | 'preact-cli'
   | 'svelte'
   | 'create-react-app-typescript'
-  | 'create-react-app';
+  | 'create-react-app'
+  | 'angular-cli';
 
 export function getMainFile(template: ITemplate) {
   if (template === 'vue-cli') {
     return 'src/main.js';
+  }
+
+  if (template === 'angular-cli') {
+    return 'src/main.ts';
   }
 
   if (template === 'create-react-app-typescript') {
@@ -36,6 +41,12 @@ export function getTemplate(
     ...Object.keys(dependencies),
     ...Object.keys(devDependencies),
   ];
+
+  console.log(JSON.stringify(totalDependencies), null, 2);
+
+  if (totalDependencies.indexOf('@angular/core') > -1) {
+    return 'angular-cli';
+  }
 
   if (totalDependencies.indexOf('preact-cli') > -1) {
     return 'preact-cli';
