@@ -1,6 +1,6 @@
 {
   "name": "codesandbox",
-  "version": "1.1.16-0",
+  "version": "1.1.16-1",
   "description": "The CLI used for communicating with CodeSandbox",
   "main": "lib/index.js",
   "bin": {
@@ -12,7 +12,7 @@
     "test": "npm run build && jest",
     "test:watch": "jest --watch",
     "build": "rimraf lib && tsc -p tsconfig.json",
-    "bundle": "microbundle"
+    "prepublish": "build"
   },
   "repository": "CompuIves/codesandbox-cli",
   "files": [

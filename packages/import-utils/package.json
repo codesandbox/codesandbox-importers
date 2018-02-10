@@ -1,12 +1,12 @@
 {
   "name": "codesandbox-import-utils",
-  "version": "1.1.16-0",
+  "version": "1.1.16-1",
   "main": "lib/index.js",
   "files": [
     "lib/**"
   ],
   "scripts": {
-    "build": "tsc -c",
+    "build": "tsc -p tsconfig.json",
     "prepublish": "yarn build"
   }
 }
