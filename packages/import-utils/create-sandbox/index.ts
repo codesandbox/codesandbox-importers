@@ -2,7 +2,7 @@ import { generate as generateShortid } from 'shortid';
 import { pickBy } from 'lodash';
 import { join } from 'path';
 
-import { INormalizedModules, IModule } from '../normalize';
+import { INormalizedModules, IModule } from 'types';
 import denormalize, { ISandboxFile, ISandboxDirectory } from '../denormalize';
 
 import parseHTML from './html-parser';

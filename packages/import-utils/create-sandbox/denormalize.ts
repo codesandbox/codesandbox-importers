@@ -1,21 +1,12 @@
 import { dirname, basename } from 'path';
-import { INormalizedModules, IModule } from './normalize';
+import {
+  INormalizedModules,
+  IModule,
+  ISandboxFile,
+  ISandboxDirectory,
+} from 'types';
 
 import { generate as generateShortid } from 'shortid';
-
-export interface ISandboxFile {
-  title: string;
-  code: string;
-  shortid: string;
-  isBinary: boolean;
-  directoryShortid: string | undefined;
-}
-
-export interface ISandboxDirectory {
-  shortid: string;
-  title: string;
-  directoryShortid: string | undefined;
-}
 
 function generateSandboxFile(
   module: IModule,

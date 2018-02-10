@@ -1,6 +1,6 @@
 import { Context } from 'koa';
+import createSandbox from 'import-utils/create-sandbox';
 import { INormalizedModules, IModule } from '../utils/sandbox/normalize';
-import createSandbox from '../utils/sandbox/create-sandbox/index';
 
 export const define = async (ctx: Context, next: () => Promise<any>) => {
   const { files } = ctx.request.body;

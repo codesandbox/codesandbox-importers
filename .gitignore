@@ -10,4 +10,4 @@ jest
 .aws
 dist
 
-config/production.json
+

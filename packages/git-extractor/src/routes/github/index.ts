@@ -1,10 +1,10 @@
 import { Context } from 'koa';
 import { extname, basename, dirname, join } from 'path';
+import createSandbox from 'import-utils/create-sandbox';
 
 import { downloadRepository } from './pull/download';
-import createSandbox from '../../utils/sandbox/create-sandbox';
-
 import * as api from './api';
+
 import * as push from './push';
 
 import normalizeSandbox, {
