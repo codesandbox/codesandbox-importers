@@ -3,11 +3,15 @@
   "version": "1.0.0",
   "description": "",
   "private": true,
-  "scripts": {},
+  "scripts": {
+    "build": "lerna run build",
+    "test": "lerna run test",
+    "start": "lerna run start --stream"
+  },
   "author": "",
-  "devDependencies": {},
-  "dependencies": {},
-
+  "devDependencies": {
+    "lerna": "^2.4.0"
+  },
   "workspaces": [
     "packages/cli",
     "packages/git-extractor",

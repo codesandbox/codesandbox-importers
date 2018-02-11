@@ -133,7 +133,10 @@ function getRepoPath(options: IOptions) {
     const usernameParts = process.env.REPOSITORY_URL.match(
       /github.com[:|\/](.*)\/reactjs\.org/
     );
-    currentUsername = usernameParts[1];
+
+    if (usernameParts) {
+      currentUsername = usernameParts[1];
+    }
     currentBranch = process.env.BRANCH;
   } else {
     currentBranch = branch.sync(gitPath);

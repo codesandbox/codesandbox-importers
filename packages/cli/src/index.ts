@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 import * as chalk from 'chalk';
 import * as program from 'commander';
 import * as updateNotifier from 'update-notifier';
@@ -13,7 +11,8 @@ import logoutCommand from './commands/logout';
 
 import { extraHelp, logCodeSandbox } from './utils/log';
 
-import packageInfo = require('../package.json');
+// tslint:disable no-var-requires
+const packageInfo = require('../package.json');
 
 console.log();
 logCodeSandbox();

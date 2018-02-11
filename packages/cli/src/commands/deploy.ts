@@ -1,7 +1,7 @@
 import * as chalk from 'chalk';
 import * as Commander from 'commander';
 import * as inquirer from 'inquirer';
-import ora = require('ora');
+import { join } from 'path';
 
 import { getUser } from '../cfg';
 import { uploadSandbox } from '../utils/api';
@@ -13,7 +13,9 @@ import { login } from './login';
 import parseSandbox from '../utils/parse-sandbox';
 import FileError from '../utils/parse-sandbox/file-error';
 
-const MAX_MODULE_COUNT = 100;
+// tslint:disable no-var-requires
+const ora = require('ora');
+const MAX_MODULE_COUNT = 120;
 const MAX_DIRECTORY_COUNT = 50;
 
 /**
@@ -38,17 +40,8 @@ async function showWarnings(resolvedPath: string, errors: FileError[]) {
 
       log(`${chalk.yellow.bold(relativePath)}: ${err.message}`);
     }
+    console.log();
   }
-
-  console.log();
-  log(
-    chalk.yellow(
-      'File hosting using the ' +
-        chalk.bold('public') +
-        ' folder is not supported yet.'
-    )
-  );
-  console.log();
 }
 
 export default function registerCommand(program: typeof Commander) {
@@ -74,27 +67,22 @@ export default function registerCommand(program: typeof Commander) {
 
       info(`Deploying ${path} to CodeSandbox`);
       try {
-        const {
-          modules,
-          directories,
-          errors,
-          externalResources,
-          dependencies,
-          resolvedPath,
-        } = await parseSandbox(path);
+        const resolvedPath = join(process.cwd(), path);
 
-        if (modules.length > MAX_MODULE_COUNT) {
+        const { errors, sandbox } = await parseSandbox(resolvedPath);
+
+        if (sandbox.modules.length > MAX_MODULE_COUNT) {
           throw new Error(
             `This project is too big, it contains ${
-              modules.length
+              sandbox.modules.length
             } files which is more than the max of ${MAX_MODULE_COUNT}.`
           );
         }
 
-        if (directories.length > MAX_DIRECTORY_COUNT) {
+        if (sandbox.directories.length > MAX_DIRECTORY_COUNT) {
           throw new Error(
             `This project is too big, it contains ${
-              directories.length
+              sandbox.directories.length
             } directories which is more than the max of ${MAX_DIRECTORY_COUNT}.`
           );
         }
@@ -106,6 +94,7 @@ export default function registerCommand(program: typeof Commander) {
           'By deploying to CodeSandbox, the code of your project will be made ' +
             chalk.bold('public')
         );
+
         const acceptPublic = await confirm(
           'Are you sure you want to proceed with the deployment?',
           true
@@ -117,18 +106,14 @@ export default function registerCommand(program: typeof Commander) {
         const spinner = ora('Uploading to CodeSandbox').start();
 
         try {
-          const sandbox = await uploadSandbox(
-            modules,
-            directories,
-            externalResources,
-            dependencies
-          );
+          const sandboxData = await uploadSandbox(sandbox);
+
           spinner.stop();
 
           success(
             'Succesfully created the sandbox, you can find the sandbox here:'
           );
-          success(createSandboxUrl(sandbox));
+          success(createSandboxUrl(sandboxData));
         } catch (e) {
           spinner.stop();
 

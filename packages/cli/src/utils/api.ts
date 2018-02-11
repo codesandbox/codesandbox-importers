@@ -1,11 +1,9 @@
 import axios, { AxiosRequestConfig } from 'axios';
+import { ISandboxDirectory, ISandboxFile, ISandbox } from 'types';
 import { values } from 'lodash';
+import { decamelizeKeys } from 'humps';
 
 import { getToken } from '../cfg';
-import {
-  ISandboxDirectory,
-  ISandboxModule,
-} from '../utils/parse-sandbox/file-mapper';
 import { CREATE_SANDBOX_URL, GET_USER_URL, verifyUserTokenUrl } from './url';
 
 const callApi = async (options: AxiosRequestConfig) => {
@@ -20,29 +18,21 @@ const callApi = async (options: AxiosRequestConfig) => {
   }
 };
 
-export async function uploadSandbox(
-  modules: ISandboxModule[],
-  directories: ISandboxDirectory[],
-  externalResources: string[],
-  dependencies: { [name: string]: string }
-) {
+export async function uploadSandbox(sandbox: ISandbox) {
   const token = await getToken();
 
   if (token == null) {
     throw new Error("You're not signed in");
   }
 
-  const sandbox = {
-    directories,
-    external_resources: externalResources,
+  const sandboxData = {
+    ...decamelizeKeys(sandbox),
     from_cli: true,
-    modules,
-    npm_dependencies: dependencies,
   };
 
   const options: AxiosRequestConfig = {
     data: {
-      sandbox,
+      sandbox: sandboxData,
     },
     headers: {
       Authorization: `Bearer ${token}`,

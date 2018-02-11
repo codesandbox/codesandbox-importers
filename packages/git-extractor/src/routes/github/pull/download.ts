@@ -1,33 +1,13 @@
 import * as JSZip from 'jszip';
+
+import { isText } from 'codesandbox-import-utils/lib/is-text';
+
 import { IGitInfo } from '../push/index';
 import { downloadZip } from '../api';
 import { INormalizedModules } from '../../../utils/sandbox/normalize';
 
-const _isText = require('istextorbinary').isText;
-
-const jsRegex = /(t|j)sx?$/i;
-
-const isText = (filename: string, buffer: Buffer) => {
-  if (jsRegex.test(filename)) {
-    return true;
-  }
-
-  return new Promise((resolve, reject) => {
-    _isText(filename, buffer, (err: Error, result: boolean) => {
-      if (err) {
-        return reject(err);
-      }
-
-      resolve(result);
-    });
-  });
-};
-
 const getFolderName = (zip: JSZip) =>
   `${Object.keys(zip.files)[0].split('/')[0]}/`;
-
-const FILE_LOADER_REGEX = /\.(ico|jpg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm)(\?.*)?$/i;
-const MAX_FILE_SIZE = 200 * 1024;
 
 /**
  * We use https://rawgit.com/ as urls, since they change the content-type corresponding
@@ -70,11 +50,7 @@ export async function downloadRepository(
           const text = await isText(file.name, bufferContents);
 
           const contents = await file.async('text');
-          if (
-            !text ||
-            FILE_LOADER_REGEX.test(relativePath) ||
-            contents.length > MAX_FILE_SIZE
-          ) {
+          if (!text) {
             result[relativePath] = {
               content: rawGitUrl(gitInfo, relativePath, commitSha),
               isBinary: true,
