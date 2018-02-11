@@ -41,8 +41,6 @@ export const data = async (ctx: Context, next: () => Promise<any>) => {
     title = title + `: ${splittedPath[splittedPath.length - 1]}`;
   }
 
-  const isFilePath = path && !!extname(path);
-
   const downloadedFiles = await downloadRepository(
     {
       username,
@@ -55,20 +53,7 @@ export const data = async (ctx: Context, next: () => Promise<any>) => {
 
   const sandboxParams = await createSandbox(downloadedFiles);
 
-  let finalTitle = sandboxParams.title || title;
-
-  if (isFilePath) {
-    const relativePath = path.split('src/').pop();
-    if (relativePath) {
-      if (basename(relativePath) === 'index.js') {
-        finalTitle = dirname(relativePath)
-          .split('/')
-          .pop();
-      } else {
-        finalTitle = basename(relativePath);
-      }
-    }
-  }
+  const finalTitle = sandboxParams.title || title;
 
   ctx.body = {
     ...sandboxParams,

@@ -15,14 +15,8 @@
     "prepublish": "yarn build"
   },
   "repository": "CompuIves/codesandbox-cli",
-  "files": [
-    "lib"
-  ],
-  "keywords": [
-    "codesandbox",
-    "cli",
-    "editor"
-  ],
+  "files": ["lib"],
+  "keywords": ["codesandbox", "cli", "editor"],
   "dependencies": {
     "axios": "^0.16.2",
     "chalk": "^1.1.3",
@@ -67,19 +61,11 @@
   },
   "jest": {
     "transform": {
-      ".(ts|tsx)": "<rootDir>/node_modules/ts-jest/preprocessor.js"
+      ".(ts|tsx)": "<rootDir>../../node_modules/ts-jest/preprocessor.js"
     },
     "testEnvironment": "node",
-    "moduleFileExtensions": [
-      "ts",
-      "tsx",
-      "js",
-      "json"
-    ],
-    "testPathIgnorePatterns": [
-      "<rootDir>/node_modules/",
-      "<rootDir>/dist/"
-    ],
+    "moduleFileExtensions": ["ts", "tsx", "js", "json"],
+    "testPathIgnorePatterns": ["<rootDir>/node_modules/", "<rootDir>/dist/"],
     "testRegex": "(/__tests__/.*|\\.(test|spec))\\.(ts|tsx|js)$"
   }
 }
