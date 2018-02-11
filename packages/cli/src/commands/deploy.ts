@@ -67,7 +67,11 @@ export default function registerCommand(program: typeof Commander) {
 
       info(`Deploying ${path} to CodeSandbox`);
       try {
-        const resolvedPath = join(process.cwd(), path);
+        let resolvedPath = join(process.cwd(), path);
+
+        if (resolvedPath.endsWith('/')) {
+          resolvedPath = resolvedPath.slice(0, -1);
+        }
 
         const { errors, sandbox } = await parseSandbox(resolvedPath);
 
