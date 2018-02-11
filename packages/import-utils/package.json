@@ -11,5 +11,8 @@
   },
   "devDependencies": {
     "typescript": "^2.7.1"
+  },
+  "dependencies": {
+    "istextorbinary": "^2.2.1"
   }
 }

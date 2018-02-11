@@ -2,13 +2,18 @@ import { generate as generateShortid } from 'shortid';
 import { pickBy } from 'lodash';
 import { join } from 'path';
 
-import { INormalizedModules, IModule } from 'types';
-import denormalize, { ISandboxFile, ISandboxDirectory } from '../denormalize';
+import {
+  INormalizedModules,
+  IModule,
+  ISandboxFile,
+  ISandboxDirectory,
+  ISandbox,
+  ITemplate,
+} from 'types';
+import denormalize from './denormalize';
 
 import parseHTML from './html-parser';
-import { getMainFile, getTemplate, ITemplate } from './templates';
-
-import log from '../../log';
+import { getMainFile, getTemplate } from './templates';
 
 interface IDependencies {
   [name: string]: string;
@@ -53,7 +58,9 @@ function findMainFile(
  * @param {Array<Module>} files
  * @param {Array<Module>} directories
  */
-export default async function createSandbox(directory: INormalizedModules) {
+export default async function createSandbox(
+  directory: INormalizedModules
+): Promise<ISandbox> {
   const packageJson = directory['package.json'];
   if (!packageJson) throw new Error('Could not find package.json');
 
@@ -71,8 +78,6 @@ export default async function createSandbox(directory: INormalizedModules) {
   // are used in the code
 
   const { modules, directories } = denormalize(directory);
-
-  log('Creating sandbox with template ' + template);
 
   return {
     title: packageJsonPackage.title || packageJsonPackage.name,

@@ -2,57 +2,92 @@ import * as chalk from 'chalk';
 import * as fs from 'fs-extra';
 import * as inquirer from 'inquirer';
 import * as path from 'path';
+import createSandbox from 'codesandbox-import-utils/lib/create-sandbox';
+import { isText, isTooBig } from 'codesandbox-import-utils/lib/is-text';
+import {
+  IModule,
+  INormalizedModules,
+  ISandboxDirectory,
+  ISandboxFile,
+} from 'types';
 
-import mapDependencies from './dependency-mapper';
 import FileError from './file-error';
-import mapFiles, { ISandboxDirectory, ISandboxModule } from './file-mapper';
-import parseHTML from './html-parser';
 
-/**
- * Return package.json object
- *
- * @param {string} projectPath
- * @returns
- */
-async function getPackageJSON(projectPath: string) {
-  const packageJSONPath = path.join(projectPath, 'package.json');
-  const fileExists = await fs.exists(packageJSONPath);
-  if (!fileExists) {
-    throw new Error(`The project doesn't have a package.json.`);
-  }
+async function normalizeFilesInDirectory(
+  p: string,
+  startingPath: string
+): Promise<{ errors: FileError[]; files: INormalizedModules }> {
+  const entries = await fs.readdir(p);
+  const dirs: string[] = [];
+  const files: string[] = [];
+  const errors: FileError[] = [];
 
-  return fs.readJson(packageJSONPath);
+  await Promise.all(
+    entries.map(async e => {
+      const absolutePath = path.join(p, e);
+      const stat = await fs.stat(absolutePath);
+
+      if (stat.isDirectory()) {
+        if (e !== 'node_modules' && e !== '.git') {
+          dirs.push(absolutePath);
+        }
+      } else {
+        files.push(absolutePath);
+      }
+    })
+  );
+
+  const recursiveDirs: { [path: string]: IModule } = (await Promise.all(
+    dirs.map(d => normalizeFilesInDirectory(d, startingPath))
+  )).reduce((prev, next) => {
+    next.errors.forEach(e => {
+      errors.push(e);
+    });
+
+    return { ...prev, ...next.files };
+  }, {});
+
+  const fileData = (await Promise.all(
+    files.map(async t => {
+      const code = await fs.readFile(t);
+
+      const relativePath = t.replace(startingPath + '/', '');
+      const isBinary = !await isText(t, code);
+      if (isBinary) {
+        errors.push(
+          new FileError(
+            isTooBig(code) ? 'Is too big' : 'Is a binary file',
+            relativePath,
+            true
+          )
+        );
+        return false;
+      }
+
+      return { path: relativePath, code: code.toString() };
+    })
+  )).reduce((prev, next) => {
+    if (next === false) {
+      return prev;
+    }
+
+    return {
+      ...prev,
+      [next.path]: { content: next.code },
+    };
+  }, {});
+
+  return { errors, files: { ...recursiveDirs, ...fileData } };
 }
 
-/**
- * Validates the existence of the specified file
- *
- * @param {string} projectPath Path to project
- * @param {string} checkPath Absolute path to file to check
- */
-async function validateExistance(projectPath: string, checkPath: string) {
-  const fileExists = await fs.exists(checkPath);
-
-  if (!fileExists) {
-    const friendlyPath = checkPath.replace(projectPath, './');
-    throw new Error(`The project doesn't contain a ${friendlyPath}`);
+const exists = async (p: string) => {
+  try {
+    const stat = await fs.stat(p);
+    return true;
+  } catch (e) {
+    return false;
   }
-}
-
-/**
- * Return public/index.html contents
- *
- * @param {string} projectPath
- */
-async function getIndexHTML(projectPath: string) {
-  const indexHTMLPath = path.join(projectPath, 'public', 'index.html');
-  const fileExists = await fs.exists(indexHTMLPath);
-  if (!fileExists) {
-    return '';
-  }
-
-  return fs.readFileSync(indexHTMLPath) || '';
-}
+};
 
 /**
  * This will take a path and return all parameters that are relevant for the call
@@ -61,38 +96,15 @@ async function getIndexHTML(projectPath: string) {
  * @export
  * @param {string} path
  */
-export default async function parseSandbox(projectPath: string) {
-  const resolvedPath = path.join(process.cwd(), projectPath);
-
-  const dirExists = await fs.exists(resolvedPath);
+export default async function parseSandbox(resolvedPath: string) {
+  const dirExists = await exists(resolvedPath);
   if (!dirExists) {
     throw new Error(`The given path (${resolvedPath}) doesn't exist.`);
   }
 
-  const packageJSON = await getPackageJSON(resolvedPath);
+  const fileData = await normalizeFilesInDirectory(resolvedPath, resolvedPath);
 
-  // Check if src/index.js exists
-  await validateExistance(
-    resolvedPath,
-    path.join(resolvedPath, 'src', 'index.js')
-  );
+  const sandbox = await createSandbox(fileData.files);
 
-  const indexHTML = await getIndexHTML(resolvedPath);
-
-  const dependencies = await mapDependencies(packageJSON.dependencies);
-  const { body, externalResources } = parseHTML(indexHTML.toString());
-
-  const { directories, modules, errors } = await mapFiles(
-    path.join(resolvedPath, 'src'),
-    body
-  );
-
-  return {
-    dependencies,
-    directories,
-    errors,
-    externalResources,
-    modules,
-    resolvedPath,
-  };
+  return { sandbox, errors: fileData.errors };
 }

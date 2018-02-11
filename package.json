@@ -5,9 +5,9 @@
   "private": true,
   "scripts": {},
   "author": "",
-  "devDependencies": {},
-  "dependencies": {},
-
+  "devDependencies": {
+    "lerna": "^2.4.0"
+  },
   "workspaces": [
     "packages/cli",
     "packages/git-extractor",
