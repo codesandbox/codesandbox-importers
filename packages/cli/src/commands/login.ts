@@ -55,7 +55,7 @@ export async function login() {
   info("You'll need enter this token in the CLI to sign in.");
 
   const confirmed = await confirm(
-    'We will open CodeSandbox to finish the login process.',
+    'We will open CodeSandbox to finish the login process.'
   );
 
   console.log();
@@ -80,7 +80,7 @@ export default function registerCLI(program: typeof Commander) {
 
       if (user) {
         const confirmed = await confirm(
-          'You are already logged in, would you like to sign out first?',
+          'You are already logged in, would you like to sign out first?'
         );
 
         if (confirmed) {

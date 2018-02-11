@@ -2,11 +2,12 @@ import { homedir } from 'os';
 
 import * as fs from 'fs-extra';
 import * as path from 'path';
-import ms = require('ms');
 
 import * as api from './utils/api';
 import { error } from './utils/log';
 
+// tslint:disable no-var-requires
+const ms = require('ms');
 const TTL = ms('8h');
 
 export interface IUser {

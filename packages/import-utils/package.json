@@ -1,6 +1,6 @@
 {
   "name": "codesandbox-import-utils",
-  "version": "1.1.16-1",
+  "version": "1.1.16-2",
   "main": "lib/index.js",
   "files": [
     "lib/**"
@@ -8,5 +8,11 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "prepublish": "yarn build"
+  },
+  "devDependencies": {
+    "typescript": "^2.7.1"
+  },
+  "dependencies": {
+    "istextorbinary": "^2.2.1"
   }
 }
