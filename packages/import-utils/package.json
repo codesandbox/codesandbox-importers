@@ -13,6 +13,7 @@
     "typescript": "^2.7.1"
   },
   "dependencies": {
-    "istextorbinary": "^2.2.1"
+    "istextorbinary": "^2.2.1",
+    "lz-string": "^1.4.4"
   }
 }
