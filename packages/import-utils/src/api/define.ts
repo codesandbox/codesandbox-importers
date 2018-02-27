@@ -14,6 +14,6 @@ function compress(input: string) {
     .replace(/=+$/, ``); // Remove ending '='
 }
 
-export function getParameters(files: IFiles) {
-  return compress(JSON.stringify(files));
+export function getParameters(parameters: { files: IFiles }) {
+  return compress(JSON.stringify(parameters));
 }
