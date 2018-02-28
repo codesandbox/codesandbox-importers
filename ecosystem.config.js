@@ -9,7 +9,7 @@ module.exports = {
     // First application
     {
       name: 'Git Extractor',
-      script: 'dist/index.js',
+      script: 'packages/git-extractor/dist/index.js',
       instances: 0,
       exec_mode: 'cluster',
       env_production: {
@@ -32,7 +32,7 @@ module.exports = {
       repo: 'git@github.com:CompuIves/codesandbox-git-extractor.git',
       path: '/home/bundler',
       'pre-deploy-local':
-        'scp config/production.json bundler@ssh.codesandbox.io:./source/config/production.json',
+        'scp packages/git-extractor/config/production.json bundler@ssh.codesandbox.io:./source/packages/git-extractor/config/production.json',
       'post-deploy':
         'yarn && npm run build && pm2 startOrRestart ecosystem.config.js --env production',
     },
