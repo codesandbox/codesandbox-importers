@@ -1,4 +1,4 @@
-const productionVars = require('./config/production.json');
+const productionVars = require('./packages/git-extractor/config/production.json');
 
 module.exports = {
   /**
