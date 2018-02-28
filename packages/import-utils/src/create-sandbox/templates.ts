@@ -14,6 +14,10 @@ export function getMainFile(template: ITemplate) {
     return 'src/index.tsx';
   }
 
+  if (template === 'parcel') {
+    return 'src/index.html';
+  }
+
   return 'src/index.js';
 }
 
@@ -35,11 +39,21 @@ export function getTemplate(
     ...Object.keys(devDependencies),
   ];
 
+  if (
+    totalDependencies.indexOf('react-scripts-ts') > -1 ||
+    totalDependencies.indexOf('react') > -1
+  ) {
+    return 'create-react-app-typescript';
+  }
+
   if (totalDependencies.indexOf('@angular/core') > -1) {
     return 'angular-cli';
   }
 
-  if (totalDependencies.indexOf('preact-cli') > -1) {
+  if (
+    totalDependencies.indexOf('preact-cli') > -1 ||
+    totalDependencies.indexOf('preact') > -1
+  ) {
     return 'preact-cli';
   }
 
@@ -47,13 +61,9 @@ export function getTemplate(
     return 'svelte';
   }
 
-  if (totalDependencies.indexOf('react-scripts-ts') > -1) {
-    return 'create-react-app-typescript';
-  }
-
   if (totalDependencies.indexOf('vue') > -1) {
     return 'vue-cli';
   }
 
-  return 'create-react-app';
+  return 'parcel';
 }

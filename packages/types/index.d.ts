@@ -27,7 +27,8 @@ export type ITemplate =
   | 'svelte'
   | 'create-react-app-typescript'
   | 'create-react-app'
-  | 'angular-cli';
+  | 'angular-cli'
+  | 'parcel';
 
 export interface ISandbox {
   title: string;
