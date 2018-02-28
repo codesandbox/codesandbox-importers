@@ -34,7 +34,7 @@ module.exports = {
       'pre-deploy-local':
         'scp packages/git-extractor/config/production.json bundler@ssh.codesandbox.io:./source/packages/git-extractor/config/production.json',
       'post-deploy':
-        'yarn && npm run build && pm2 startOrRestart ecosystem.config.js --env production',
+        'yarn && npm run build:git-extractor && pm2 startOrRestart ecosystem.config.js --env production',
     },
   },
 };
