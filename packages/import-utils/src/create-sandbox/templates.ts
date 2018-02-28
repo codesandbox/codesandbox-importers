@@ -15,7 +15,7 @@ export function getMainFile(template: ITemplate) {
   }
 
   if (template === 'parcel') {
-    return 'src/index.html';
+    return 'index.html';
   }
 
   return 'src/index.js';
