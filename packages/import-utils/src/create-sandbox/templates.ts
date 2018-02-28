@@ -39,10 +39,7 @@ export function getTemplate(
     ...Object.keys(devDependencies),
   ];
 
-  if (
-    totalDependencies.indexOf('react-scripts-ts') > -1 ||
-    totalDependencies.indexOf('react') > -1
-  ) {
+  if (totalDependencies.indexOf('react-scripts-ts') > -1) {
     return 'create-react-app-typescript';
   }
 
@@ -50,10 +47,7 @@ export function getTemplate(
     return 'angular-cli';
   }
 
-  if (
-    totalDependencies.indexOf('preact-cli') > -1 ||
-    totalDependencies.indexOf('preact') > -1
-  ) {
+  if (totalDependencies.indexOf('preact-cli') > -1) {
     return 'preact-cli';
   }
 
