@@ -39,6 +39,10 @@ export function getTemplate(
     ...Object.keys(devDependencies),
   ];
 
+  if (totalDependencies.indexOf('react-scripts') > -1) {
+    return 'create-react-app';
+  }
+
   if (totalDependencies.indexOf('react-scripts-ts') > -1) {
     return 'create-react-app-typescript';
   }
