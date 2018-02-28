@@ -29,7 +29,7 @@ module.exports = {
       user: 'bundler',
       host: 'ssh.codesandbox.io',
       ref: 'origin/master',
-      repo: 'git@github.com:CompuIves/codesandbox-git-extractor.git',
+      repo: 'git@github.com:codesandbox-app/codesandbox-importers.git',
       path: '/home/bundler',
       'pre-deploy-local':
         'scp packages/git-extractor/config/production.json bundler@ssh.codesandbox.io:./source/packages/git-extractor/config/production.json',
