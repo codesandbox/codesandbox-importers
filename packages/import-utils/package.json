@@ -6,10 +6,11 @@
     "lib/**"
   ],
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "rimraf lib && tsc -p tsconfig.json",
     "prepublish": "yarn build"
   },
   "devDependencies": {
+    "rimraf": "^2.6.2",
     "typescript": "^2.7.1"
   },
   "dependencies": {

@@ -5,7 +5,8 @@
   "private": true,
   "scripts": {
     "build": "lerna run build",
-    "build:git-extractor": "lerna run build --scope import-utils --scope types --stream && lerna run build --scope git-converter",
+    "build:git-extractor":
+      "lerna run build --scope codesandbox-import-utils --scope types --stream && lerna run build --scope git-converter",
     "test": "lerna run test",
     "start": "lerna run start --stream"
   },
