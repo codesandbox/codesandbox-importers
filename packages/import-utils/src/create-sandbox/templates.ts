@@ -39,8 +39,8 @@ export function getTemplate(
     ...Object.keys(devDependencies),
   ];
 
-  if (totalDependencies.indexOf('react-scripts') > -1) {
-    return 'create-react-app';
+  if (totalDependencies.indexOf('parcel-bundler') > -1) {
+    return 'parcel';
   }
 
   if (totalDependencies.indexOf('react-scripts-ts') > -1) {
@@ -63,5 +63,5 @@ export function getTemplate(
     return 'vue-cli';
   }
 
-  return 'parcel';
+  return 'create-react-app';
 }
