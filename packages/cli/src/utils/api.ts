@@ -1,5 +1,5 @@
 import axios, { AxiosRequestConfig } from 'axios';
-import { ISandboxDirectory, ISandboxFile, ISandbox } from '@codesandbox/types';
+import { ISandboxDirectory, ISandboxFile, ISandbox } from 'types';
 import { values } from 'lodash';
 import { decamelizeKeys } from 'humps';
 

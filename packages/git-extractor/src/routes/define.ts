@@ -1,5 +1,5 @@
 import { Context } from 'koa';
-import createSandbox from '@codesandbox/import-utils/lib/create-sandbox';
+import createSandbox from 'codesandbox-import-utils/lib/create-sandbox';
 import { INormalizedModules, IModule } from '../utils/sandbox/normalize';
 
 export const define = async (ctx: Context, next: () => Promise<any>) => {

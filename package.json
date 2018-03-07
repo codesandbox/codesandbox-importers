@@ -4,16 +4,13 @@
   "description": "",
   "private": true,
   "scripts": {
-    "build":
-      "yarn build:dependencies && lerna run build --scope @codesandbox/cli --scope git-converter --stream",
-    "build:dependencies":
-      "lerna run build --scope @codesandbox/import-utils --scope @codesandbox/types --stream",
+    "build": "lerna run build",
     "build:git-extractor":
-      "yarn build:dependencies && lerna run build --scope git-converter",
+      "lerna run build --scope codesandbox-import-utils --scope types --stream && lerna run build --scope git-converter",
     "test": "lerna run test",
     "start": "lerna run start --stream"
   },
-  "author": "Ives van Hoorne",
+  "author": "",
   "devDependencies": {
     "lerna": "^2.4.0"
   },

@@ -2,14 +2,14 @@ import * as chalk from 'chalk';
 import * as fs from 'fs-extra';
 import * as inquirer from 'inquirer';
 import * as path from 'path';
-import createSandbox from '@codesandbox/import-utils/lib/create-sandbox';
-import { isText, isTooBig } from '@codesandbox/import-utils/lib/is-text';
+import createSandbox from 'codesandbox-import-utils/lib/create-sandbox';
+import { isText, isTooBig } from 'codesandbox-import-utils/lib/is-text';
 import {
   IModule,
   INormalizedModules,
   ISandboxDirectory,
   ISandboxFile,
-} from '@codesandbox/types';
+} from 'types';
 
 import FileError from './file-error';
 
