@@ -1,10 +1,8 @@
 {
-  "name": "codesandbox-import-utils",
+  "name": "@codesandbox/import-utils",
   "version": "1.2.2",
   "main": "lib/index.js",
-  "files": [
-    "lib/**"
-  ],
+  "files": ["lib/**"],
   "scripts": {
     "build": "rimraf lib && tsc -p tsconfig.json",
     "prepublish": "yarn build"

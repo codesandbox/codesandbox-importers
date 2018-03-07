@@ -79,16 +79,8 @@
       ".(ts|tsx)": "<rootDir>../../node_modules/ts-jest/preprocessor.js"
     },
     "testEnvironment": "node",
-    "moduleFileExtensions": [
-      "ts",
-      "tsx",
-      "js",
-      "json"
-    ],
-    "testPathIgnorePatterns": [
-      "<rootDir>/node_modules/",
-      "<rootDir>/dist/"
-    ],
+    "moduleFileExtensions": ["ts", "tsx", "js", "json"],
+    "testPathIgnorePatterns": ["<rootDir>/node_modules/", "<rootDir>/dist/"],
     "testRegex": "(/__tests__/.*|\\.(test|spec))\\.(ts|tsx|js)$"
   }
 }

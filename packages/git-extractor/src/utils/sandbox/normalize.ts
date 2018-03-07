@@ -1,6 +1,6 @@
 import { join } from 'path';
 
-import { ISandboxFile, ISandboxDirectory } from 'types';
+import { ISandboxFile, ISandboxDirectory } from '@codesandbox/types';
 
 export interface IModule {
   content: string;

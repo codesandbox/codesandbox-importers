@@ -1,6 +1,6 @@
 import * as JSZip from 'jszip';
 
-import { isText } from 'codesandbox-import-utils/lib/is-text';
+import { isText } from '@codesandbox/import-utils/lib/is-text';
 
 import { IGitInfo } from '../push/index';
 import { downloadZip } from '../api';
