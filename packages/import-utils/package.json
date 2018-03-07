@@ -2,9 +2,7 @@
   "name": "codesandbox-import-utils",
   "version": "1.2.2",
   "main": "lib/index.js",
-  "files": [
-    "lib/**"
-  ],
+  "files": ["lib/**"],
   "scripts": {
     "build": "rimraf lib && tsc -p tsconfig.json",
     "prepublish": "yarn build"
@@ -14,6 +12,7 @@
     "typescript": "^2.7.1"
   },
   "dependencies": {
+    "codesandbox-import-util-types": "^1.2.2",
     "istextorbinary": "^2.2.1",
     "lz-string": "^1.4.4"
   }
