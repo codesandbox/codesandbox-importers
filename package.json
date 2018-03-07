@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "build":
-      "yarn build:dependencies && lerna run build --scope cli --scope git-converter --parallel",
+      "yarn build:dependencies && lerna run build --scope codesandbox --scope git-converter --parallel",
     "build:git-extractor":
       "yarn build:dependencies && lerna run build --scope git-converter",
     "build:dependencies":
