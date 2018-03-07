@@ -9,7 +9,7 @@ import {
   ISandboxDirectory,
   ISandbox,
   ITemplate,
-} from 'types';
+} from 'codesandbox-import-util-types';
 import denormalize from './denormalize';
 
 import parseHTML from './html-parser';

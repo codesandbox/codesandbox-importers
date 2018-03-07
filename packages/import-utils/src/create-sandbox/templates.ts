@@ -1,5 +1,5 @@
-import { INormalizedModules } from 'types';
-import { ITemplate } from 'types';
+import { INormalizedModules } from 'codesandbox-import-util-types';
+import { ITemplate } from 'codesandbox-import-util-types';
 
 export function getMainFile(template: ITemplate) {
   if (template === 'vue-cli') {

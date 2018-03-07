@@ -9,7 +9,7 @@ import {
   INormalizedModules,
   ISandboxDirectory,
   ISandboxFile,
-} from 'types';
+} from 'codesandbox-import-util-types';
 
 import FileError from './file-error';
 

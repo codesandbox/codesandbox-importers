@@ -4,7 +4,7 @@ import {
   IModule,
   ISandboxFile,
   ISandboxDirectory,
-} from 'types';
+} from 'codesandbox-import-util-types';
 
 import { generate as generateShortid } from 'shortid';
 

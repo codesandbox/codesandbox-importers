@@ -4,9 +4,12 @@
   "description": "",
   "private": true,
   "scripts": {
-    "build": "lerna run build",
+    "build":
+      "yarn build:dependencies && lerna run build --scope cli --scope git-converter --parallel",
     "build:git-extractor":
-      "lerna run build --scope codesandbox-import-utils --scope types --stream && lerna run build --scope git-converter",
+      "yarn build:dependencies && lerna run build --scope git-converter",
+    "build:dependencies":
+      "lerna run build --scope codesandbox-import-utils --scope codesandbox-import-util-types --stream",
     "test": "lerna run test",
     "start": "lerna run start --stream"
   },
