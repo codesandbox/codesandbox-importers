@@ -21,6 +21,8 @@ export function getMainFile(template: ITemplate) {
   return "src/index.js";
 }
 
+const SANDBOX_CONFIG = "sandbox.config.json";
+
 export function getTemplate(
   packageJSONPackage: {
     dependencies: { [key: string]: string };
@@ -28,9 +30,9 @@ export function getTemplate(
   },
   modules: INormalizedModules
 ): ITemplate {
-  if (modules["sandbox.config.json"]) {
+  if (modules[SANDBOX_CONFIG]) {
     try {
-      const config = JSON.parse(modules["/sandbox.config.json"].content);
+      const config = JSON.parse(modules[SANDBOX_CONFIG].content);
 
       if (config.template) {
         return config.template;
