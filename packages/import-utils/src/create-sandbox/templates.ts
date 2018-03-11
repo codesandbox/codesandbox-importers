@@ -28,7 +28,7 @@ export function getTemplate(
   },
   modules: INormalizedModules
 ): ITemplate {
-  if (modules["/sandbox.config.json"]) {
+  if (modules["sandbox.config.json"]) {
     try {
       const config = JSON.parse(modules["/sandbox.config.json"].content);
 
