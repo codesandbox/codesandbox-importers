@@ -1,12 +1,12 @@
-import { dirname, basename } from 'path';
+import { dirname, basename } from "path";
 import {
   INormalizedModules,
   IModule,
   ISandboxFile,
-  ISandboxDirectory,
-} from 'codesandbox-import-util-types';
+  ISandboxDirectory
+} from "codesandbox-import-util-types";
 
-import { generate as generateShortid } from 'shortid';
+import { generate as generateShortid } from "shortid";
 
 function generateSandboxFile(
   module: IModule,
@@ -18,7 +18,7 @@ function generateSandboxFile(
     code: module.content,
     directoryShortid: parentDirectoryShortid,
     title: basename(path),
-    isBinary: module.isBinary,
+    isBinary: module.isBinary
   };
 }
 
@@ -33,7 +33,7 @@ function createDirectoryRecursively(
   const parentDir = dirname(path);
 
   // This means root, so create it
-  if (parentDir === '.') {
+  if (parentDir === ".") {
     directories[path] = generateSandboxDirectory(path, undefined);
     return;
   }
@@ -55,7 +55,7 @@ function generateSandboxDirectory(
   return {
     shortid: generateShortid(),
     directoryShortid: parentDirectoryShortid,
-    title,
+    title
   };
 }
 
@@ -64,7 +64,7 @@ export default function denormalize(files: INormalizedModules) {
 
   Object.keys(files).forEach(path => {
     const dir = dirname(path);
-    if (dir !== '.') {
+    if (dir !== ".") {
       directories.add(dirname(path));
     }
   });
@@ -83,8 +83,6 @@ export default function denormalize(files: INormalizedModules) {
 
   return {
     modules: sandboxModules,
-    directories: Object.keys(sandboxDirectories).map(
-      s => sandboxDirectories[s]
-    ),
+    directories: Object.keys(sandboxDirectories).map(s => sandboxDirectories[s])
   };
 }

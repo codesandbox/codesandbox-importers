@@ -1,13 +1,13 @@
-import * as JSZip from 'jszip';
+import * as JSZip from "jszip";
 
-import { isText } from 'codesandbox-import-utils/lib/is-text';
+import { isText } from "codesandbox-import-utils/lib/is-text";
 
-import { IGitInfo } from '../push/index';
-import { downloadZip } from '../api';
-import { INormalizedModules } from '../../../utils/sandbox/normalize';
+import { IGitInfo } from "../push/index";
+import { downloadZip } from "../api";
+import { INormalizedModules } from "../../../utils/sandbox/normalize";
 
 const getFolderName = (zip: JSZip) =>
-  `${Object.keys(zip.files)[0].split('/')[0]}/`;
+  `${Object.keys(zip.files)[0].split("/")[0]}/`;
 
 /**
  * We use https://rawgit.com/ as urls, since they change the content-type corresponding
@@ -18,7 +18,7 @@ const rawGitUrl = (gitInfo: IGitInfo, filePath: string, commitSha: string) => {
     gitInfo.repo
   }/${commitSha || gitInfo.branch}/`;
   if (gitInfo.path) {
-    url += gitInfo.path + '/';
+    url += gitInfo.path + "/";
   }
   url += filePath;
 
@@ -33,7 +33,7 @@ export async function downloadRepository(
   let folderName = getFolderName(zip);
 
   if (gitInfo.path) {
-    folderName += gitInfo.path + '/';
+    folderName += gitInfo.path + "/";
   }
 
   const result: INormalizedModules = {};
@@ -41,24 +41,24 @@ export async function downloadRepository(
   await Promise.all(
     Object.keys(zip.files).map(async path => {
       if (path.startsWith(folderName)) {
-        const relativePath = path.replace(folderName, '');
+        const relativePath = path.replace(folderName, "");
 
         const file = zip.files[path];
 
         if (!file.dir) {
-          const bufferContents = await file.async('nodebuffer');
+          const bufferContents = await file.async("nodebuffer");
           const text = await isText(file.name, bufferContents);
 
-          const contents = await file.async('text');
+          const contents = await file.async("text");
           if (!text) {
             result[relativePath] = {
               content: rawGitUrl(gitInfo, relativePath, commitSha),
-              isBinary: true,
+              isBinary: true
             };
           } else {
             result[relativePath] = {
               content: contents,
-              isBinary: false,
+              isBinary: false
             };
           }
         }

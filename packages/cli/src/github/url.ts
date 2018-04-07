@@ -1,10 +1,10 @@
-import * as fs from 'fs';
-import { basename, dirname } from 'path';
+import * as fs from "fs";
+import { basename, dirname } from "path";
 
 /* tslint:disable no-var-requires */
-const branch = require('git-branch');
-const username = require('git-username');
-const repoName = require('git-repo-name');
+const branch = require("git-branch");
+const username = require("git-username");
+const repoName = require("git-repo-name");
 /* tslint:enable */
 
 export interface IOptions {
@@ -13,7 +13,7 @@ export interface IOptions {
   fontSize?: number;
   highlightedLines?: number[];
   editorSize?: number;
-  view?: 'editor' | 'preview';
+  view?: "editor" | "preview";
   hideNavigation?: boolean;
   currentModuleView?: boolean;
   autoResize?: boolean;
@@ -34,9 +34,9 @@ function optionsToParameterizedUrl(options: { [option: string]: any }) {
     .map(
       key => `${encodeURIComponent(key)}=${encodeURIComponent(options[key])}`
     )
-    .join('&');
+    .join("&");
 
-  return keyValues ? `?${keyValues}` : '';
+  return keyValues ? `?${keyValues}` : "";
 }
 
 function getUrlOptions(options: IOptions) {
@@ -51,7 +51,7 @@ function getUrlOptions(options: IOptions) {
     useCodeMirror,
     expandDevTools,
     forceRefresh,
-    openedModule,
+    openedModule
   } = options;
 
   const results: { [option: string]: any } = {};
@@ -109,14 +109,14 @@ function findGitRoot() {
   let currentPath = __dirname;
 
   while (
-    !fs.readdirSync(currentPath).find(f => basename(f) === '.git') &&
-    currentPath !== '/'
+    !fs.readdirSync(currentPath).find(f => basename(f) === ".git") &&
+    currentPath !== "/"
   ) {
     currentPath = dirname(currentPath);
   }
 
-  if (currentPath === '/') {
-    throw new Error('Could not find .git folder');
+  if (currentPath === "/") {
+    throw new Error("Could not find .git folder");
   }
 
   return currentPath;
@@ -147,25 +147,25 @@ function getRepoPath(options: IOptions) {
   currentUsername = currentUsername || options.gitUsername;
 
   if (!currentBranch) {
-    throw new Error('Could not fetch branch from the git info.');
+    throw new Error("Could not fetch branch from the git info.");
   }
   if (!currentUsername) {
-    throw new Error('Could not fetch username from the git info.');
+    throw new Error("Could not fetch username from the git info.");
   }
   if (!currentRepo) {
-    throw new Error('Could not fetch repository from the git info.');
+    throw new Error("Could not fetch repository from the git info.");
   }
 
   let path = `${currentUsername}/${currentRepo}/tree/${currentBranch}`;
 
   if (options.examplePath) {
-    path += '/' + options.examplePath;
+    path += "/" + options.examplePath;
   }
 
   return path;
 }
 
-function getFullUrl(type: 's' | 'embed', options: IOptions) {
+function getFullUrl(type: "s" | "embed", options: IOptions) {
   const gitPath = getRepoPath(options);
   const urlOptions = getUrlOptions(options);
 
@@ -173,9 +173,9 @@ function getFullUrl(type: 's' | 'embed', options: IOptions) {
 }
 
 export function getSandboxUrl(options?: IOptions) {
-  return getFullUrl('s', options || {});
+  return getFullUrl("s", options || {});
 }
 
 export function getEmbedUrl(options?: IOptions) {
-  return getFullUrl('embed', options || {});
+  return getFullUrl("embed", options || {});
 }

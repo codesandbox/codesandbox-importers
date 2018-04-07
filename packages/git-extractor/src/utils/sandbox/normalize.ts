@@ -1,6 +1,6 @@
-import { join } from 'path';
+import { join } from "path";
 
-import { ISandboxFile, ISandboxDirectory } from 'codesandbox-import-util-types';
+import { ISandboxFile, ISandboxDirectory } from "codesandbox-import-util-types";
 
 export interface IModule {
   content: string;
@@ -15,7 +15,7 @@ function findSandboxFiles(
   modules: ISandboxFile[],
   directories: ISandboxDirectory[],
   currentDir: string | null,
-  path: string = ''
+  path: string = ""
 ): INormalizedModules {
   let result: INormalizedModules = {};
 
@@ -26,7 +26,7 @@ function findSandboxFiles(
   modulesInDirectory.forEach(m => {
     const newPath = join(path, m.title);
 
-    result[newPath] = { content: m.code || '', isBinary: m.isBinary };
+    result[newPath] = { content: m.code || "", isBinary: m.isBinary };
   });
 
   const childrenFiles = directories

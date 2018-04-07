@@ -1,6 +1,6 @@
-import { generate as generateShortid } from 'shortid';
-import { pickBy } from 'lodash';
-import { join } from 'path';
+import { generate as generateShortid } from "shortid";
+import { pickBy } from "lodash";
+import { join } from "path";
 
 import {
   INormalizedModules,
@@ -8,12 +8,12 @@ import {
   ISandboxFile,
   ISandboxDirectory,
   ISandbox,
-  ITemplate,
-} from 'codesandbox-import-util-types';
-import denormalize from './denormalize';
+  ITemplate
+} from "codesandbox-import-util-types";
+import denormalize from "./denormalize";
 
-import parseHTML from './html-parser';
-import { getMainFile, getTemplate } from './templates';
+import parseHTML from "./html-parser";
+import { getMainFile, getTemplate } from "./templates";
 
 interface IDependencies {
   [name: string]: string;
@@ -40,11 +40,11 @@ function findMainFile(
   if (directory[getMainFile(template)]) {
     return getMainFile(template);
   }
-  if (directory['src/index.js']) {
-    return 'src/index.js';
+  if (directory["src/index.js"]) {
+    return "src/index.js";
   }
-  if (directory['index.js']) {
-    return 'index.js';
+  if (directory["index.js"]) {
+    return "index.js";
   }
 
   return mainFile || getMainFile(template);
@@ -61,8 +61,8 @@ function findMainFile(
 export default async function createSandbox(
   directory: INormalizedModules
 ): Promise<ISandbox> {
-  const packageJson = directory['package.json'];
-  if (!packageJson) throw new Error('Could not find package.json');
+  const packageJson = directory["package.json"];
+  if (!packageJson) throw new Error("Could not find package.json");
 
   const packageJsonPackage = JSON.parse(packageJson.content);
 
@@ -87,6 +87,6 @@ export default async function createSandbox(
     directories,
     externalResources: [],
     template,
-    entry: mainFile,
+    entry: mainFile
   };
 }

@@ -1,19 +1,19 @@
 #!/usr/bin/env node
-import * as chalk from 'chalk';
-import * as program from 'commander';
-import * as updateNotifier from 'update-notifier';
+import * as chalk from "chalk";
+import * as program from "commander";
+import * as updateNotifier from "update-notifier";
 
-import { read } from './cfg';
+import { read } from "./cfg";
 
 // Commands
-import deployCommand from './commands/deploy';
-import loginCommand from './commands/login';
-import logoutCommand from './commands/logout';
+import deployCommand from "./commands/deploy";
+import loginCommand from "./commands/login";
+import logoutCommand from "./commands/logout";
 
-import { extraHelp, logCodeSandbox } from './utils/log';
+import { extraHelp, logCodeSandbox } from "./utils/log";
 
 // tslint:disable no-var-requires
-const packageInfo = require('../package.json');
+const packageInfo = require("../package.json");
 
 console.log();
 logCodeSandbox();
@@ -21,7 +21,7 @@ console.log();
 
 program.version(packageInfo.version);
 
-program.on('--help', extraHelp);
+program.on("--help", extraHelp);
 
 // Register commands
 deployCommand(program);

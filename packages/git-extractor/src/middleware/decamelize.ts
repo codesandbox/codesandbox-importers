@@ -1,5 +1,5 @@
-import { Context } from 'koa';
-import { decamelizeKeys } from 'humps';
+import { Context } from "koa";
+import { decamelizeKeys } from "humps";
 
 const decamelizeMiddleware = async (ctx: Context, next: () => Promise<any>) => {
   await next();

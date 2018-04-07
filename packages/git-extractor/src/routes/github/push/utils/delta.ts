@@ -1,14 +1,14 @@
-import { ITree } from '../index';
-import { INormalizedModules } from '../../../../utils/sandbox/normalize';
+import { ITree } from "../index";
+import { INormalizedModules } from "../../../../utils/sandbox/normalize";
 
-import { createHash } from 'crypto';
+import { createHash } from "crypto";
 
 function getGitSha(content: string) {
-  const hash = createHash('sha1');
+  const hash = createHash("sha1");
 
-  hash.update('blob ' + new Buffer(content).length + '\0' + content);
+  hash.update("blob " + new Buffer(content).length + "\0" + content);
 
-  return hash.digest('hex');
+  return hash.digest("hex");
 }
 
 export default function getDelta(tree: ITree, modules: INormalizedModules) {

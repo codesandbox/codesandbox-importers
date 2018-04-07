@@ -7,7 +7,7 @@ type Module = {
   html_url: string;
   git_url: string;
   download_url: string;
-  type: 'file' | 'dir';
+  type: "file" | "dir";
 };
 
 type NormalizedDirectory = {

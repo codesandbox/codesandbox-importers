@@ -1,14 +1,14 @@
-import axios, { AxiosRequestConfig } from 'axios';
+import axios, { AxiosRequestConfig } from "axios";
 import {
   ISandboxDirectory,
   ISandboxFile,
-  ISandbox,
-} from 'codesandbox-import-util-types';
-import { values } from 'lodash';
-import { decamelizeKeys } from 'humps';
+  ISandbox
+} from "codesandbox-import-util-types";
+import { values } from "lodash";
+import { decamelizeKeys } from "humps";
 
-import { getToken } from '../cfg';
-import { CREATE_SANDBOX_URL, GET_USER_URL, verifyUserTokenUrl } from './url';
+import { getToken } from "../cfg";
+import { CREATE_SANDBOX_URL, GET_USER_URL, verifyUserTokenUrl } from "./url";
 
 const callApi = async (options: AxiosRequestConfig) => {
   try {
@@ -31,18 +31,18 @@ export async function uploadSandbox(sandbox: ISandbox) {
 
   const sandboxData = {
     ...decamelizeKeys(sandbox),
-    from_cli: true,
+    from_cli: true
   };
 
   const options: AxiosRequestConfig = {
     data: {
-      sandbox: sandboxData,
+      sandbox: sandboxData
     },
     headers: {
-      Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${token}`
     },
-    method: 'POST',
-    url: CREATE_SANDBOX_URL,
+    method: "POST",
+    url: CREATE_SANDBOX_URL
   };
 
   return callApi(options);
@@ -52,10 +52,10 @@ export async function fetchUser(token: string) {
   const Authorization = `Bearer ${token}`;
   const options: AxiosRequestConfig = {
     headers: {
-      Authorization,
+      Authorization
     },
-    method: 'GET',
-    url: GET_USER_URL,
+    method: "GET",
+    url: GET_USER_URL
   };
 
   return callApi(options);
@@ -63,8 +63,8 @@ export async function fetchUser(token: string) {
 
 export async function verifyUser(token: string) {
   const options: AxiosRequestConfig = {
-    method: 'GET',
-    url: verifyUserTokenUrl(token),
+    method: "GET",
+    url: verifyUserTokenUrl(token)
   };
 
   return callApi(options);

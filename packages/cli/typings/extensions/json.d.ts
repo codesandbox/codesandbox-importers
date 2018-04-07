@@ -1,4 +1,4 @@
-declare module '*.json' {
+declare module "*.json" {
   const package: {
     name: string;
     version: string;

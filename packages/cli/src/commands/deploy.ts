@@ -1,20 +1,20 @@
-import * as chalk from 'chalk';
-import * as Commander from 'commander';
-import * as inquirer from 'inquirer';
-import { join } from 'path';
+import * as chalk from "chalk";
+import * as Commander from "commander";
+import * as inquirer from "inquirer";
+import { join } from "path";
 
-import { getUser } from '../cfg';
-import { uploadSandbox } from '../utils/api';
-import confirm from '../utils/confirm';
-import { error, info, log, success } from '../utils/log';
-import { createSandboxUrl } from '../utils/url';
-import { login } from './login';
+import { getUser } from "../cfg";
+import { uploadSandbox } from "../utils/api";
+import confirm from "../utils/confirm";
+import { error, info, log, success } from "../utils/log";
+import { createSandboxUrl } from "../utils/url";
+import { login } from "./login";
 
-import parseSandbox from '../utils/parse-sandbox';
-import FileError from '../utils/parse-sandbox/file-error';
+import parseSandbox from "../utils/parse-sandbox";
+import FileError from "../utils/parse-sandbox/file-error";
 
 // tslint:disable no-var-requires
-const ora = require('ora');
+const ora = require("ora");
 const MAX_MODULE_COUNT = 120;
 const MAX_DIRECTORY_COUNT = 50;
 
@@ -36,7 +36,7 @@ async function showWarnings(resolvedPath: string, errors: FileError[]) {
       )
     );
     for (const err of errors) {
-      const relativePath = err.path.replace(resolvedPath, '');
+      const relativePath = err.path.replace(resolvedPath, "");
 
       log(`${chalk.yellow.bold(relativePath)}: ${err.message}`);
     }
@@ -46,17 +46,17 @@ async function showWarnings(resolvedPath: string, errors: FileError[]) {
 
 export default function registerCommand(program: typeof Commander) {
   program
-    .command('deploy <path>')
-    .alias('*')
+    .command("deploy <path>")
+    .alias("*")
     .description(
-      `deploy an application to CodeSandbox ${chalk.bold('(default)')}`
+      `deploy an application to CodeSandbox ${chalk.bold("(default)")}`
     )
     .action(async path => {
       const user = await getUser();
 
       if (!user) {
-        info('You need to sign in before you can deploy applications');
-        const confirmed = await confirm('Do you want to sign in using GitHub?');
+        info("You need to sign in before you can deploy applications");
+        const confirmed = await confirm("Do you want to sign in using GitHub?");
 
         if (!confirmed) {
           return;
@@ -69,7 +69,7 @@ export default function registerCommand(program: typeof Commander) {
       try {
         let resolvedPath = join(process.cwd(), path);
 
-        if (resolvedPath.endsWith('/')) {
+        if (resolvedPath.endsWith("/")) {
           resolvedPath = resolvedPath.slice(0, -1);
         }
 
@@ -95,19 +95,19 @@ export default function registerCommand(program: typeof Commander) {
         await showWarnings(resolvedPath, errors);
 
         info(
-          'By deploying to CodeSandbox, the code of your project will be made ' +
-            chalk.bold('public')
+          "By deploying to CodeSandbox, the code of your project will be made " +
+            chalk.bold("public")
         );
 
         const acceptPublic = await confirm(
-          'Are you sure you want to proceed with the deployment?',
+          "Are you sure you want to proceed with the deployment?",
           true
         );
         if (!acceptPublic) {
           return;
         }
 
-        const spinner = ora('Uploading to CodeSandbox').start();
+        const spinner = ora("Uploading to CodeSandbox").start();
 
         try {
           const sandboxData = await uploadSandbox(sandbox);
@@ -115,13 +115,13 @@ export default function registerCommand(program: typeof Commander) {
           spinner.stop();
 
           success(
-            'Succesfully created the sandbox, you can find the sandbox here:'
+            "Succesfully created the sandbox, you can find the sandbox here:"
           );
           success(createSandboxUrl(sandboxData));
         } catch (e) {
           spinner.stop();
 
-          error('Something went wrong while uploading to the API');
+          error("Something went wrong while uploading to the API");
           error(e.message);
         }
       } catch (e) {

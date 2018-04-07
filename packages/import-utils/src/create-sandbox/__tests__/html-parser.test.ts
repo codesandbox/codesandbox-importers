@@ -1,7 +1,7 @@
-import parser from '../html-parser';
+import parser from "../html-parser";
 
-describe('html-parser', () => {
-  it('can retrieve body from html', () => {
+describe("html-parser", () => {
+  it("can retrieve body from html", () => {
     const BODY_HTML = `
       <!doctype html>
       <html lang="en">
@@ -26,7 +26,7 @@ describe('html-parser', () => {
     expect(parser(BODY_HTML)).toMatchSnapshot();
   });
 
-  it('can retrieve js external resources', () => {
+  it("can retrieve js external resources", () => {
     const BODY_HTML = `
       <!doctype html>
       <html lang="en">
@@ -58,7 +58,7 @@ describe('html-parser', () => {
     expect(parser(BODY_HTML)).toMatchSnapshot();
   });
 
-  it('can retrieve css external resources', () => {
+  it("can retrieve css external resources", () => {
     const BODY_HTML = `
       <!doctype html>
       <html lang="en">

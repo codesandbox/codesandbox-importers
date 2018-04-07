@@ -1,17 +1,17 @@
-import { Context } from 'koa';
-import { extname, basename, dirname, join } from 'path';
-import createSandbox from 'codesandbox-import-utils/lib/create-sandbox';
+import { Context } from "koa";
+import { extname, basename, dirname, join } from "path";
+import createSandbox from "codesandbox-import-utils/lib/create-sandbox";
 
-import { downloadRepository } from './pull/download';
-import * as api from './api';
+import { downloadRepository } from "./pull/download";
+import * as api from "./api";
 
-import * as push from './push';
+import * as push from "./push";
 
 import normalizeSandbox, {
   IModule,
-  INormalizedModules,
-} from '../../utils/sandbox/normalize';
-import { IGitInfo } from './push';
+  INormalizedModules
+} from "../../utils/sandbox/normalize";
+import { IGitInfo } from "./push";
 
 export const info = async (ctx: Context, next: () => Promise<any>) => {
   const response = await api.fetchRepoInfo(
@@ -33,11 +33,11 @@ export const data = async (ctx: Context, next: () => Promise<any>) => {
   // We get branch, etc from here because there could be slashes in a branch name,
   // we can retrieve if this is the case from this method
   const { username, repo, branch, commitSha } = ctx.params;
-  const path = ctx.params.path && ctx.params.path.replace('+', ' ');
+  const path = ctx.params.path && ctx.params.path.replace("+", " ");
 
   let title = `${username}/${repo}`;
   if (path) {
-    const splittedPath = path.split('/');
+    const splittedPath = path.split("/");
     title = title + `: ${splittedPath[splittedPath.length - 1]}`;
   }
 
@@ -46,7 +46,7 @@ export const data = async (ctx: Context, next: () => Promise<any>) => {
       username,
       repo,
       branch,
-      path,
+      path
     },
     commitSha
   );
@@ -58,7 +58,7 @@ export const data = async (ctx: Context, next: () => Promise<any>) => {
   ctx.body = {
     ...sandboxParams,
     // If no title is set in package.json, go for this one
-    title: finalTitle,
+    title: finalTitle
   };
 };
 
@@ -68,7 +68,7 @@ export const diff = async (ctx: Context, next: () => Promise<any>) => {
     directories,
     commitSha,
     currentUser,
-    token,
+    token
   } = ctx.request.body;
 
   const { username, repo, branch, path } = ctx.params;
@@ -78,7 +78,7 @@ export const diff = async (ctx: Context, next: () => Promise<any>) => {
     repo,
     branch,
     path,
-    commitSha,
+    commitSha
   };
 
   const normalizedFiles = normalizeSandbox(modules, directories);
@@ -89,14 +89,14 @@ export const diff = async (ctx: Context, next: () => Promise<any>) => {
       commitSha,
       normalizedFiles
     ),
-    api.fetchRights(username, repo, currentUser, token),
+    api.fetchRights(username, repo, currentUser, token)
   ]);
 
   ctx.body = {
     added: delta.added,
     modified: delta.modified,
     deleted: delta.deleted,
-    rights,
+    rights
   };
 };
 
@@ -107,7 +107,7 @@ export const pr = async (ctx: Context, next: () => Promise<any>) => {
     commitSha,
     message,
     currentUser,
-    token,
+    token
   } = ctx.request.body;
   const normalizedFiles = normalizeSandbox(modules, directories);
 
@@ -117,12 +117,12 @@ export const pr = async (ctx: Context, next: () => Promise<any>) => {
     username,
     repo,
     branch,
-    path,
+    path
   };
 
   const rights = await api.fetchRights(username, repo, currentUser, token);
 
-  if (rights === 'none' || rights === 'read') {
+  if (rights === "none" || rights === "read") {
     // Ah, we need to fork...
     gitInfo = await push.createFork(gitInfo, currentUser, token);
   }
@@ -140,7 +140,7 @@ export const pr = async (ctx: Context, next: () => Promise<any>) => {
   ctx.body = {
     url: res.url,
     newBranch: res.branchName,
-    sha: commit.sha,
+    sha: commit.sha
   };
 };
 
@@ -154,7 +154,7 @@ export const commit = async (ctx: Context, next: () => Promise<any>) => {
     username,
     repo,
     branch,
-    path,
+    path
   };
 
   const commit = await push.createCommit(
@@ -186,7 +186,7 @@ export const commit = async (ctx: Context, next: () => Promise<any>) => {
       ctx.body = {
         url: res.url,
         sha: commit.sha,
-        merge: false,
+        merge: false
       };
       return;
     } catch (e) {
@@ -207,7 +207,7 @@ export const commit = async (ctx: Context, next: () => Promise<any>) => {
     ctx.body = {
       url: res.url,
       sha: res.sha,
-      merge: true,
+      merge: true
     };
     return;
   } catch (e) {
@@ -218,7 +218,7 @@ export const commit = async (ctx: Context, next: () => Promise<any>) => {
       ctx.body = {
         url: res.url,
         sha: commit.sha,
-        newBranch: res.branchName,
+        newBranch: res.branchName
       };
       return;
     } else {
@@ -230,7 +230,7 @@ export const commit = async (ctx: Context, next: () => Promise<any>) => {
 export const repo = async (ctx: Context, next: () => Promise<any>) => {
   const {
     token,
-    normalizedFiles: fileArray,
+    normalizedFiles: fileArray
   }: {
     token: string;
     normalizedFiles: Array<IModule & { path: string }>;
@@ -240,13 +240,13 @@ export const repo = async (ctx: Context, next: () => Promise<any>) => {
   const normalizedFiles: INormalizedModules = fileArray.reduce(
     (total, file) => ({
       ...total,
-      [file.path]: file,
+      [file.path]: file
     }),
     {}
   );
 
   if (!repo) {
-    throw new Error('Repo name cannot be empty');
+    throw new Error("Repo name cannot be empty");
   }
 
   const result = await push.createRepo(username, repo, normalizedFiles, token);

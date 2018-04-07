@@ -1,20 +1,20 @@
-import axios from 'axios';
-import * as LRU from 'lru-cache';
-import * as zip from 'jszip';
-import fetch from 'node-fetch';
+import axios from "axios";
+import * as LRU from "lru-cache";
+import * as zip from "jszip";
+import fetch from "node-fetch";
 
-import log from '../../utils/log';
+import log from "../../utils/log";
 
-import { ITree, IGitInfo } from './push';
+import { ITree, IGitInfo } from "./push";
 
-const API_URL = 'https://api.github.com';
-const BASE_URL = API_URL + '/repos';
+const API_URL = "https://api.github.com";
+const BASE_URL = API_URL + "/repos";
 
 const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID;
 const GITHUB_CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET;
 
 const NOT_FOUND_MESSAGE =
-  'Could not find the specified repository or directory';
+  "Could not find the specified repository or directory";
 
 function buildApiUrl(username: string, repo: string) {
   return `${BASE_URL}/${username}/${repo}`;
@@ -63,8 +63,8 @@ type Response = Array<Module>;
 export async function fetchContents(
   username: string,
   repo: string,
-  branch: string = 'master',
-  path: string = ''
+  branch: string = "master",
+  path: string = ""
 ): Promise<Response | Module> {
   try {
     const url = buildContentsUrl(username, repo, branch, path);
@@ -81,7 +81,7 @@ export async function fetchContents(
 }
 
 interface RightsResponse {
-  permission: 'admin' | 'write' | 'read' | 'none';
+  permission: "admin" | "write" | "read" | "none";
 }
 
 /**
@@ -92,7 +92,7 @@ export async function fetchRights(
   repo: string,
   currentUser: string,
   token: string
-): Promise<'admin' | 'write' | 'read' | 'none'> {
+): Promise<"admin" | "write" | "read" | "none"> {
   const url = `${buildApiUrl(
     username,
     repo
@@ -101,13 +101,13 @@ export async function fetchRights(
   try {
     const response: { data: RightsResponse } = await axios({
       url,
-      headers: { Authorization: `Bearer ${token}` },
+      headers: { Authorization: `Bearer ${token}` }
     });
 
     return response.data.permission;
   } catch (e) {
     if (e.response && e.response.status === 403) {
-      return 'none';
+      return "none";
     } else {
       throw e;
     }
@@ -124,7 +124,7 @@ interface ITreeResponse {
 export async function fetchTree(
   username: string,
   repo: string,
-  path: string = '',
+  path: string = "",
   commitSha: string,
   recursive: boolean = true
 ): Promise<ITreeResponse> {
@@ -134,7 +134,7 @@ export async function fetchTree(
   )}/git/trees/${commitSha}${buildSecretParams()}&path=${path}`;
 
   if (recursive) {
-    url += '&recursive=1';
+    url += "&recursive=1";
   }
 
   const response: { data: ITreeResponse } = await axios({ url });
@@ -345,9 +345,9 @@ export async function createRepo(
     `${API_URL}/user/repos${buildSecretParams()}`,
     {
       name: repo,
-      description: 'Created with CodeSandbox',
+      description: "Created with CodeSandbox",
       homepage: `https://codesandbox.io/s/github/${username}/${repo}`,
-      auto_init: true,
+      auto_init: true
     },
     { headers: { Authorization: `Bearer ${token}` } }
   );
@@ -384,19 +384,19 @@ export async function doesRepoExist(username: string, repo: string) {
 export async function fetchCode(file: Module): Promise<string> {
   const response: { data: any } = await axios({
     url: file.download_url,
-    responseType: 'text',
+    responseType: "text",
     headers: {
-      Accept: 'text/plain',
+      Accept: "text/plain"
     },
     // We need to tell axios not to do anything (don't parse)
-    transformResponse: [d => d],
+    transformResponse: [d => d]
   }).catch(e => {
     if (e.response && e.response.status === 404) {
       // Maybe it is not yet added to github api, let's try the raw git object
       return axios({
-        url: file.git_url + buildSecretParams(),
+        url: file.git_url + buildSecretParams()
       }).then(res => ({
-        data: new Buffer(res.data.content, 'base64').toString(),
+        data: new Buffer(res.data.content, "base64").toString()
       }));
     }
 
@@ -416,11 +416,11 @@ interface CommitResponse {
 
 const shaCache = LRU({
   max: 500,
-  maxAge: 1000 * 30, // 30 seconds
+  maxAge: 1000 * 30 // 30 seconds
 });
 
 export function resetShaCache(gitInfo: IGitInfo) {
-  const { username, repo, branch = 'master', path = '' } = gitInfo;
+  const { username, repo, branch = "master", path = "" } = gitInfo;
 
   return shaCache.del(username + repo + branch + path);
 }
@@ -428,8 +428,8 @@ export function resetShaCache(gitInfo: IGitInfo) {
 export async function fetchRepoInfo(
   username: string,
   repo: string,
-  branch: string = 'master',
-  path: string = '',
+  branch: string = "master",
+  path: string = "",
   skipCache: boolean = false
 ): Promise<CommitResponse> {
   try {
@@ -451,22 +451,22 @@ export async function fetchRepoInfo(
       username,
       repo,
       branch,
-      path,
+      path
     };
   } catch (e) {
     // There is a chance that the branch contains slashes, we try to fix this
     // by requesting again with the first part of the path appended to the branch
     // when a request fails (404)
     if (e.response && e.response.status === 404) {
-      const [branchAddition, ...newPath] = path.split('/');
+      const [branchAddition, ...newPath] = path.split("/");
       const newBranch = `${branch}/${branchAddition}`;
 
-      if (branchAddition !== '') {
+      if (branchAddition !== "") {
         return await fetchRepoInfo(
           username,
           repo,
           newBranch,
-          newPath.join('/')
+          newPath.join("/")
         );
       }
 
@@ -484,8 +484,8 @@ export async function downloadZip(gitInfo: IGitInfo) {
   const buffer = await fetch(
     `${ZIP_URL}/${gitInfo.username}/${gitInfo.repo}/zip/${gitInfo.branch}`
   ).then(res => {
-    if (+res.headers.get('Content-Length') > MAX_ZIP_SIZE) {
-      throw new Error('This repo is too big to import');
+    if (+res.headers.get("Content-Length") > MAX_ZIP_SIZE) {
+      throw new Error("This repo is too big to import");
     }
 
     return res.buffer();

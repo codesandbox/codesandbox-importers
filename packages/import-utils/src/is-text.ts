@@ -1,4 +1,4 @@
-const _isText = require('istextorbinary').isText;
+const _isText = require("istextorbinary").isText;
 
 const jsRegex = /(t|j)sx?$/i;
 

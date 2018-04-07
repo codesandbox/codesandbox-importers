@@ -1,10 +1,10 @@
-import * as api from '../api';
-import { INormalizedModules } from '../../../utils/sandbox/normalize';
+import * as api from "../api";
+import { INormalizedModules } from "../../../utils/sandbox/normalize";
 
-import getDelta from './utils/delta';
-import { createBlobs } from './utils/create-blobs';
-import { join } from 'path';
-import delay from '../../../utils/delay';
+import getDelta from "./utils/delta";
+import { createBlobs } from "./utils/create-blobs";
+import { join } from "path";
+import delay from "../../../utils/delay";
 
 export interface IGitInfo {
   username: string;
@@ -38,13 +38,13 @@ async function getNormalizedTree(
   );
 
   if (truncated) {
-    throw new Error('This repository is too big to make a commit.');
+    throw new Error("This repository is too big to make a commit.");
   }
 
   if (path && makeRelative) {
     tree = tree
-      .filter(t => t.path.startsWith(path + '/'))
-      .map(t => ({ ...t, path: t.path.replace(path + '/', '') }));
+      .filter(t => t.path.startsWith(path + "/"))
+      .map(t => ({ ...t, path: t.path.replace(path + "/", "") }));
   }
 
   // 2. Filter tree on files only (check for size property)
@@ -108,7 +108,7 @@ export async function createFork(
 
       if (tryCount > 300) {
         throw new Error(
-          'Forking repo takes longer than 5 minutes, try again later.'
+          "Forking repo takes longer than 5 minutes, try again later."
         );
       }
 
@@ -131,7 +131,7 @@ export async function createCommit(
   message: string,
   userToken: string
 ) {
-  const { username, repo, branch, path = '' } = gitInfo;
+  const { username, repo, branch, path = "" } = gitInfo;
 
   const tree = await getNormalizedTree(gitInfo, commitSha, false);
   let absoluteSandboxFiles = sandboxFiles;
@@ -140,7 +140,7 @@ export async function createCommit(
     absoluteSandboxFiles = Object.keys(sandboxFiles).reduce(
       (total, next) => ({
         ...total,
-        [join(path, next)]: sandboxFiles[next],
+        [join(path, next)]: sandboxFiles[next]
       }),
       {}
     );
@@ -189,14 +189,14 @@ export async function createRepo(
     username: latestData.username,
     repo: latestData.repo,
     branch: latestData.branch,
-    path: latestData.path,
+    path: latestData.path
   };
 
   const commit = await createCommit(
     gitInfo,
     sandboxFiles,
     latestData.commitSha,
-    'Initial commit',
+    "Initial commit",
     userToken
   );
 

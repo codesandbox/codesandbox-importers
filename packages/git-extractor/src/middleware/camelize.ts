@@ -1,5 +1,5 @@
-import { Context } from 'koa';
-import { camelizeKeys } from 'humps';
+import { Context } from "koa";
+import { camelizeKeys } from "humps";
 
 const camelizeMiddleware = async (ctx: Context, next: () => Promise<any>) => {
   if (ctx.request.body) {

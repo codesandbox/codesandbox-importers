@@ -1,18 +1,18 @@
-import * as chalk from 'chalk';
-import * as fs from 'fs-extra';
-import * as inquirer from 'inquirer';
-import * as path from 'path';
-import createSandbox from 'codesandbox-import-utils/lib/create-sandbox';
-import { isText, isTooBig } from 'codesandbox-import-utils/lib/is-text';
+import * as chalk from "chalk";
+import * as fs from "fs-extra";
+import * as inquirer from "inquirer";
+import * as path from "path";
+import createSandbox from "codesandbox-import-utils/lib/create-sandbox";
+import { isText, isTooBig } from "codesandbox-import-utils/lib/is-text";
 import {
   IModule,
   INormalizedModules,
   ISandboxDirectory,
   ISandboxFile,
-  ISandbox,
-} from 'codesandbox-import-util-types';
+  ISandbox
+} from "codesandbox-import-util-types";
 
-import FileError from './file-error';
+import FileError from "./file-error";
 
 async function normalizeFilesInDirectory(
   p: string,
@@ -29,7 +29,7 @@ async function normalizeFilesInDirectory(
       const stat = await fs.stat(absolutePath);
 
       if (stat.isDirectory()) {
-        if (e !== 'node_modules' && e !== '.git') {
+        if (e !== "node_modules" && e !== ".git") {
           dirs.push(absolutePath);
         }
       } else {
@@ -52,12 +52,12 @@ async function normalizeFilesInDirectory(
     files.map(async t => {
       const code = await fs.readFile(t);
 
-      const relativePath = t.replace(startingPath + '/', '');
+      const relativePath = t.replace(startingPath + "/", "");
       const isBinary = !await isText(t, code);
       if (isBinary) {
         errors.push(
           new FileError(
-            isTooBig(code) ? 'Is too big' : 'Is a binary file',
+            isTooBig(code) ? "Is too big" : "Is a binary file",
             relativePath,
             true
           )
@@ -74,7 +74,7 @@ async function normalizeFilesInDirectory(
 
     return {
       ...prev,
-      [next.path]: { content: next.code },
+      [next.path]: { content: next.code }
     };
   }, {});
 

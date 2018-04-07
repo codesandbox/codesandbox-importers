@@ -1,4 +1,4 @@
-import * as LZString from 'lz-string';
+import * as LZString from "lz-string";
 
 export interface IFiles {
   [key: string]: {

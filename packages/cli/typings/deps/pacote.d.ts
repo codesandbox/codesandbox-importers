@@ -1,5 +1,5 @@
-declare module 'pacote' {
+declare module "pacote" {
   export function manifest(
-    dependency: string,
+    dependency: string
   ): Promise<{ [key: string]: string }>;
 }

@@ -22,13 +22,13 @@ export interface ISandboxDirectory {
 }
 
 export type ITemplate =
-  | 'vue-cli'
-  | 'preact-cli'
-  | 'svelte'
-  | 'create-react-app-typescript'
-  | 'create-react-app'
-  | 'angular-cli'
-  | 'parcel';
+  | "vue-cli"
+  | "preact-cli"
+  | "svelte"
+  | "create-react-app-typescript"
+  | "create-react-app"
+  | "angular-cli"
+  | "parcel";
 
 export interface ISandbox {
   title: string;

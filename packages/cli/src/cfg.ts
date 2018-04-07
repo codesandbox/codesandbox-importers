@@ -1,14 +1,14 @@
-import { homedir } from 'os';
+import { homedir } from "os";
 
-import * as fs from 'fs-extra';
-import * as path from 'path';
+import * as fs from "fs-extra";
+import * as path from "path";
 
-import * as api from './utils/api';
-import { error } from './utils/log';
+import * as api from "./utils/api";
+import { error } from "./utils/log";
 
 // tslint:disable no-var-requires
-const ms = require('ms');
-const TTL = ms('8h');
+const ms = require("ms");
+const TTL = ms("8h");
 
 export interface IUser {
   avatar_url: string;
@@ -27,7 +27,7 @@ export interface IConfig {
 
 const file = process.env.CODESANDBOX_JSON
   ? path.resolve(process.env.CODESANDBOX_JSON)
-  : path.resolve(homedir(), '.codesandbox.json');
+  : path.resolve(homedir(), ".codesandbox.json");
 
 /**
  * Save config file
@@ -44,7 +44,7 @@ async function save(data: object) {
 export async function read(): Promise<IConfig> {
   let existing: IConfig = {};
   try {
-    const fileData = await (fs.readFile(file, 'utf8') as Promise<string>);
+    const fileData = await (fs.readFile(file, "utf8") as Promise<string>);
     existing = JSON.parse(fileData);
   } catch (err) {
     /* Do nothing */
@@ -67,7 +67,7 @@ export async function read(): Promise<IConfig> {
         await deleteUser();
       }
     } catch (e) {
-      error('Could not authorize the user.');
+      error("Could not authorize the user.");
       await deleteUser();
     }
   }
