@@ -40,7 +40,9 @@ export function info(text: string) {
 }
 
 export function error(text: string) {
+  console.log();
   log(chalk.red(`[error] ${text}`));
+  console.log();
 }
 
 export function warn(text: string) {

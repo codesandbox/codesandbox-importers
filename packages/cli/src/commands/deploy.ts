@@ -1,6 +1,8 @@
 import * as chalk from "chalk";
 import * as Commander from "commander";
 import * as inquirer from "inquirer";
+import * as filesize from "filesize";
+import createSandbox from "codesandbox-import-utils/lib/create-sandbox";
 import { join } from "path";
 
 import { getUser } from "../cfg";
@@ -10,8 +12,9 @@ import { error, info, log, success } from "../utils/log";
 import { createSandboxUrl } from "../utils/url";
 import { login } from "./login";
 
-import parseSandbox from "../utils/parse-sandbox";
+import parseSandbox, { IUploads } from "../utils/parse-sandbox";
 import FileError from "../utils/parse-sandbox/file-error";
+import uploadFiles from "../utils/parse-sandbox/upload-files";
 
 // tslint:disable no-var-requires
 const ora = require("ora");
@@ -32,7 +35,7 @@ async function showWarnings(resolvedPath: string, errors: FileError[]) {
       chalk.yellow(
         `There are ${chalk.bold(
           errors.length.toString()
-        )} files that cannot be uploaded:`
+        )} files that cannot be deployed:`
       )
     );
     for (const err of errors) {
@@ -40,6 +43,28 @@ async function showWarnings(resolvedPath: string, errors: FileError[]) {
 
       log(`${chalk.yellow.bold(relativePath)}: ${err.message}`);
     }
+    console.log();
+  }
+}
+
+async function showUploads(resolvedPath: string, uploads: IUploads) {
+  if (Object.keys(uploads).length > 0) {
+    console.log();
+    log(
+      chalk.blue(
+        `We will upload ${
+          Object.keys(uploads).length
+        } static files to your CodeSandbox upload storage:`
+      )
+    );
+    Object.keys(uploads).forEach(path => {
+      const relativePath = path.replace(resolvedPath, "");
+      log(
+        `${chalk.yellow.bold(relativePath)}: ${filesize(
+          uploads[path].byteLength
+        )}`
+      );
+    });
     console.log();
   }
 }
@@ -73,7 +98,38 @@ export default function registerCommand(program: typeof Commander) {
           resolvedPath = resolvedPath.slice(0, -1);
         }
 
-        const { errors, sandbox } = await parseSandbox(resolvedPath);
+        const fileData = await parseSandbox(resolvedPath);
+
+        // Show files that will be uploaded
+        await showUploads(resolvedPath, fileData.uploads);
+
+        // Show warnings for all errors
+        await showWarnings(resolvedPath, fileData.errors);
+
+        info(
+          "By deploying to CodeSandbox, the code of your project will be made " +
+            chalk.bold("public")
+        );
+
+        const acceptPublic = await confirm(
+          "Are you sure you want to proceed with the deployment?",
+          true
+        );
+        if (!acceptPublic) {
+          return;
+        }
+
+        let finalFiles = fileData.files;
+        const spinner = ora("").start();
+        if (Object.keys(fileData.uploads).length) {
+          spinner.text = "Uploading files to CodeSandbox";
+
+          const uploadedFiles = await uploadFiles(fileData.uploads);
+
+          finalFiles = { ...finalFiles, ...uploadedFiles };
+        }
+
+        const sandbox = await createSandbox(finalFiles);
 
         if (sandbox.modules.length > MAX_MODULE_COUNT) {
           throw new Error(
@@ -91,23 +147,7 @@ export default function registerCommand(program: typeof Commander) {
           );
         }
 
-        // Show warnings for all errors
-        await showWarnings(resolvedPath, errors);
-
-        info(
-          "By deploying to CodeSandbox, the code of your project will be made " +
-            chalk.bold("public")
-        );
-
-        const acceptPublic = await confirm(
-          "Are you sure you want to proceed with the deployment?",
-          true
-        );
-        if (!acceptPublic) {
-          return;
-        }
-
-        const spinner = ora("Uploading to CodeSandbox").start();
+        spinner.text = "Deploying to CodeSandbox";
 
         try {
           const sandboxData = await uploadSandbox(sandbox);

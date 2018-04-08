@@ -8,7 +8,15 @@ import { values } from "lodash";
 import { decamelizeKeys } from "humps";
 
 import { getToken } from "../cfg";
-import { CREATE_SANDBOX_URL, GET_USER_URL, verifyUserTokenUrl } from "./url";
+import {
+  CREATE_SANDBOX_URL,
+  GET_USER_URL,
+  verifyUserTokenUrl,
+  CREATE_UPLOAD_URL
+} from "./url";
+
+// tslint:disable-next-line:no-var-requires
+const Datauri = require("datauri");
 
 const callApi = async (options: AxiosRequestConfig) => {
   try {
@@ -65,6 +73,33 @@ export async function verifyUser(token: string) {
   const options: AxiosRequestConfig = {
     method: "GET",
     url: verifyUserTokenUrl(token)
+  };
+
+  return callApi(options);
+}
+
+export async function createUpload(filename: string, buffer: Buffer) {
+  const datauri = new Datauri();
+
+  datauri.format(filename, buffer);
+  const uri = datauri.content;
+
+  const token = await getToken();
+
+  if (token == null) {
+    throw new Error("You're not signed in");
+  }
+
+  const options: AxiosRequestConfig = {
+    data: {
+      name: filename,
+      content: uri
+    },
+    headers: {
+      Authorization: `Bearer ${token}`
+    },
+    method: "POST",
+    url: CREATE_UPLOAD_URL
   };
 
   return callApi(options);

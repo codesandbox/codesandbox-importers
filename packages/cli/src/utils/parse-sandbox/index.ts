@@ -14,14 +14,25 @@ import {
 
 import FileError from "./file-error";
 
+const MAX_FILE_SIZE = 5 * 1024 * 1024;
+
+export interface IUploads {
+  [path: string]: Buffer;
+}
+
 async function normalizeFilesInDirectory(
   p: string,
   startingPath: string
-): Promise<{ errors: FileError[]; files: INormalizedModules }> {
+): Promise<{
+  errors: FileError[];
+  uploads: IUploads;
+  files: INormalizedModules;
+}> {
   const entries = await fs.readdir(p);
   const dirs: string[] = [];
   const files: string[] = [];
   const errors: FileError[] = [];
+  let uploads: IUploads = {};
 
   await Promise.all(
     entries.map(async e => {
@@ -45,6 +56,8 @@ async function normalizeFilesInDirectory(
       errors.push(e);
     });
 
+    uploads = { ...next.uploads, ...uploads };
+
     return { ...prev, ...next.files };
   }, {});
 
@@ -55,14 +68,19 @@ async function normalizeFilesInDirectory(
       const relativePath = t.replace(startingPath + "/", "");
       const isBinary = !await isText(t, code);
       if (isBinary) {
-        errors.push(
-          new FileError(
-            isTooBig(code) ? "Is too big" : "Is a binary file",
-            relativePath,
-            true
-          )
-        );
-        return false;
+        if (code.byteLength > MAX_FILE_SIZE) {
+          errors.push(
+            new FileError(
+              isTooBig(code) ? "Is too big" : "Is a binary file",
+              relativePath,
+              true
+            )
+          );
+          return false;
+        } else {
+          uploads[relativePath] = code;
+          return false;
+        }
       }
 
       return { path: relativePath, code: code.toString() };
@@ -78,7 +96,7 @@ async function normalizeFilesInDirectory(
     };
   }, {});
 
-  return { errors, files: { ...recursiveDirs, ...fileData } };
+  return { errors, uploads, files: { ...recursiveDirs, ...fileData } };
 }
 
 const exists = async (p: string) => {
@@ -105,7 +123,5 @@ export default async function parseSandbox(resolvedPath: string) {
 
   const fileData = await normalizeFilesInDirectory(resolvedPath, resolvedPath);
 
-  const sandbox = await createSandbox(fileData.files);
-
-  return { sandbox, errors: fileData.errors };
+  return fileData;
 }
