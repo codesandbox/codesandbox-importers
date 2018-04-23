@@ -7,8 +7,8 @@ jobs:
   build:
     docker:
       # specify the version you desire here
-      - image: circleci/node:9
-      
+      - image: circleci/node:9.2.1
+
       # Specify service dependencies here if necessary
       # CircleCI maintains a library of pre-built images
       # documented at https://circleci.com/docs/2.0/circleci-images/
@@ -32,9 +32,47 @@ jobs:
           paths:
             - node_modules
           key: v1-dependencies-{{ checksum "yarn.lock" }}
-        
+
       # run tests!
       - run: yarn build
       - run: yarn test
+
+      - save_cache:
+          key: v1-repo-{{ .Environment.CIRCLE_SHA1 }}
+          paths:
+            - ~/codesandbox
+  create-docker-image:
+    machine: true
+    working_directory: ~/codesandbox/packages/git-extractor
+    steps:
+      - restore_cache:
+          key: v7-repo-{{ .Environment.CIRCLE_SHA1 }}
+      - run:
+          name: Docker Sign In
+          command: "if [ -n $DOCKER_USER ]; then echo $DOCKER_PWD | docker login -u $DOCKER_USER --password-stdin; else exit 0; fi"
+      - run:
+          name: Create Dockerfile
+          command: |
+            cat > Dockerfile <<EOF
+            FROM busybox:1.28.1
+            WORKDIR /app
+            COPY ~/codesandbox /app
+            CMD ["node", "~/codesandbox/packages/git-extractor/index.js"]
+            EOF
+      - run:
+          name: Create Image
+          command: docker build -t codesandbox/importers:${CIRCLE_SHA1:0:7} .
+      - deploy:
+          name: Push Image
+          command: "if [ -n $DOCKER_USER ]; then docker push codesandbox/importers:${CIRCLE_SHA1:0:7}; else exit 0; fi"
+
+workflows:
+  version: 2
+  build-and-test:
+    jobs:
+      - build
+      - create-docker-image:
+          requires:
+            - build
 
 
