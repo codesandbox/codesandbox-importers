@@ -76,6 +76,6 @@ workflows:
       - build-dependencies
       - create-docker-image:
           requires:
-            - build
+            - build-dependencies
 
 
