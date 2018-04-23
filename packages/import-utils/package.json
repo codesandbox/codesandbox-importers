@@ -1,6 +1,6 @@
 {
   "name": "codesandbox-import-utils",
-  "version": "1.2.8",
+  "version": "1.2.10",
   "main": "lib/index.js",
   "files": [
     "lib/**"
