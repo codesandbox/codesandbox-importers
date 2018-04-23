@@ -6,20 +6,10 @@ version: 2
 jobs:
   build-dependencies:
     docker:
-      # specify the version you desire here
       - image: circleci/node:9.2.1
-
-      # Specify service dependencies here if necessary
-      # CircleCI maintains a library of pre-built images
-      # documented at https://circleci.com/docs/2.0/circleci-images/
-      # - image: circleci/mongo:3.4.4
-
     working_directory: ~/codesandbox
-
     steps:
       - checkout
-
-      # Download and cache dependencies
       - restore_cache:
           keys:
           - v1-dependencies-{{ checksum "yarn.lock" }}
@@ -49,7 +39,7 @@ jobs:
     working_directory: ~/codesandbox
     steps:
       - restore_cache:
-          key: v7-repo-{{ .Environment.CIRCLE_SHA1 }}
+          key: v1-repo-{{ .Environment.CIRCLE_SHA1 }}
       - run:
           name: Docker Sign In
           command: "if [ -n $DOCKER_USER ]; then echo $DOCKER_PWD | docker login -u $DOCKER_USER --password-stdin; else exit 0; fi"
