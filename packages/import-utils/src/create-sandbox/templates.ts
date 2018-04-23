@@ -75,5 +75,13 @@ export function getTemplate(
     return "vue-cli";
   }
 
+  if (totalDependencies.indexOf("@dojo/core") > -1) {
+    return "@dojo/cli-create-app";
+  }
+
+  if (totalDependencies.indexOf("cx") > -1) {
+    return "cxjs";
+  }
+
   return "create-react-app";
 }
