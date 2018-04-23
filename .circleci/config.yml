@@ -46,7 +46,7 @@ jobs:
             - ~/codesandbox
   create-docker-image:
     machine: true
-    working_directory: ~/codesandbox/packages/git-extractor
+    working_directory: ~/codesandbox
     steps:
       - restore_cache:
           key: v7-repo-{{ .Environment.CIRCLE_SHA1 }}
