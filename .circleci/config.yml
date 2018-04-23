@@ -60,7 +60,7 @@ jobs:
             FROM node:9.11.1
             WORKDIR /app
             COPY ./ /app
-            CMD ["node", "~/codesandbox/packages/git-extractor/index.js"]
+            CMD ["node", "./packages/git-extractor/dist/index.js"]
             EOF
       - run:
           name: Create Image
