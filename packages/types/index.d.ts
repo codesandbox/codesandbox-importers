@@ -28,7 +28,9 @@ export type ITemplate =
   | "create-react-app-typescript"
   | "create-react-app"
   | "angular-cli"
-  | "parcel";
+  | "parcel"
+  | "@dojo/cli-create-app"
+  | "cxjs";
 
 export interface ISandbox {
   title: string;

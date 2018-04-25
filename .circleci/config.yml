@@ -1,0 +1,71 @@
+# Javascript Node CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-javascript/ for more details
+#
+version: 2
+jobs:
+  build-dependencies:
+    docker:
+      - image: circleci/node:9.2.1
+    working_directory: ~/codesandbox
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+          - v1-dependencies-{{ checksum "yarn.lock" }}
+          # fallback to using the latest cache if no exact match is found
+          - v1-dependencies-
+
+      - run: yarn install
+
+      - save_cache:
+          paths:
+            - node_modules
+            - packages/cli/node_modules
+            - packages/git-extractors/node_modules
+            - packages/import-utils/node_modules
+          key: v1-dependencies-{{ checksum "yarn.lock" }}
+
+      # run tests!
+      - run: yarn build
+      - run: yarn test
+
+      - save_cache:
+          key: v1-repo-{{ .Environment.CIRCLE_SHA1 }}
+          paths:
+            - ~/codesandbox
+  create-docker-image:
+    machine: true
+    working_directory: ~/codesandbox
+    steps:
+      - restore_cache:
+          key: v1-repo-{{ .Environment.CIRCLE_SHA1 }}
+      - run:
+          name: Docker Sign In
+          command: "if [ -n $DOCKER_USER ]; then echo $DOCKER_PWD | docker login -u $DOCKER_USER --password-stdin; else exit 0; fi"
+      - run:
+          name: Create Dockerfile
+          command: |
+            cat > Dockerfile <<EOF
+            FROM node:9.11.1
+            WORKDIR /app
+            COPY . /app
+            CMD ["node", "./packages/git-extractor/dist/index.js"]
+            EOF
+      - run:
+          name: Create Image
+          command: docker build -t codesandbox/importers:${CIRCLE_SHA1:0:7} .
+      - deploy:
+          name: Push Image
+          command: "if [ -n $DOCKER_USER ]; then docker push codesandbox/importers:${CIRCLE_SHA1:0:7}; else exit 0; fi"
+
+workflows:
+  version: 2
+  build-and-test:
+    jobs:
+      - build-dependencies
+      - create-docker-image:
+          requires:
+            - build-dependencies
+
+
