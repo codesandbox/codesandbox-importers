@@ -1,5 +1,5 @@
 export const BASE_URL =
-  process.env.NODE_ENV === "development"
+  process.env.CODESANDBOX_NODE_ENV === "development"
     ? "https://codesandbox.stream"
     : "https://codesandbox.io";
 
