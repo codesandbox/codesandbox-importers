@@ -51,6 +51,14 @@ export function getTemplate(
     ...Object.keys(devDependencies)
   ];
 
+  if (totalDependencies.indexOf("gatsby") > -1) {
+    return "gatsby";
+  }
+
+  if (totalDependencies.indexOf("nuxt") > -1) {
+    return "nuxt";
+  }
+
   if (totalDependencies.indexOf("parcel-bundler") > -1) {
     return "parcel";
   }
