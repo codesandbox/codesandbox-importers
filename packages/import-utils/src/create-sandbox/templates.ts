@@ -19,7 +19,7 @@ export function getMainFile(template: ITemplate) {
   }
 
   if (template === "gatsby") {
-    return "pages/index.js";
+    return "src/pages/index.js";
   }
 
   if (template === "nuxt") {
