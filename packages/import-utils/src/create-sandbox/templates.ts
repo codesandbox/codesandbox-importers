@@ -47,12 +47,15 @@ export function getTemplate(
       }
     } catch (e) {}
   }
+  const { dependencies = {}, devDependencies = {} } = packageJSONPackage;
+
+  if (totalDependencies.indexOf("nuxt") > -1) {
+    return "nuxt";
+  }
 
   if (Object.keys(modules).find(m => m.endsWith(".vue"))) {
     return "vue-cli";
   }
-
-  const { dependencies = {}, devDependencies = {} } = packageJSONPackage;
 
   const totalDependencies = [
     ...Object.keys(dependencies),
@@ -61,10 +64,6 @@ export function getTemplate(
 
   if (totalDependencies.indexOf("gatsby") > -1) {
     return "gatsby";
-  }
-
-  if (totalDependencies.indexOf("nuxt") > -1) {
-    return "nuxt";
   }
 
   if (totalDependencies.indexOf("parcel-bundler") > -1) {
