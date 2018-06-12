@@ -55,7 +55,10 @@ export function getTemplate(
     ...Object.keys(devDependencies)
   ];
 
-  if (totalDependencies.indexOf("nuxt") > -1) {
+  if (
+    totalDependencies.indexOf("nuxt") > -1 ||
+    totalDependencies.indexOf("nuxt-edge") > -1
+  ) {
     return "nuxt";
   }
 
