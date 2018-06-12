@@ -6,7 +6,7 @@ version: 2
 jobs:
   build-dependencies:
     docker:
-      - image: circleci/node:9.2.1
+      - image: circleci/node:9
     working_directory: ~/codesandbox
     steps:
       - checkout
