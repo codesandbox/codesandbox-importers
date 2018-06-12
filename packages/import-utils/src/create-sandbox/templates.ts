@@ -23,7 +23,8 @@ export function getMainFile(template: ITemplate) {
   }
 
   if (template === "nuxt") {
-    return "pages/index.vue";
+    // Wildcard, because nuxt is not specific on this
+    return "package.json";
   }
 
   return "src/index.js";
