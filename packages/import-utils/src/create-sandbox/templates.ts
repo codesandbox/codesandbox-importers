@@ -49,6 +49,11 @@ export function getTemplate(
   }
   const { dependencies = {}, devDependencies = {} } = packageJSONPackage;
 
+  const totalDependencies = [
+    ...Object.keys(dependencies),
+    ...Object.keys(devDependencies)
+  ];
+
   if (totalDependencies.indexOf("nuxt") > -1) {
     return "nuxt";
   }
@@ -56,11 +61,6 @@ export function getTemplate(
   if (Object.keys(modules).find(m => m.endsWith(".vue"))) {
     return "vue-cli";
   }
-
-  const totalDependencies = [
-    ...Object.keys(dependencies),
-    ...Object.keys(devDependencies)
-  ];
 
   if (totalDependencies.indexOf("gatsby") > -1) {
     return "gatsby";
