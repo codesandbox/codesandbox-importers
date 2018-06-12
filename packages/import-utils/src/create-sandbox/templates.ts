@@ -18,6 +18,14 @@ export function getMainFile(template: ITemplate) {
     return "index.html";
   }
 
+  if (template === "gatsby") {
+    return "pages/index.js";
+  }
+
+  if (template === "nuxt") {
+    return "pages/index.vue";
+  }
+
   return "src/index.js";
 }
 
