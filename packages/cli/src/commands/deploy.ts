@@ -92,7 +92,7 @@ export default function registerCommand(program: typeof Commander) {
 
       info(`Deploying ${path} to CodeSandbox`);
       try {
-        let resolvedPath = join(process.cwd(), path);
+        let resolvedPath = join("./", path);
 
         if (resolvedPath.endsWith("/")) {
           resolvedPath = resolvedPath.slice(0, -1);
