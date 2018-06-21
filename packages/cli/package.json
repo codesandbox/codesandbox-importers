@@ -15,7 +15,7 @@
     "watch": "tsc --watch -p tsconfig.json",
     "prepublish": "yarn build"
   },
-  "repository": "CompuIves/codesandbox-cli",
+  "repository": "codesandbox-app/codesandbox-importers",
   "files": [
     "lib"
   ],
