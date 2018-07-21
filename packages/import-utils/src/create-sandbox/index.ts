@@ -67,7 +67,8 @@ export default async function createSandbox(
   const packageJsonPackage = JSON.parse(packageJson.content);
 
   const template = getTemplate(packageJsonPackage, directory);
-  const mainFile = findMainFile(directory, packageJsonPackage.main, template);
+  const mainFileUnix = findMainFile(directory, packageJsonPackage.main, template);
+  const mainFile = process.platform === "win32" ? mainFileUnix.replace(/\//g, "\\") : mainFileUnix;
 
   if (!directory[mainFile]) {
     throw new Error(
