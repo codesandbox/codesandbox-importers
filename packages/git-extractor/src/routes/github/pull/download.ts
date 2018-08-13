@@ -27,9 +27,10 @@ const rawGitUrl = (gitInfo: IGitInfo, filePath: string, commitSha: string) => {
 
 export async function downloadRepository(
   gitInfo: IGitInfo,
-  commitSha: string
+  commitSha: string,
+  userToken?: string
 ): Promise<INormalizedModules> {
-  const zip = await downloadZip(gitInfo);
+  const zip = await downloadZip(gitInfo, commitSha, userToken);
   let folderName = getFolderName(zip);
 
   if (gitInfo.path) {
