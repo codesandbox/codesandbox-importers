@@ -10,6 +10,9 @@ import * as push from "./push";
 const getUserToken = (ctx: Context) => {
   const header = ctx.header.authorization;
   if (header) {
+    if (header.startsWith("Bearer ")) {
+      return header.replace("Bearer ", "");
+    }
     return header;
   }
 
