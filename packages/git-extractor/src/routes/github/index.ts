@@ -36,6 +36,19 @@ export const info = async (ctx: Context, next: () => Promise<any>) => {
   ctx.body = response;
 };
 
+export const getRights = async (ctx: Context) => {
+  const userToken = getUserToken(ctx);
+
+  const rights = await api.fetchRights(
+    ctx.params.username,
+    ctx.params.repo,
+    ctx.params.currentUser,
+    userToken
+  );
+
+  return rights;
+};
+
 /**
  * This route will take a github path and return sandbox data for it
  *
