@@ -193,7 +193,14 @@ export const commit = async (ctx: Context, next: () => Promise<any>) => {
   // reset the cache so the user sees the latest version
   api.resetShaCache({ username, repo, branch, path });
 
-  const lastInfo = await api.fetchRepoInfo(username, repo, branch, path, true);
+  const lastInfo = await api.fetchRepoInfo(
+    username,
+    repo,
+    branch,
+    path,
+    true,
+    token
+  );
 
   // If we're up to date we just move the head, if that's not the cache we create
   // a merge
