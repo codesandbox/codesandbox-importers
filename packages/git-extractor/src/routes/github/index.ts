@@ -104,21 +104,14 @@ export const diff = async (ctx: Context, next: () => Promise<any>) => {
 
   const { username, repo, branch, path } = ctx.params;
 
-  const gitInfo = {
-    username,
-    repo,
-    branch,
-    path,
-    commitSha
-  };
-
   const normalizedFiles = normalizeSandbox(modules, directories);
 
   const [delta, rights] = await Promise.all([
     push.getFileDifferences(
       { username, repo, branch, path },
       commitSha,
-      normalizedFiles
+      normalizedFiles,
+      token
     ),
     api.fetchRights(username, repo, currentUser, token)
   ]);
