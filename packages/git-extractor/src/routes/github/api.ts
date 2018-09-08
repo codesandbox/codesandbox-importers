@@ -524,8 +524,6 @@ export async function downloadZip(
   const repoUrl = buildApiUrl(gitInfo.username, gitInfo.repo);
   const url = `${repoUrl}/zipball/${commitSha}`;
 
-  console.log(url, userToken);
-
   const buffer: Buffer = await fetch(url, {
     headers: { Authorization: userToken ? `Bearer ${userToken}` : "" }
   }).then(res => {

@@ -75,6 +75,10 @@ export const data = async (ctx: Context, next: () => Promise<any>) => {
     isPrivate = await api.isRepoPrivate(username, repo, userToken);
   }
 
+  if (isPrivate) {
+    api.resetShaCache({ branch, username, repo, path });
+  }
+
   const sandboxParams = await createSandbox(downloadedFiles);
 
   const finalTitle = sandboxParams.title || title;
