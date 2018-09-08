@@ -137,7 +137,7 @@ export async function createCommit(
 ) {
   const { username, repo, branch, path = "" } = gitInfo;
 
-  const tree = await getNormalizedTree(gitInfo, commitSha, false);
+  const tree = await getNormalizedTree(gitInfo, commitSha, false, userToken);
   let absoluteSandboxFiles = sandboxFiles;
 
   if (path) {
