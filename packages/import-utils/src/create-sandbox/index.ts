@@ -67,13 +67,16 @@ export default async function createSandbox(
   const packageJsonPackage = JSON.parse(packageJson.content);
 
   const template = getTemplate(packageJsonPackage, directory);
-  const mainFile = findMainFile(directory, packageJsonPackage.main, template);
+  const mainFileUnix = findMainFile(
+    directory,
+    packageJsonPackage.main,
+    template
+  );
+  const mainFile =
+    process.platform === "win32"
+      ? mainFileUnix.replace(/\//g, "\\")
+      : mainFileUnix;
 
-  if (!directory[mainFile]) {
-    throw new Error(
-      `Cannot find the specified entry point: '${mainFile}'. Please specify one in 'package.json#main' or create a file at the specified entry point.`
-    );
-  }
   // Give the sandboxModules to getDependencies to fetch which devDependencies
   // are used in the code
 
