@@ -7,6 +7,15 @@ import * as api from "./api";
 
 import * as push from "./push";
 
+const getUserToken = (ctx: Context) => {
+  const header = ctx.header.authorization;
+  if (header) {
+    return header;
+  }
+
+  return undefined;
+};
+
 import normalizeSandbox, {
   IModule,
   INormalizedModules
@@ -14,11 +23,14 @@ import normalizeSandbox, {
 import { IGitInfo } from "./push";
 
 export const info = async (ctx: Context, next: () => Promise<any>) => {
+  const userToken = getUserToken(ctx);
   const response = await api.fetchRepoInfo(
     ctx.params.username,
     ctx.params.repo,
     ctx.params.branch,
-    ctx.params.path
+    ctx.params.path,
+    false,
+    userToken
   );
 
   ctx.body = response;
@@ -32,7 +44,9 @@ export const info = async (ctx: Context, next: () => Promise<any>) => {
 export const data = async (ctx: Context, next: () => Promise<any>) => {
   // We get branch, etc from here because there could be slashes in a branch name,
   // we can retrieve if this is the case from this method
-  const { username, repo, branch, commitSha } = ctx.params;
+  const { username, repo, branch, commitSha, currentUsername } = ctx.params;
+  const userToken = getUserToken(ctx);
+
   const path = ctx.params.path && ctx.params.path.replace("+", " ");
 
   let title = `${username}/${repo}`;
@@ -48,8 +62,15 @@ export const data = async (ctx: Context, next: () => Promise<any>) => {
       branch,
       path
     },
-    commitSha
+    commitSha,
+    userToken
   );
+
+  let isPrivate = false;
+
+  if (userToken) {
+    isPrivate = await api.isRepoPrivate(username, repo, userToken);
+  }
 
   const sandboxParams = await createSandbox(downloadedFiles);
 
@@ -58,7 +79,10 @@ export const data = async (ctx: Context, next: () => Promise<any>) => {
   ctx.body = {
     ...sandboxParams,
     // If no title is set in package.json, go for this one
-    title: finalTitle
+    title: finalTitle,
+
+    // Privacy 2 is private, privacy 0 is public
+    privacy: isPrivate ? 2 : 0
   };
 };
 

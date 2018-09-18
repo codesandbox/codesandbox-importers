@@ -48,6 +48,35 @@ function buildCommitsUrl(
   )}/commits/${branch}${buildSecretParams()}&path=${path}`;
 }
 
+interface IRepoResponse {
+  id: number;
+  node_id: string;
+  name: string;
+  full_name: string;
+  private: boolean;
+}
+
+export async function getRepo(username: string, repo: string, token: string) {
+  const url = buildApiUrl(username, repo);
+
+  const response: { data: IRepoResponse } = await axios({
+    url,
+    headers: { Authorization: `Bearer ${token}` }
+  });
+
+  return response.data;
+}
+
+export async function isRepoPrivate(
+  username: string,
+  repo: string,
+  token: string
+) {
+  const data = await getRepo(username, repo, token);
+
+  return data.private;
+}
+
 type Response = Array<Module>;
 
 /**
@@ -430,7 +459,8 @@ export async function fetchRepoInfo(
   repo: string,
   branch: string = "master",
   path: string = "",
-  skipCache: boolean = false
+  skipCache: boolean = false,
+  userToken?: string
 ): Promise<CommitResponse> {
   try {
     const cacheId = username + repo + branch + path;
@@ -440,7 +470,12 @@ export async function fetchRepoInfo(
 
     if (!latestSha || skipCache) {
       const url = buildCommitsUrl(username, repo, branch, path);
-      const response = await axios(url);
+      const response = await axios({
+        url,
+        headers: {
+          Authorization: userToken ? `Bearer ${userToken}` : ""
+        }
+      });
       latestSha = response.data.sha as string;
 
       shaCache.set(cacheId, latestSha);
@@ -466,7 +501,9 @@ export async function fetchRepoInfo(
           username,
           repo,
           newBranch,
-          newPath.join("/")
+          newPath.join("/"),
+          false,
+          userToken
         );
       }
 
@@ -477,13 +514,19 @@ export async function fetchRepoInfo(
   }
 }
 
-const ZIP_URL = `https://codeload.github.com`;
 const MAX_ZIP_SIZE = 128 * 1024 * 1024; // 128Mb
 
-export async function downloadZip(gitInfo: IGitInfo) {
-  const buffer = await fetch(
-    `${ZIP_URL}/${gitInfo.username}/${gitInfo.repo}/zip/${gitInfo.branch}`
-  ).then(res => {
+export async function downloadZip(
+  gitInfo: IGitInfo,
+  commitSha: string,
+  userToken?: string
+) {
+  const repoUrl = buildApiUrl(gitInfo.username, gitInfo.repo);
+  const url = `${repoUrl}/zipball/${commitSha}`;
+
+  const buffer: Buffer = await fetch(url, {
+    headers: { Authorization: userToken ? `Bearer ${userToken}` : "" }
+  }).then(res => {
     if (+res.headers.get("Content-Length") > MAX_ZIP_SIZE) {
       throw new Error("This repo is too big to import");
     }

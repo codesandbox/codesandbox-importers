@@ -94,7 +94,7 @@ export function getTemplate(
     return "vue-cli";
   }
 
-  if (totalDependencies.indexOf("@dojo/core") > -1) {
+  if (totalDependencies.indexOf("@dojo/core") > -1 || totalDependencies.indexOf("@dojo/framework") > -1) {
     return "@dojo/cli-create-app";
   }
 
