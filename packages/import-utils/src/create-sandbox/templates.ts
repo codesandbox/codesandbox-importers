@@ -27,6 +27,11 @@ export function getMainFile(template: ITemplate) {
     return "package.json";
   }
 
+  if (template === "next") {
+    // Wildcard, because nuxt is not specific on this
+    return "package.json";
+  }
+
   return "src/index.js";
 }
 
@@ -62,6 +67,10 @@ export function getTemplate(
     return "nuxt";
   }
 
+  if (totalDependencies.indexOf("next") > -1) {
+    return "next";
+  }
+
   if (Object.keys(modules).find(m => m.endsWith(".vue"))) {
     return "vue-cli";
   }
@@ -94,7 +103,10 @@ export function getTemplate(
     return "vue-cli";
   }
 
-  if (totalDependencies.indexOf("@dojo/core") > -1 || totalDependencies.indexOf("@dojo/framework") > -1) {
+  if (
+    totalDependencies.indexOf("@dojo/core") > -1 ||
+    totalDependencies.indexOf("@dojo/framework") > -1
+  ) {
     return "@dojo/cli-create-app";
   }
 

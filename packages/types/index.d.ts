@@ -32,7 +32,8 @@ export type ITemplate =
   | "@dojo/cli-create-app"
   | "cxjs"
   | "gatsby"
-  | "nuxt";
+  | "nuxt"
+  | "next";
 
 export interface ISandbox {
   title: string;
