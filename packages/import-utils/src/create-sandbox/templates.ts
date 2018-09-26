@@ -37,6 +37,11 @@ export function getMainFile(template: ITemplate) {
     return "package.json";
   }
 
+  if (template === "reason") {
+    // Wildcard, because reason is not specific on this
+    return "package.json";
+  }
+
   if (template === "sapper") {
     // Wildcard, because sapper is not specific on this
     return "package.json";
@@ -89,8 +94,13 @@ export function getTemplate(
     return "sapper";
   }
 
-  if (Object.keys(modules).find(m => m.endsWith(".vue"))) {
+  const moduleNames = Object.keys(modules);
+  if (moduleNames.some(m => m.endsWith(".vue"))) {
     return "vue-cli";
+  }
+
+  if (moduleNames.some(m => m.endsWith(".re"))) {
+    return "reason";
   }
 
   if (totalDependencies.indexOf("gatsby") > -1) {

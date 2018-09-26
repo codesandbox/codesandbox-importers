@@ -34,6 +34,7 @@ export type ITemplate =
   | "gatsby"
   | "nuxt"
   | "next"
+  | "reason"
   | "apollo"
   | "sapper";
 
