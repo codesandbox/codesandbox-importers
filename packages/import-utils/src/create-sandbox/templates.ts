@@ -58,7 +58,7 @@ export function getTemplate(
     devDependencies: { [key: string]: string };
   },
   modules: INormalizedModules
-): ITemplate {
+): ITemplate | undefined {
   if (modules[SANDBOX_CONFIG]) {
     try {
       const config = JSON.parse(modules[SANDBOX_CONFIG].content);
@@ -142,5 +142,5 @@ export function getTemplate(
     return "cxjs";
   }
 
-  return "create-react-app";
+  return undefined;
 }

@@ -60,7 +60,8 @@ export default async function createSandbox(
 
   const packageJsonPackage = JSON.parse(packageJson.content);
 
-  const template = getTemplate(packageJsonPackage, directory);
+  const template =
+    getTemplate(packageJsonPackage, directory) || "create-react-app";
   const mainFileUnix = findMainFile(
     directory,
     packageJsonPackage.main,
