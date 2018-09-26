@@ -33,7 +33,9 @@ export type ITemplate =
   | "cxjs"
   | "gatsby"
   | "nuxt"
-  | "next";
+  | "next"
+  | "apollo"
+  | "sapper";
 
 export interface ISandbox {
   title: string;

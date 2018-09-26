@@ -28,7 +28,17 @@ export function getMainFile(template: ITemplate) {
   }
 
   if (template === "next") {
-    // Wildcard, because nuxt is not specific on this
+    // Wildcard, because next is not specific on this
+    return "package.json";
+  }
+
+  if (template === "apollo") {
+    // Wildcard, because apollo is not specific on this
+    return "package.json";
+  }
+
+  if (template === "sapper") {
+    // Wildcard, because sapper is not specific on this
     return "package.json";
   }
 
@@ -69,6 +79,14 @@ export function getTemplate(
 
   if (totalDependencies.indexOf("next") > -1) {
     return "next";
+  }
+
+  if (totalDependencies.indexOf("apollo-server") > -1) {
+    return "apollo";
+  }
+
+  if (totalDependencies.indexOf("sapper") > -1) {
+    return "sapper";
   }
 
   if (Object.keys(modules).find(m => m.endsWith(".vue"))) {

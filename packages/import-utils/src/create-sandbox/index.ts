@@ -1,12 +1,6 @@
-import { generate as generateShortid } from "shortid";
-import { pickBy } from "lodash";
-import { join } from "path";
-
 import {
   INormalizedModules,
   IModule,
-  ISandboxFile,
-  ISandboxDirectory,
   ISandbox,
   ITemplate
 } from "codesandbox-import-util-types";
