@@ -30,7 +30,13 @@ export type ITemplate =
   | "angular-cli"
   | "parcel"
   | "@dojo/cli-create-app"
-  | "cxjs";
+  | "cxjs"
+  | "gatsby"
+  | "nuxt"
+  | "next"
+  | "reason"
+  | "apollo"
+  | "sapper";
 
 export interface ISandbox {
   title: string;

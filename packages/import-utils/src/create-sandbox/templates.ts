@@ -18,6 +18,35 @@ export function getMainFile(template: ITemplate) {
     return "index.html";
   }
 
+  if (template === "gatsby") {
+    return "src/pages/index.js";
+  }
+
+  if (template === "nuxt") {
+    // Wildcard, because nuxt is not specific on this
+    return "package.json";
+  }
+
+  if (template === "next") {
+    // Wildcard, because next is not specific on this
+    return "package.json";
+  }
+
+  if (template === "apollo") {
+    // Wildcard, because apollo is not specific on this
+    return "package.json";
+  }
+
+  if (template === "reason") {
+    // Wildcard, because reason is not specific on this
+    return "package.json";
+  }
+
+  if (template === "sapper") {
+    // Wildcard, because sapper is not specific on this
+    return "package.json";
+  }
+
   return "src/index.js";
 }
 
@@ -29,7 +58,7 @@ export function getTemplate(
     devDependencies: { [key: string]: string };
   },
   modules: INormalizedModules
-): ITemplate {
+): ITemplate | undefined {
   if (modules[SANDBOX_CONFIG]) {
     try {
       const config = JSON.parse(modules[SANDBOX_CONFIG].content);
@@ -39,17 +68,44 @@ export function getTemplate(
       }
     } catch (e) {}
   }
-
-  if (Object.keys(modules).find(m => m.endsWith(".vue"))) {
-    return "vue-cli";
-  }
-
   const { dependencies = {}, devDependencies = {} } = packageJSONPackage;
 
   const totalDependencies = [
     ...Object.keys(dependencies),
     ...Object.keys(devDependencies)
   ];
+
+  if (
+    totalDependencies.indexOf("nuxt") > -1 ||
+    totalDependencies.indexOf("nuxt-edge") > -1
+  ) {
+    return "nuxt";
+  }
+
+  if (totalDependencies.indexOf("next") > -1) {
+    return "next";
+  }
+
+  if (totalDependencies.indexOf("apollo-server") > -1) {
+    return "apollo";
+  }
+
+  if (totalDependencies.indexOf("sapper") > -1) {
+    return "sapper";
+  }
+
+  const moduleNames = Object.keys(modules);
+  if (moduleNames.some(m => m.endsWith(".vue"))) {
+    return "vue-cli";
+  }
+
+  if (moduleNames.some(m => m.endsWith(".re"))) {
+    return "reason";
+  }
+
+  if (totalDependencies.indexOf("gatsby") > -1) {
+    return "gatsby";
+  }
 
   if (totalDependencies.indexOf("parcel-bundler") > -1) {
     return "parcel";
@@ -75,7 +131,10 @@ export function getTemplate(
     return "vue-cli";
   }
 
-  if (totalDependencies.indexOf("@dojo/core") > -1 || totalDependencies.indexOf("@dojo/framework") > -1) {
+  if (
+    totalDependencies.indexOf("@dojo/core") > -1 ||
+    totalDependencies.indexOf("@dojo/framework") > -1
+  ) {
     return "@dojo/cli-create-app";
   }
 
@@ -83,5 +142,5 @@ export function getTemplate(
     return "cxjs";
   }
 
-  return "create-react-app";
+  return undefined;
 }
