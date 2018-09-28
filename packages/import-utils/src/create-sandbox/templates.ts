@@ -47,6 +47,10 @@ export function getMainFile(template: ITemplate) {
     return "package.json";
   }
 
+  if(template === "nest") {
+    return "src/main.ts"
+  }
+
   return "src/index.js";
 }
 
@@ -140,6 +144,13 @@ export function getTemplate(
 
   if (totalDependencies.indexOf("cx") > -1) {
     return "cxjs";
+  }
+
+  if(
+    totalDependencies.indexOf("@nestjs/core") > -1 ||
+    totalDependencies.indexOf("@nestjs/common") > -1
+  )  {
+    return "nest"
   }
 
   return undefined;
