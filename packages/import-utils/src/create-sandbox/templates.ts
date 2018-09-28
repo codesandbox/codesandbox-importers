@@ -75,8 +75,8 @@ export function getTemplate(
     ...Object.keys(devDependencies)
   ];
 
-  const nuxt = ["nuxt", "nuxt-edge"]
-  
+  const nuxt = ["nuxt", "nuxt-edge"];
+
   if (totalDependencies.some(dep => nuxt.indexOf(dep) > -1)) {
     return "nuxt";
   }
@@ -84,7 +84,7 @@ export function getTemplate(
   if (totalDependencies.indexOf("next") > -1) {
     return "next";
   }
-  
+
   const apollo = [
     "apollo-server",
     "apollo-server-express",
@@ -92,7 +92,7 @@ export function getTemplate(
     "apollo-server-koa",
     "apollo-server-lambda",
     "apollo-server-micro"
-  ]
+  ];
 
   if (totalDependencies.some(dep => apollo.indexOf(dep) > -1)) {
     return "apollo";
@@ -119,6 +119,10 @@ export function getTemplate(
     return "parcel";
   }
 
+  if (totalDependencies.indexOf("react-scripts") > -1) {
+    return "create-react-app";
+  }
+
   if (totalDependencies.indexOf("react-scripts-ts") > -1) {
     return "create-react-app-typescript";
   }
@@ -138,9 +142,9 @@ export function getTemplate(
   if (totalDependencies.indexOf("vue") > -1) {
     return "vue-cli";
   }
-  
-  const dojo = ["@dojo/core", "@dojo/framework"]
-  
+
+  const dojo = ["@dojo/core", "@dojo/framework"];
+
   if (totalDependencies.some(dep => dojo.indexOf(dep) > -1)) {
     return "@dojo/cli-create-app";
   }

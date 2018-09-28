@@ -7,15 +7,36 @@
   ],
   "scripts": {
     "build": "rimraf lib && tsc -p tsconfig.json",
+    "test": "jest",
+    "test:watch": "jest --watch",
     "prepublish": "yarn build"
   },
   "devDependencies": {
+    "jest": "^23.6.0",
     "rimraf": "^2.6.2",
+    "ts-jest": "^22.4.6",
     "typescript": "^2.7.1"
   },
   "dependencies": {
     "codesandbox-import-util-types": "^1.2.17",
     "istextorbinary": "^2.2.1",
     "lz-string": "^1.4.4"
+  },
+  "jest": {
+    "transform": {
+      ".(ts|tsx)": "<rootDir>../../node_modules/ts-jest/preprocessor.js"
+    },
+    "testEnvironment": "node",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "json"
+    ],
+    "testPathIgnorePatterns": [
+      "<rootDir>/node_modules/",
+      "<rootDir>/dist/"
+    ],
+    "testRegex": "(/__tests__/.*|\\.(test|spec))\\.(ts|tsx|js)$"
   }
 }
