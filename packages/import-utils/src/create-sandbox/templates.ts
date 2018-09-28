@@ -77,7 +77,7 @@ export function getTemplate(
 
   const nuxt = ["nuxt", "nuxt-edge"]
   
-  if (totalDependencies.some(dep => nuxt.includes(dep))) {
+  if (totalDependencies.some(dep => nuxt.indexOf(dep) > -1)) {
     return "nuxt";
   }
 
@@ -94,7 +94,7 @@ export function getTemplate(
     "apollo-server-micro"
   ]
 
-  if (totalDependencies.some(dep => apollo.includes(dep))) {
+  if (totalDependencies.some(dep => apollo.indexOf(dep) > -1)) {
     return "apollo";
   }
 
@@ -141,7 +141,7 @@ export function getTemplate(
   
   const dojo = ["@dojo/core", "@dojo/framework"]
   
-  if (totalDependencies.some(dep => dojo.includes(dep))) {
+  if (totalDependencies.some(dep => dojo.indexOf(dep) > -1)) {
     return "@dojo/cli-create-app";
   }
 
