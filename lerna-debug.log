@@ -1,46 +1,43 @@
-0 silly input [ 'build' ]
+0 silly input [ 'test' ]
 1 silly flags { _: [ 'run' ],
 1 silly flags   'reject-cycles': false,
 1 silly flags   rejectCycles: false,
-1 silly flags   parallel: true,
-1 silly flags   scope: [ 'codesandbox', 'git-converter' ],
-1 silly flags   script: 'build',
+1 silly flags   script: 'test',
 1 silly flags   args: [] }
 2 verbose rootPath /Users/i_van_hoorne/Documents/dev/codesandbox/git-extractor
 3 info version 2.11.0
 4 silly existsSync /Users/i_van_hoorne/Documents/dev/codesandbox/git-extractor/VERSION
-5 info scope [ 'codesandbox', 'git-converter' ]
-6 silly initialize attempt
-7 silly initialize success
-8 silly execute attempt
-9 info run in 2 package(s): npm run build
-10 silly runScriptInPackageStreaming [ 'build', [], 'codesandbox' ]
+5 silly initialize attempt
+6 silly initialize success
+7 silly execute attempt
+8 silly runScriptInDir test [] git-extractor
+9 silly getExecOpts { cwd:
+9 silly getExecOpts    '/Users/i_van_hoorne/Documents/dev/codesandbox/git-extractor/packages/git-extractor' }
+10 silly runScriptInDir test [] import-utils
 11 silly getExecOpts { cwd:
-11 silly getExecOpts    '/Users/i_van_hoorne/Documents/dev/codesandbox/git-extractor/packages/cli' }
-12 silly runScriptInPackageStreaming [ 'build', [], 'git-converter' ]
-13 silly getExecOpts { cwd:
-13 silly getExecOpts    '/Users/i_van_hoorne/Documents/dev/codesandbox/git-extractor/packages/git-extractor' }
-14 error execute callback with error
-15 error Error: Command failed: yarn run build
-15 error error Command failed with exit code 2.
-15 error
-15 error $ rimraf lib && tsc -p tsconfig.json
-15 error src/commands/deploy.ts(35,13): error TS2339: Property 'yellow' does not exist on type 'typeof import("/Users/i_van_hoorne/Documents/dev/codesandbox/git-extractor/node_modules/chalk/types/index")'.
-15 error src/commands/deploy.ts(36,28): error TS2339: Property 'bold' does not exist on type 'typeof import("/Users/i_van_hoorne/Documents/dev/codesandbox/git-extractor/node_modules/chalk/types/index")'.
-15 error src/commands/deploy.ts(44,20): error TS2339: Property 'yellow' does not exist on type 'typeof import("/Users/i_van_hoorne/Documents/dev/codesandbox/git-extractor/node_modules/chalk/types/index")'.
-15 error src/commands/deploy.ts(54,13): error TS2339: Property 'blue' does not exist on type 'typeof import("/Users/i_van_hoorne/Documents/dev/codesandbox/git-extractor/node_modules/chalk/types/index")'.
-15 error src/commands/deploy.ts(63,18): error TS2339: Property 'yellow' does not exist on type 'typeof import("/Users/i_van_hoorne/Documents/dev/codesandbox/git-extractor/node_modules/chalk/types/index")'.
-15 error src/commands/deploy.ts(77,53): error TS2339: Property 'bold' does not exist on type 'typeof import("/Users/i_van_hoorne/Documents/dev/codesandbox/git-extractor/node_modules/chalk/types/index")'.
-15 error src/commands/deploy.ts(111,19): error TS2339: Property 'bold' does not exist on type 'typeof import("/Users/i_van_hoorne/Documents/dev/codesandbox/git-extractor/node_modules/chalk/types/index")'.
-15 error src/utils/log.ts(9,16): error TS2339: Property 'blue' does not exist on type 'typeof import("/Users/i_van_hoorne/Documents/dev/codesandbox/git-extractor/node_modules/chalk/types/index")'.
-15 error src/utils/log.ts(9,42): error TS2339: Property 'yellow' does not exist on type 'typeof import("/Users/i_van_hoorne/Documents/dev/codesandbox/git-extractor/node_modules/chalk/types/index")'.
-15 error src/utils/log.ts(9,74): error TS2339: Property 'bold' does not exist on type 'typeof import("/Users/i_van_hoorne/Documents/dev/codesandbox/git-extractor/node_modules/chalk/types/index")'.
-15 error src/utils/log.ts(28,21): error TS2339: Property 'gray' does not exist on type 'typeof import("/Users/i_van_hoorne/Documents/dev/codesandbox/git-extractor/node_modules/chalk/types/index")'.
-15 error src/utils/log.ts(32,21): error TS2339: Property 'gray' does not exist on type 'typeof import("/Users/i_van_hoorne/Documents/dev/codesandbox/git-extractor/node_modules/chalk/types/index")'.
-15 error src/utils/log.ts(39,13): error TS2339: Property 'blue' does not exist on type 'typeof import("/Users/i_van_hoorne/Documents/dev/codesandbox/git-extractor/node_modules/chalk/types/index")'.
-15 error src/utils/log.ts(44,13): error TS2339: Property 'red' does not exist on type 'typeof import("/Users/i_van_hoorne/Documents/dev/codesandbox/git-extractor/node_modules/chalk/types/index")'.
-15 error src/utils/log.ts(49,13): error TS2339: Property 'yellow' does not exist on type 'typeof import("/Users/i_van_hoorne/Documents/dev/codesandbox/git-extractor/node_modules/chalk/types/index")'.
-15 error src/utils/log.ts(53,13): error TS2339: Property 'green' does not exist on type 'typeof import("/Users/i_van_hoorne/Documents/dev/codesandbox/git-extractor/node_modules/chalk/types/index")'.
-15 error info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
-15 error
-15 error     at Promise.all.then.arr (/Users/i_van_hoorne/Documents/dev/codesandbox/git-extractor/node_modules/lerna/node_modules/execa/index.js:236:11)
+11 silly getExecOpts    '/Users/i_van_hoorne/Documents/dev/codesandbox/git-extractor/packages/import-utils' }
+12 error test Errored while running script in 'git-converter'
+13 error execute callback with error
+14 error Error: Command failed: yarn run test
+14 error ts-jest[main] (WARN) Replace any occurrences of "ts-jest/dist/preprocessor.js" or  "<rootDir>/node_modules/ts-jest/preprocessor.js" in the 'transform' section of your Jest config with just "ts-jest".
+14 error FAIL src/routes/github/push/utils/__tests__/delta.test.ts
+14 error   ● Test suite failed to run
+14 error
+14 error     TypeScript diagnostics (customize using `[jest-config].globals.ts-jest.diagnostics` option):
+14 error     [96msrc/routes/github/push/utils/__tests__/delta.test.ts[0m:[93m124[0m:[93m36[0m - [91merror[0m[90m TS2345: [0mArgument of type '{ "src/App.js": null; }' is not assignable to parameter of type 'INormalizedModules'.
+14 error       Property '"src/App.js"' is incompatible with index signature.
+14 error         Type 'null' is not assignable to type 'IModule'.
+14 error
+14 error     [7m124[0m       expect(getDelta(SAMPLE_TREE, newModules)).toEqual({
+14 error     [7m   [0m [91m                                   ~~~~~~~~~~[0m
+14 error
+14 error Test Suites: 1 failed, 1 total
+14 error Tests:       0 total
+14 error Snapshots:   0 total
+14 error Time:        26.742s
+14 error Ran all test suites.
+14 error error Command failed with exit code 1.
+14 error $ jest
+14 error info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
+14 error
+14 error     at Promise.all.then.arr (/Users/i_van_hoorne/Documents/dev/codesandbox/git-extractor/node_modules/lerna/node_modules/execa/index.js:236:11)
