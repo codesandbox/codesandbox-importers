@@ -64,12 +64,9 @@
     "@types/shortid": "^0.0.29",
     "@types/update-notifier": "^1.0.1",
     "filesize": "^3.6.1",
-    "jest": "^20.0.4",
     "rimraf": "^2.6.1",
-    "ts-jest": "^20.0.6",
     "tslint": "^5.4.3",
-    "tslint-config-prettier": "^1.10.0",
-    "typescript": "^2.8.1"
+    "tslint-config-prettier": "^1.10.0"
   },
   "jest": {
     "transform": {

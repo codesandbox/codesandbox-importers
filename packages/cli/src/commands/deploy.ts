@@ -1,4 +1,4 @@
-import * as chalk from "chalk";
+import chalk from "chalk";
 import * as Commander from "commander";
 import * as inquirer from "inquirer";
 import * as filesize from "filesize";
