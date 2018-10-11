@@ -6,6 +6,7 @@
   "private": true,
   "scripts": {
     "build": "rimraf dist && yarn compile",
+    "dev": "nodemon dist",
     "compile": "tsc",
     "start": "node dist",
     "test": "jest",
@@ -36,7 +37,8 @@
     "eslint-plugin-react": "^6.8.0",
     "gulp": "3.9.1",
     "gulp-sourcemaps": "^2.6.0",
-    "gulp-typescript": "3.1.1"
+    "gulp-typescript": "3.1.1",
+    "nodemon": "^1.18.4"
   },
   "dependencies": {
     "acorn": "^5.1.2",

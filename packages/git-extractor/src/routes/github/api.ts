@@ -79,36 +79,6 @@ export async function isRepoPrivate(
 
 type Response = Array<Module>;
 
-/**
- * Fetch all directories (flat) and files that exist in this repo by path and branch
- *
- * @export
- * @param {string} username
- * @param {string} repo
- * @param {string} [branch='master']
- * @param {string} [path='']
- * @returns {Promise<Response>}
- */
-export async function fetchContents(
-  username: string,
-  repo: string,
-  branch: string = "master",
-  path: string = ""
-): Promise<Response | Module> {
-  try {
-    const url = buildContentsUrl(username, repo, branch, path);
-    const response = await axios.get(url);
-
-    return response.data;
-  } catch (e) {
-    if (e.response && e.response.status === 404) {
-      e.message = NOT_FOUND_MESSAGE;
-    }
-
-    throw e;
-  }
-}
-
 interface RightsResponse {
   permission: "admin" | "write" | "read" | "none";
 }
