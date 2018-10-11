@@ -29,29 +29,7 @@ const BASE_URL = API_URL + "/projects";
 const NOT_FOUND_MESSAGE =
   "Could not find the specified repository or directory";
 
-interface IRepoResponse {
-  id: number;
-  node_id: string;
-  name: string;
-  full_name: string;
-  private: boolean;
-}
-
-
 type Response = Array<Module>;
-
-interface ITreeResponse {
-  sha: string;
-  tree: ITree;
-  truncated: boolean;
-  url: string;
-}
-
-
-interface IBlobResponse {
-  url: string;
-  sha: string;
-}
 
 function buildApiUrl(username: string, repo: string) {
   return `${BASE_URL}/${username}%2F${repo}`;
@@ -83,9 +61,9 @@ const shaCache = LRU({
 });
 
 export function resetShaCache(gitInfo: IGitInfo) {
-  const { username, repo, branch = "master", path = "" } = gitInfo;
+  const { username, repo, branch = "master" } = gitInfo;
 
-  return shaCache.del(username + repo + branch + path);
+  return shaCache.del(username + repo + branch);
 }
 
 export async function fetchRepoInfo(
