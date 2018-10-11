@@ -9,8 +9,7 @@
     "compile": "tsc",
     "start": "node dist",
     "test": "jest",
-    "test:watch": "jest --watch",
-    "watch": "gulp"
+    "test:watch": "jest --watch"
   },
   "author": "",
   "license": "ISC",

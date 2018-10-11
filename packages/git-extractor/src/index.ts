@@ -14,6 +14,7 @@ import notFound from "./middleware/not-found";
 
 // ROUTES
 import * as github from "./routes/github";
+import * as gitlab from "./routes/gitlab";
 import * as define from "./routes/define";
 
 const DEFAULT_PORT = process.env.PORT || 2000;
@@ -36,6 +37,15 @@ router
   .get("/git/github/info/:username/:repo/tree/:branch/:path*", github.info) // allow tree urls
   .get("/git/github/info/:username/:repo/blob/:branch/:path*", github.info) // allow blob urls
   .get("/git/github/info/:username/:repo", github.info) // For when tree isn't in path (root path)
+  // Gitlab
+  .get(
+    "/git/gitlab/data/:username/:repo/:branch*/commit/:commitSha",
+    gitlab.data
+  )
+  .get("/git/gitlab/info/:username/:repo/tree/:branch", gitlab.info) // allow tree urls
+  .get("/git/gitlab/info/:username/:repo/blob/:branch", gitlab.info) // allow blob urls
+  .get("/git/gitlab/info/:username/:repo", gitlab.info) // For when tree isn't in path (root path)
+
   // Push
   .post("/git/github/diff/:username/:repo/:branch*/path/:path*", github.diff)
   .post(
