@@ -2,6 +2,10 @@ import { Context } from "koa";
 import { extname, basename, dirname, join } from "path";
 import createSandbox from "codesandbox-import-utils/lib/create-sandbox";
 
+import normalizeSandbox, {
+  IModule,
+  INormalizedModules
+} from "../../utils/sandbox/normalize";
 import { downloadRepository } from "./pull/download";
 import * as api from "./api";
 
@@ -28,17 +32,12 @@ export const info = async (ctx: Context, next: () => Promise<any>) => {
   ctx.body = response;
 };
 
-export interface IGitInfo {
+interface IGitInfo {
   username: string
   repo: string
   branch: string
   path?: string
 }
-
-import normalizeSandbox, {
-  IModule,
-  INormalizedModules
-} from "../../utils/sandbox/normalize";
 
 /**
  * This route will take a github path and return sandbox data for it

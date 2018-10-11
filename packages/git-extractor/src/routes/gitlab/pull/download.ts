@@ -16,11 +16,11 @@ const getFolderName = (zip: JSZip) =>
   `${Object.keys(zip.files)[0].split("/")[0]}/`;
 
 /**
- * We use https://rawgit.com/ as urls, since they change the content-type corresponding
+ * We use https://githack.com/ as urls, since they change the content-type corresponding
  * to the file. Github always uses text/plain
  */
 const rawGitUrl = (gitInfo: IGitInfo, filePath: string, commitSha: string) => {
-  let url = `https://rawcdn.githack.com/${gitInfo.username}/${
+  let url = `https://glcdn.githack.com/${gitInfo.username}/${
     gitInfo.repo
   }/${commitSha || gitInfo.branch}/`;
   if (gitInfo.path) {
