@@ -1,0 +1,59 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`denormalize can denormalize 1`] = `
+Object {
+  "directories": Array [],
+  "modules": Array [
+    Object {
+      "code": "hello",
+      "directoryShortid": undefined,
+      "isBinary": false,
+      "shortid": "2",
+      "title": "index.js",
+    },
+    Object {
+      "code": "hello2",
+      "directoryShortid": "0",
+      "isBinary": false,
+      "shortid": "3",
+      "title": "index.js",
+    },
+    Object {
+      "code": "hello3",
+      "directoryShortid": "1",
+      "isBinary": false,
+      "shortid": "4",
+      "title": "index.js",
+    },
+  ],
+}
+`;
+
+exports[`denormalize can filter out existing directories 1`] = `
+Object {
+  "directories": Array [],
+  "modules": Array [
+    Object {
+      "code": "hello",
+      "directoryShortid": undefined,
+      "isBinary": false,
+      "shortid": "0",
+      "title": "index.js",
+    },
+    Object {
+      "code": "hello2",
+      "directoryShortid": "dir1",
+      "isBinary": false,
+      "shortid": "1",
+      "title": "index.js",
+    },
+    Object {
+      "code": "hello3",
+      "directoryShortid": "dir2",
+      "isBinary": false,
+      "shortid": "2",
+      "title": "index.js",
+    },
+  ],
+}
+`;

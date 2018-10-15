@@ -7,6 +7,7 @@ import {
 } from "codesandbox-import-util-types";
 
 import { generate as generateShortid } from "shortid";
+import { getDirectoryPaths } from "./utils/resolve";
 
 function generateSandboxFile(
   module: IModule,
@@ -59,17 +60,36 @@ function generateSandboxDirectory(
   };
 }
 
-export default function denormalize(files: INormalizedModules) {
-  const directories: Set<string> = new Set();
+export default function denormalize(
+  paramFiles: INormalizedModules,
+  existingDirs: ISandboxDirectory[] = []
+) {
+  const existingDirPathsParams = getDirectoryPaths(existingDirs);
 
+  // Remove all leading slashes
+  let existingDirPaths: {
+    [p: string]: ISandboxDirectory;
+  } = {};
+  Object.keys(existingDirPathsParams).forEach(path => {
+    existingDirPaths[path.replace(/^\//, "")] = existingDirPathsParams[path];
+  });
+
+  let files: INormalizedModules = {};
+  Object.keys(paramFiles).forEach(path => {
+    files[path.replace(/^\//, "")] = paramFiles[path];
+  });
+
+  const directories: Set<string> = new Set();
   Object.keys(files).forEach(path => {
     const dir = dirname(path);
-    if (dir !== ".") {
+    if (dir !== "." && !existingDirPaths["/" + dir]) {
       directories.add(dirname(path));
     }
   });
 
-  const sandboxDirectories: { [path: string]: ISandboxDirectory } = {};
+  const sandboxDirectories: {
+    [path: string]: ISandboxDirectory;
+  } = existingDirPaths;
   Array.from(directories).forEach(dirPath => {
     createDirectoryRecursively(dirPath, sandboxDirectories);
   });
@@ -83,6 +103,8 @@ export default function denormalize(files: INormalizedModules) {
 
   return {
     modules: sandboxModules,
-    directories: Object.keys(sandboxDirectories).map(s => sandboxDirectories[s])
+    directories: Object.keys(sandboxDirectories)
+      .map(s => !existingDirPaths[s] && sandboxDirectories[s])
+      .filter(Boolean)
   };
 }
