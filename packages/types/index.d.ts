@@ -12,13 +12,13 @@ export interface ISandboxFile {
   code: string;
   shortid: string;
   isBinary: boolean;
-  directoryShortid: string | undefined;
+  directoryShortid: string | undefined | null;
 }
 
 export interface ISandboxDirectory {
   shortid: string;
   title: string;
-  directoryShortid: string | undefined;
+  directoryShortid: string | undefined | null;
 }
 
 export type ITemplate =
@@ -37,7 +37,8 @@ export type ITemplate =
   | "reason"
   | "apollo"
   | "sapper"
-  | "ember-cli";
+  | "ember-cli"
+  | "nest";
 
 export interface ISandbox {
   title: string;

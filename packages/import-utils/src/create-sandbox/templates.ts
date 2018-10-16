@@ -47,6 +47,10 @@ export function getMainFile(template: ITemplate) {
     return "package.json";
   }
 
+  if(template === "nest") {
+    return "src/main.ts"
+  }
+
   return "src/index.js";
 }
 
@@ -75,10 +79,9 @@ export function getTemplate(
     ...Object.keys(devDependencies)
   ];
 
-  if (
-    totalDependencies.indexOf("nuxt") > -1 ||
-    totalDependencies.indexOf("nuxt-edge") > -1
-  ) {
+  const nuxt = ["nuxt", "nuxt-edge"];
+
+  if (totalDependencies.some(dep => nuxt.indexOf(dep) > -1)) {
     return "nuxt";
   }
 
@@ -86,7 +89,16 @@ export function getTemplate(
     return "next";
   }
 
-  if (totalDependencies.indexOf("apollo-server") > -1) {
+  const apollo = [
+    "apollo-server",
+    "apollo-server-express",
+    "apollo-server-hapi",
+    "apollo-server-koa",
+    "apollo-server-lambda",
+    "apollo-server-micro"
+  ];
+
+  if (totalDependencies.some(dep => apollo.indexOf(dep) > -1)) {
     return "apollo";
   }
 
@@ -115,6 +127,10 @@ export function getTemplate(
     return "parcel";
   }
 
+  if (totalDependencies.indexOf("react-scripts") > -1) {
+    return "create-react-app";
+  }
+
   if (totalDependencies.indexOf("react-scripts-ts") > -1) {
     return "create-react-app-typescript";
   }
@@ -135,15 +151,21 @@ export function getTemplate(
     return "vue-cli";
   }
 
-  if (
-    totalDependencies.indexOf("@dojo/core") > -1 ||
-    totalDependencies.indexOf("@dojo/framework") > -1
-  ) {
+  const dojo = ["@dojo/core", "@dojo/framework"];
+
+  if (totalDependencies.some(dep => dojo.indexOf(dep) > -1)) {
     return "@dojo/cli-create-app";
   }
 
   if (totalDependencies.indexOf("cx") > -1) {
     return "cxjs";
+  }
+
+  if(
+    totalDependencies.indexOf("@nestjs/core") > -1 ||
+    totalDependencies.indexOf("@nestjs/common") > -1
+  )  {
+    return "nest"
   }
 
   return undefined;

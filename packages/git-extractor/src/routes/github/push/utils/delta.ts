@@ -1,5 +1,5 @@
 import { ITree } from "../index";
-import { INormalizedModules } from "../../../../utils/sandbox/normalize";
+import { IModule } from "../../../../utils/sandbox/normalize";
 
 import { createHash } from "crypto";
 
@@ -11,7 +11,14 @@ function getGitSha(content: string) {
   return hash.digest("hex");
 }
 
-export default function getDelta(tree: ITree, modules: INormalizedModules) {
+interface INormalizedAndDeletedModules {
+  [path: string]: IModule | null;
+}
+
+export default function getDelta(
+  tree: ITree,
+  modules: INormalizedAndDeletedModules
+) {
   const added: string[] = [];
   const modified: string[] = [];
   const deleted: string[] = [];

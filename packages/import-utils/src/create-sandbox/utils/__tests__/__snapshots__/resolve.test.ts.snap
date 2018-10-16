@@ -1,0 +1,16 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`resolve getDirectoryPaths can resolve dir paths 1`] = `
+Object {
+  "/world": Object {
+    "directoryShortid": undefined,
+    "shortid": "dir1",
+    "title": "world",
+  },
+  "/world/hello": Object {
+    "directoryShortid": "dir1",
+    "shortid": "dir2",
+    "title": "hello",
+  },
+}
+`;

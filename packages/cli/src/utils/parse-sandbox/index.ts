@@ -1,4 +1,4 @@
-import * as chalk from "chalk";
+import chalk from "chalk";
 import * as fs from "fs-extra";
 import * as inquirer from "inquirer";
 import * as path from "path";

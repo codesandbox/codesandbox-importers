@@ -1,11 +1,12 @@
 {
   "name": "git-converter",
-  "version": "1.2.17",
+  "version": "1.3.1",
   "description": "",
   "main": "index.js",
   "private": true,
   "scripts": {
-    "build": "rimraf dist && ./node_modules/.bin/tsc",
+    "build": "rimraf dist && yarn compile",
+    "compile": "tsc",
     "start": "node dist",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -36,10 +37,7 @@
     "eslint-plugin-react": "^6.8.0",
     "gulp": "3.9.1",
     "gulp-sourcemaps": "^2.6.0",
-    "gulp-typescript": "3.1.1",
-    "jest": "^20.0.4",
-    "ts-jest": "^20.0.5",
-    "typescript": "^2.7.1"
+    "gulp-typescript": "3.1.1"
   },
   "dependencies": {
     "acorn": "^5.1.2",

@@ -12,7 +12,11 @@
   },
   "author": "",
   "devDependencies": {
-    "lerna": "^2.4.0"
+    "jest": "^23.6.0",
+    "lerna": "^2.4.0",
+    "rimraf": "^2.6.2",
+    "ts-jest": "^23.10.4",
+    "typescript": "^3.1.1"
   },
   "workspaces": [
     "packages/cli",

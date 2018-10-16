@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import * as chalk from "chalk";
+import chalk from "chalk";
 import * as program from "commander";
 import * as updateNotifier from "update-notifier";
 
