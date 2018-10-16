@@ -91,7 +91,7 @@ export function getTemplate(
   }
 
   if (totalDependencies.indexOf("ember-cli") > -1) {
-    return "node";
+    return "ember-cli";
   }
 
   if (totalDependencies.indexOf("sapper") > -1) {
