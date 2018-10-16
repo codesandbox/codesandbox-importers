@@ -36,7 +36,8 @@ export type ITemplate =
   | "next"
   | "reason"
   | "apollo"
-  | "sapper";
+  | "sapper"
+  | "nest";
 
 export interface ISandbox {
   title: string;
