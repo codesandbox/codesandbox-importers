@@ -89,7 +89,7 @@ export default function denormalize(
 
   const sandboxDirectories: {
     [path: string]: ISandboxDirectory;
-  } = existingDirPaths;
+  } = { ...existingDirPaths };
   Array.from(directories).forEach(dirPath => {
     createDirectoryRecursively(dirPath, sandboxDirectories);
   });
@@ -101,10 +101,12 @@ export default function denormalize(
     return generateSandboxFile(files[path], path, parentShortid);
   });
 
+  const dirs: unknown = Object.keys(sandboxDirectories)
+    .map(s => !existingDirPaths[s] && sandboxDirectories[s])
+    .filter(Boolean);
+
   return {
     modules: sandboxModules,
-    directories: Object.keys(sandboxDirectories)
-      .map(s => !existingDirPaths[s] && sandboxDirectories[s])
-      .filter(Boolean)
+    directories: dirs as ISandboxDirectory[]
   };
 }

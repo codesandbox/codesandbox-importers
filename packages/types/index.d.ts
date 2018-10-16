@@ -12,13 +12,13 @@ export interface ISandboxFile {
   code: string;
   shortid: string;
   isBinary: boolean;
-  directoryShortid: string | undefined;
+  directoryShortid: string | undefined | null;
 }
 
 export interface ISandboxDirectory {
   shortid: string;
   title: string;
-  directoryShortid: string | undefined;
+  directoryShortid: string | undefined | null;
 }
 
 export type ITemplate =

@@ -1,8 +1,40 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`denormalize can create nested directories 1`] = `
+Object {
+  "directories": Array [
+    Object {
+      "directoryShortid": "GXOoy",
+      "shortid": "0",
+      "title": "test",
+    },
+  ],
+  "modules": Array [
+    Object {
+      "code": "",
+      "directoryShortid": "0",
+      "isBinary": false,
+      "shortid": "1",
+      "title": "new-file.js",
+    },
+  ],
+}
+`;
+
 exports[`denormalize can denormalize 1`] = `
 Object {
-  "directories": Array [],
+  "directories": Array [
+    Object {
+      "directoryShortid": undefined,
+      "shortid": "0",
+      "title": "world",
+    },
+    Object {
+      "directoryShortid": "0",
+      "shortid": "1",
+      "title": "hello",
+    },
+  ],
   "modules": Array [
     Object {
       "code": "hello",

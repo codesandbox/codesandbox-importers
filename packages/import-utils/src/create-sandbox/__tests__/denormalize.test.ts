@@ -67,4 +67,25 @@ describe("denormalize", () => {
     expect(denormalized).toMatchSnapshot();
     expect(denormalized.directories).toEqual([]);
   });
+
+  it("can create nested directories", () => {
+    const paramFiles = {
+      "/src/test/new-file.js": { isBinary: false, content: "" }
+    };
+    const existingDirs = [
+      {
+        directoryShortid: null,
+        shortid: "rgkK4",
+        title: "public"
+      },
+      {
+        directoryShortid: null,
+        shortid: "GXOoy",
+        title: "src"
+      }
+    ];
+    const denormalized = denormalize(paramFiles, existingDirs);
+
+    expect(denormalized).toMatchSnapshot();
+  });
 });
