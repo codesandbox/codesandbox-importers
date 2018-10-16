@@ -37,7 +37,7 @@ export type ITemplate =
   | "reason"
   | "apollo"
   | "sapper"
-  | "node";
+  | "ember-cli";
 
 export interface ISandbox {
   title: string;
