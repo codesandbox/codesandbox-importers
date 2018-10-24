@@ -20,8 +20,8 @@ const DEFAULT_PORT = process.env.PORT || 2000;
 const app = new Koa();
 const router = new Router();
 
-app.use(logger);
 app.use(errorHandler);
+app.use(logger);
 app.use(bodyParser());
 app.use(camelize);
 app.use(decamelize);

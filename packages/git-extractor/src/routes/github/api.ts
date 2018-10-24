@@ -275,7 +275,9 @@ export async function createMerge(
 
     return response.data;
   } catch (e) {
-    console.error(e);
+    if (process.env.NODE_ENV === "development") {
+      console.error(e);
+    }
     if (e.response) {
       e.message = `Merging went wrong: '${e.response.data.message}'`;
     }

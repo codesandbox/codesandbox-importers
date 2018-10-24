@@ -227,7 +227,9 @@ export const commit = async (ctx: Context, next: () => Promise<any>) => {
       };
       return;
     } catch (e) {
-      console.error(e);
+      if (process.env.NODE_ENV === "development") {
+        console.error(e);
+      }
       /* Let's try to create the merge then */
     }
   }
