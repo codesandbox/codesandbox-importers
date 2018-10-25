@@ -58,7 +58,7 @@ export async function downloadRepository(
             };
           } else {
             result[relativePath] = {
-              content: contents,
+              content: contents || "",
               isBinary: false
             };
           }
