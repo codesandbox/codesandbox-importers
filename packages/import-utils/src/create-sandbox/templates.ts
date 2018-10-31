@@ -102,6 +102,10 @@ export function getTemplate(
     return "apollo";
   }
 
+  if (totalDependencies.indexOf("ember-cli") > -1) {
+    return "ember-cli";
+  }
+
   if (totalDependencies.indexOf("sapper") > -1) {
     return "sapper";
   }
