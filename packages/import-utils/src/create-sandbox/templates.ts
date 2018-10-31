@@ -47,8 +47,12 @@ export function getMainFile(template: ITemplate) {
     return "package.json";
   }
 
-  if(template === "nest") {
-    return "src/main.ts"
+  if (template === "nest") {
+    return "src/main.ts";
+  }
+
+  if (template === "static") {
+    return "index.html";
   }
 
   return "src/index.js";
@@ -103,7 +107,7 @@ export function getTemplate(
   }
 
   if (totalDependencies.indexOf("ember-cli") > -1) {
-    return "ember-cli";
+    return "ember";
   }
 
   if (totalDependencies.indexOf("sapper") > -1) {
@@ -161,11 +165,11 @@ export function getTemplate(
     return "cxjs";
   }
 
-  if(
+  if (
     totalDependencies.indexOf("@nestjs/core") > -1 ||
     totalDependencies.indexOf("@nestjs/common") > -1
-  )  {
-    return "nest"
+  ) {
+    return "nest";
   }
 
   return undefined;
