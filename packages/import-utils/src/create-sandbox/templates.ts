@@ -67,9 +67,11 @@ export function getTemplate(
   },
   modules: INormalizedModules
 ): ITemplate | undefined {
-  if (modules[SANDBOX_CONFIG]) {
+  const sandboxConfig =
+    modules[SANDBOX_CONFIG] || modules[`/${SANDBOX_CONFIG}`];
+  if (sandboxConfig) {
     try {
-      const config = JSON.parse(modules[SANDBOX_CONFIG].content);
+      const config = JSON.parse(sandboxConfig.content);
 
       if (config.template) {
         return config.template;
