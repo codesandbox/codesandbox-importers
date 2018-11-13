@@ -22,6 +22,11 @@ export function getMainFile(template: ITemplate) {
     return "src/pages/index.js";
   }
 
+  if (template === "styleguidist") {
+    // Wildcard, because styleguidist is not specific on this
+    return "package.json";
+  }
+
   if (template === "nuxt") {
     // Wildcard, because nuxt is not specific on this
     return "package.json";
@@ -127,6 +132,10 @@ export function getTemplate(
 
   if (totalDependencies.indexOf("gatsby") > -1) {
     return "gatsby";
+  }
+
+  if (totalDependencies.indexOf("react-styleguidist") > -1) {
+    return "styleguidist";
   }
 
   if (totalDependencies.indexOf("parcel-bundler") > -1) {
