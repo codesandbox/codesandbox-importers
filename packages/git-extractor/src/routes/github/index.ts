@@ -7,6 +7,12 @@ import * as api from "./api";
 
 import * as push from "./push";
 
+import normalizeSandbox, {
+  IModule,
+  INormalizedModules
+} from "../../utils/sandbox/normalize";
+import { IGitInfo } from "./push";
+
 const getUserToken = (ctx: Context) => {
   const header = ctx.header.authorization;
   if (header) {
@@ -15,12 +21,6 @@ const getUserToken = (ctx: Context) => {
 
   return undefined;
 };
-
-import normalizeSandbox, {
-  IModule,
-  INormalizedModules
-} from "../../utils/sandbox/normalize";
-import { IGitInfo } from "./push";
 
 export const info = async (ctx: Context, next: () => Promise<any>) => {
   const userToken = getUserToken(ctx);
@@ -85,6 +85,9 @@ export const data = async (ctx: Context, next: () => Promise<any>) => {
     isPrivate = await api.isRepoPrivate(username, repo, userToken);
   }
 
+  console.log(
+    `Creating sandbox for ${username}/${repo}, branch: ${branch}, path: ${path}`
+  );
   const sandboxParams = await createSandbox(downloadedFiles);
 
   const finalTitle = sandboxParams.title || title;

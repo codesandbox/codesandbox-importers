@@ -60,8 +60,14 @@ export default async function createSandbox(
 
   const packageJsonPackage = JSON.parse(packageJson.content);
 
-  const template =
-    getTemplate(packageJsonPackage, directory) || "create-react-app";
+  let template = getTemplate(packageJsonPackage, directory);
+
+  if (template === undefined) {
+    console.log("Got undefined template, defaulting to 'create-react-app");
+
+    template = "create-react-app";
+  }
+
   const mainFileUnix = findMainFile(
     directory,
     packageJsonPackage.main,
