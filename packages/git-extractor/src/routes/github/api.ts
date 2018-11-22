@@ -282,7 +282,9 @@ export async function createMerge(
 
     return response.data;
   } catch (e) {
-    console.error(e);
+    if (process.env.NODE_ENV === "development") {
+      console.error(e);
+    }
     if (e.response) {
       e.message = `Merging went wrong: '${e.response.data.message}'`;
     }
@@ -499,7 +501,10 @@ export async function fetchRepoInfo(
     // There is a chance that the branch contains slashes, we try to fix this
     // by requesting again with the first part of the path appended to the branch
     // when a request fails (404)
-    if (e.response && e.response.status === 404) {
+    if (
+      e.response &&
+      (e.response.status === 404 || e.response.status === 422)
+    ) {
       const [branchAddition, ...newPath] = path.split("/");
       const newBranch = `${branch}/${branchAddition}`;
 

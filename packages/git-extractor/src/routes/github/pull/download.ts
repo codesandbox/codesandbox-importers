@@ -14,7 +14,7 @@ const getFolderName = (zip: JSZip) =>
  * to the file. Github always uses text/plain
  */
 const rawGitUrl = (gitInfo: IGitInfo, filePath: string, commitSha: string) => {
-  let url = `https://rawgit.com/${gitInfo.username}/${
+  let url = `https://rawcdn.githack.com/${gitInfo.username}/${
     gitInfo.repo
   }/${commitSha || gitInfo.branch}/`;
   if (gitInfo.path) {
@@ -58,7 +58,7 @@ export async function downloadRepository(
             };
           } else {
             result[relativePath] = {
-              content: contents,
+              content: contents || "",
               isBinary: false
             };
           }

@@ -1,4 +1,4 @@
-import * as chalk from "chalk";
+import chalk from "chalk";
 
 export function log(text = "") {
   console.log(`> ${text}`);

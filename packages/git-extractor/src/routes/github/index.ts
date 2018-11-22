@@ -7,6 +7,12 @@ import * as api from "./api";
 
 import * as push from "./push";
 
+import normalizeSandbox, {
+  IModule,
+  INormalizedModules
+} from "../../utils/sandbox/normalize";
+import { IGitInfo } from "./push";
+
 const getUserToken = (ctx: Context) => {
   const header = ctx.header.authorization;
   if (header) {
@@ -18,12 +24,6 @@ const getUserToken = (ctx: Context) => {
 
   return undefined;
 };
-
-import normalizeSandbox, {
-  IModule,
-  INormalizedModules
-} from "../../utils/sandbox/normalize";
-import { IGitInfo } from "./push";
 
 export const info = async (ctx: Context, next: () => Promise<any>) => {
   const userToken = getUserToken(ctx);
@@ -37,6 +37,19 @@ export const info = async (ctx: Context, next: () => Promise<any>) => {
   );
 
   ctx.body = response;
+};
+
+export const getRights = async (ctx: Context) => {
+  const userToken = getUserToken(ctx);
+
+  const rights = await api.fetchRights(
+    ctx.params.username,
+    ctx.params.repo,
+    ctx.params.currentUser,
+    userToken
+  );
+
+  return rights;
 };
 
 /**
@@ -78,6 +91,10 @@ export const data = async (ctx: Context, next: () => Promise<any>) => {
   if (isPrivate) {
     api.resetShaCache({ branch, username, repo, path });
   }
+
+  console.log(
+    `Creating sandbox for ${username}/${repo}, branch: ${branch}, path: ${path}`
+  );
 
   const sandboxParams = await createSandbox(downloadedFiles);
 
@@ -221,7 +238,9 @@ export const commit = async (ctx: Context, next: () => Promise<any>) => {
       };
       return;
     } catch (e) {
-      console.error(e);
+      if (process.env.NODE_ENV === "development") {
+        console.error(e);
+      }
       /* Let's try to create the merge then */
     }
   }

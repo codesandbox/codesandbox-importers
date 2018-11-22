@@ -20,8 +20,8 @@ const DEFAULT_PORT = process.env.PORT || 2000;
 const app = new Koa();
 const router = new Router();
 
-app.use(logger);
 app.use(errorHandler);
+app.use(logger);
 app.use(bodyParser());
 app.use(camelize);
 app.use(decamelize);
@@ -32,6 +32,7 @@ router
     "/git/github/data/:username/:repo/:branch*/commit/:commitSha/path/:path*",
     github.data
   )
+  .get("/git/github/rights/:username/:repo", github.getRights)
   .get("/git/github/info/:username/:repo/tree/:branch/:path*", github.info) // allow tree urls
   .get("/git/github/info/:username/:repo/blob/:branch/:path*", github.info) // allow blob urls
   .get("/git/github/info/:username/:repo", github.info) // For when tree isn't in path (root path)

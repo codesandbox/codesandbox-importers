@@ -12,13 +12,13 @@ export interface ISandboxFile {
   code: string;
   shortid: string;
   isBinary: boolean;
-  directoryShortid: string | undefined;
+  directoryShortid: string | undefined | null;
 }
 
 export interface ISandboxDirectory {
   shortid: string;
   title: string;
-  directoryShortid: string | undefined;
+  directoryShortid: string | undefined | null;
 }
 
 export type ITemplate =
@@ -30,7 +30,16 @@ export type ITemplate =
   | "angular-cli"
   | "parcel"
   | "@dojo/cli-create-app"
-  | "cxjs";
+  | "cxjs"
+  | "gatsby"
+  | "nuxt"
+  | "next"
+  | "reason"
+  | "apollo"
+  | "sapper"
+  | "ember"
+  | "nest"
+  | "static";
 
 export interface ISandbox {
   title: string;

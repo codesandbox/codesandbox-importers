@@ -1,12 +1,6 @@
-import { generate as generateShortid } from "shortid";
-import { pickBy } from "lodash";
-import { join } from "path";
-
 import {
   INormalizedModules,
   IModule,
-  ISandboxFile,
-  ISandboxDirectory,
   ISandbox,
   ITemplate
 } from "codesandbox-import-util-types";
@@ -66,15 +60,24 @@ export default async function createSandbox(
 
   const packageJsonPackage = JSON.parse(packageJson.content);
 
-  const template = getTemplate(packageJsonPackage, directory);
-  const mainFileUnix = findMainFile(directory, packageJsonPackage.main, template);
-  const mainFile = process.platform === "win32" ? mainFileUnix.replace(/\//g, "\\") : mainFileUnix;
+  let template = getTemplate(packageJsonPackage, directory);
 
-  if (!directory[mainFile]) {
-    throw new Error(
-      `Cannot find the specified entry point: '${mainFile}'. Please specify one in 'package.json#main' or create a file at the specified entry point.`
-    );
+  if (template === undefined) {
+    console.log("Got undefined template, defaulting to 'create-react-app");
+
+    template = "create-react-app";
   }
+
+  const mainFileUnix = findMainFile(
+    directory,
+    packageJsonPackage.main,
+    template
+  );
+  const mainFile =
+    process.platform === "win32"
+      ? mainFileUnix.replace(/\//g, "\\")
+      : mainFileUnix;
+
   // Give the sandboxModules to getDependencies to fetch which devDependencies
   // are used in the code
 
