@@ -27,14 +27,17 @@ export type ITree = ITreeFile[];
 async function getNormalizedTree(
   { username, repo, branch, path }: IGitInfo,
   commitSha: string,
-  makeRelative = true
+  makeRelative = true,
+  token?: string
 ) {
   // 1. Get commit tree from GitHub based on path
   let { tree, truncated } = await api.fetchTree(
     username,
     repo,
     path,
-    commitSha
+    commitSha,
+    true,
+    token
   );
 
   if (truncated) {
@@ -56,9 +59,10 @@ async function getNormalizedTree(
 export async function getFileDifferences(
   gitInfo: IGitInfo,
   commitSha: string,
-  sandboxFiles: INormalizedModules
+  sandboxFiles: INormalizedModules,
+  token?: string
 ) {
-  const tree = await getNormalizedTree(gitInfo, commitSha);
+  const tree = await getNormalizedTree(gitInfo, commitSha, true, token);
 
   return getDelta(tree, sandboxFiles);
 }
@@ -133,7 +137,7 @@ export async function createCommit(
 ) {
   const { username, repo, branch, path = "" } = gitInfo;
 
-  const tree = await getNormalizedTree(gitInfo, commitSha, false);
+  const tree = await getNormalizedTree(gitInfo, commitSha, false, userToken);
   let absoluteSandboxFiles = sandboxFiles;
 
   if (path) {

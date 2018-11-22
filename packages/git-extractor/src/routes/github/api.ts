@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { AxiosRequestConfig } from "axios";
 import * as LRU from "lru-cache";
 import * as zip from "jszip";
 import fetch from "node-fetch";
@@ -155,7 +155,8 @@ export async function fetchTree(
   repo: string,
   path: string = "",
   commitSha: string,
-  recursive: boolean = true
+  recursive: boolean = true,
+  token?: string
 ): Promise<ITreeResponse> {
   let url = `${buildApiUrl(
     username,
@@ -166,7 +167,13 @@ export async function fetchTree(
     url += "&recursive=1";
   }
 
-  const response: { data: ITreeResponse } = await axios({ url });
+  const options: AxiosRequestConfig = { url };
+
+  if (token) {
+    options.headers = { Authorization: `Bearer ${token}` };
+  }
+
+  const response: { data: ITreeResponse } = await axios(options);
 
   return response.data;
 }

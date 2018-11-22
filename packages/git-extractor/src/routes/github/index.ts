@@ -16,6 +16,9 @@ import { IGitInfo } from "./push";
 const getUserToken = (ctx: Context) => {
   const header = ctx.header.authorization;
   if (header) {
+    if (header.startsWith("Bearer ")) {
+      return header.replace("Bearer ", "");
+    }
     return header;
   }
 
@@ -85,9 +88,14 @@ export const data = async (ctx: Context, next: () => Promise<any>) => {
     isPrivate = await api.isRepoPrivate(username, repo, userToken);
   }
 
+  if (isPrivate) {
+    api.resetShaCache({ branch, username, repo, path });
+  }
+
   console.log(
     `Creating sandbox for ${username}/${repo}, branch: ${branch}, path: ${path}`
   );
+
   const sandboxParams = await createSandbox(downloadedFiles);
 
   const finalTitle = sandboxParams.title || title;
@@ -113,21 +121,14 @@ export const diff = async (ctx: Context, next: () => Promise<any>) => {
 
   const { username, repo, branch, path } = ctx.params;
 
-  const gitInfo = {
-    username,
-    repo,
-    branch,
-    path,
-    commitSha
-  };
-
   const normalizedFiles = normalizeSandbox(modules, directories);
 
   const [delta, rights] = await Promise.all([
     push.getFileDifferences(
       { username, repo, branch, path },
       commitSha,
-      normalizedFiles
+      normalizedFiles,
+      token
     ),
     api.fetchRights(username, repo, currentUser, token)
   ]);
@@ -209,7 +210,14 @@ export const commit = async (ctx: Context, next: () => Promise<any>) => {
   // reset the cache so the user sees the latest version
   api.resetShaCache({ username, repo, branch, path });
 
-  const lastInfo = await api.fetchRepoInfo(username, repo, branch, path, true);
+  const lastInfo = await api.fetchRepoInfo(
+    username,
+    repo,
+    branch,
+    path,
+    true,
+    token
+  );
 
   // If we're up to date we just move the head, if that's not the cache we create
   // a merge
