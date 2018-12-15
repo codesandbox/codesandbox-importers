@@ -39,7 +39,8 @@ export type ITemplate =
   | "sapper"
   | "ember"
   | "nest"
-  | "static";
+  | "static"
+  | "styleguidist";
 
 export interface ISandbox {
   title: string;
