@@ -1,8 +1,9 @@
 import chalk from "chalk";
 import * as Commander from "commander";
-import * as inquirer from "inquirer";
 import * as filesize from "filesize";
 import createSandbox from "codesandbox-import-utils/lib/create-sandbox";
+import parseSandbox, { IUploads } from "codesandbox-import-utils/lib/fs";
+import FileError from "codesandbox-import-utils/lib/fs/file-error";
 import { join } from "path";
 
 import { getUser } from "../cfg";
@@ -12,14 +13,12 @@ import { error, info, log, success } from "../utils/log";
 import { createSandboxUrl } from "../utils/url";
 import { login } from "./login";
 
-import parseSandbox, { IUploads } from "../utils/parse-sandbox";
-import FileError from "../utils/parse-sandbox/file-error";
-import uploadFiles from "../utils/parse-sandbox/upload-files";
+import uploadFiles from "../utils/upload-files";
 
 // tslint:disable no-var-requires
 const ora = require("ora");
-const MAX_MODULE_COUNT = 120;
-const MAX_DIRECTORY_COUNT = 50;
+const MAX_MODULE_COUNT = 200;
+const MAX_DIRECTORY_COUNT = 100;
 
 /**
  * Show warnings for the errors that occured during mapping of files, we
@@ -155,7 +154,7 @@ export default function registerCommand(program: typeof Commander) {
           spinner.stop();
 
           success(
-            "Succesfully created the sandbox, you can find the sandbox here:"
+            "Successfully created the sandbox, you can find the sandbox here:"
           );
           success(createSandboxUrl(sandboxData));
         } catch (e) {

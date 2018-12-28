@@ -1,5 +1,5 @@
-import { IUploads } from ".";
-import { createUpload } from "../api";
+import { IUploads } from "codesandbox-import-utils/lib/fs";
+import { createUpload } from "./api";
 import { INormalizedModules } from "codesandbox-import-util-types";
 
 export default async function uploadFiles(uploads: IUploads) {

@@ -1,16 +1,7 @@
-import * as chalk from "chalk";
 import * as fs from "fs-extra";
-import * as inquirer from "inquirer";
 import * as path from "path";
-import createSandbox from "codesandbox-import-utils/lib/create-sandbox";
-import { isText, isTooBig } from "codesandbox-import-utils/lib/is-text";
-import {
-  IModule,
-  INormalizedModules,
-  ISandboxDirectory,
-  ISandboxFile,
-  ISandbox
-} from "codesandbox-import-util-types";
+import { isText, isTooBig } from "../is-text";
+import { IModule, INormalizedModules } from "codesandbox-import-util-types";
 
 import FileError from "./file-error";
 
@@ -66,7 +57,7 @@ async function normalizeFilesInDirectory(
       const code = await fs.readFile(t);
 
       const relativePath = t.replace(startingPath + "/", "");
-      const isBinary = !await isText(t, code);
+      const isBinary = !(await isText(t, code));
       if (isBinary) {
         if (code.byteLength > MAX_FILE_SIZE) {
           errors.push(
