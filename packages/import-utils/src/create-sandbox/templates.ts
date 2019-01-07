@@ -90,7 +90,7 @@ export function getTemplate(
     ...Object.keys(devDependencies)
   ];
 
-  const nuxt = ["nuxt", "nuxt-edge"];
+  const nuxt = ["nuxt", "nuxt-edge", "nuxt-ts", "nuxt-ts-edge"];
 
   if (totalDependencies.some(dep => nuxt.indexOf(dep) > -1)) {
     return "nuxt";
