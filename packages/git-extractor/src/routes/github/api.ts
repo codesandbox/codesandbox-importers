@@ -187,11 +187,12 @@ export async function createBlob(
   username: string,
   repo: string,
   content: string,
+  encoding: "utf-8" | "base64",
   token: string
 ) {
   const response: { data: IBlobResponse } = await axios.post(
     `${buildApiUrl(username, repo)}/git/blobs${buildSecretParams()}`,
-    { content: content },
+    { content: content, encoding },
     { headers: { Authorization: `Bearer ${token}` } }
   );
 
