@@ -2,7 +2,7 @@ const _isText = require("istextorbinary").isText;
 
 const jsRegex = /(t|j)sx?$/i;
 
-const FILE_LOADER_REGEX = /\.(ico|jpg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm)(\?.*)?$/i;
+const FILE_LOADER_REGEX = /\.(ico|jpg|png|gif|eot|otf|webp|ttf|woff|woff2|mp4|webm)(\?.*)?$/i;
 export const MAX_FILE_SIZE = 512 * 1024;
 
 export const isText = (filename: string, buffer: Buffer) => {
