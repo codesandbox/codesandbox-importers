@@ -57,6 +57,8 @@ export default async function createSandbox(
 ): Promise<ISandbox> {
   const packageJson = directory["package.json"];
   if (!packageJson) throw new Error("Could not find package.json");
+  if (packageJson.type === "directory")
+    throw new Error("package.json is a directory");
 
   const packageJsonPackage = JSON.parse(packageJson.content);
 

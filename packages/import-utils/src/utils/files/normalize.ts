@@ -1,15 +1,10 @@
 import { join } from "path";
 
-import { ISandboxFile, ISandboxDirectory } from "codesandbox-import-util-types";
-
-export interface IModule {
-  content: string;
-  isBinary: boolean;
-}
-
-export interface INormalizedModules {
-  [path: string]: IModule;
-}
+import {
+  ISandboxFile,
+  ISandboxDirectory,
+  INormalizedModules
+} from "codesandbox-import-util-types";
 
 function findSandboxFiles(
   modules: ISandboxFile[],

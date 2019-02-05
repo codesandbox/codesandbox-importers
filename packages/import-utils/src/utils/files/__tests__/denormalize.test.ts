@@ -90,8 +90,8 @@ describe("denormalize", () => {
   });
 
   it("can create only directory", () => {
-    const paramFiles = {
-      "/src/test/test2": { isDirectory: true }
+    const paramFiles: { "/src/test/test2": { type: "directory" } } = {
+      "/src/test/test2": { type: "directory" }
     };
     const existingDirs = [
       {

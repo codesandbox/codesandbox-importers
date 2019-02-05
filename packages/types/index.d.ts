@@ -1,10 +1,15 @@
 export interface IModule {
   content: string;
   isBinary: boolean;
+  type?: "file";
+}
+
+export interface IDirectory {
+  type: "directory";
 }
 
 export interface INormalizedModules {
-  [path: string]: IModule;
+  [path: string]: IModule | IDirectory;
 }
 
 export interface ISandboxFile {

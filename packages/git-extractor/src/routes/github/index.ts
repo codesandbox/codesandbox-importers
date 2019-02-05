@@ -1,5 +1,4 @@
 import { Context } from "koa";
-import { extname, basename, dirname, join } from "path";
 import createSandbox from "codesandbox-import-utils/lib/create-sandbox";
 import normalizeSandbox, {
   IModule,

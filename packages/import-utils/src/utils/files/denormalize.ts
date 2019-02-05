@@ -60,14 +60,8 @@ function generateSandboxDirectory(
   };
 }
 
-export type NormalizedModulesAndDirectories =
-  | INormalizedModules
-  | {
-      [path: string]: { isDirectory: boolean };
-    };
-
 export default function denormalize(
-  paramFiles: NormalizedModulesAndDirectories,
+  paramFiles: INormalizedModules,
   existingDirs: ISandboxDirectory[] = []
 ) {
   const existingDirPathsParams = getDirectoryPaths(existingDirs);
@@ -80,7 +74,7 @@ export default function denormalize(
     existingDirPaths[path.replace(/^\//, "")] = existingDirPathsParams[path];
   });
 
-  let files: NormalizedModulesAndDirectories = {};
+  let files: INormalizedModules = {};
   Object.keys(paramFiles).forEach(path => {
     files[path.replace(/^\//, "")] = paramFiles[path];
   });
@@ -93,7 +87,7 @@ export default function denormalize(
     }
 
     const file = files[path];
-    if ("isDirectory" in file && file.isDirectory) {
+    if (file.type === "directory") {
       directories.add(path);
     }
   });
@@ -112,7 +106,7 @@ export default function denormalize(
 
       const fileOrDirectory = files[path];
 
-      if ("isDirectory" in fileOrDirectory) {
+      if (fileOrDirectory.type === "directory") {
         return;
       } else {
         return generateSandboxFile(fileOrDirectory, path, parentShortid);

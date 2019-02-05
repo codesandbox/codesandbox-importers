@@ -1,6 +1,5 @@
 import { INormalizedModules } from "codesandbox-import-utils/lib/utils/files/normalize";
 import getDelta from "../delta";
-import { ITree } from "../../";
 
 describe("commit", () => {
   describe("delta", () => {
