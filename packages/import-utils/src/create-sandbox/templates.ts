@@ -74,7 +74,7 @@ export function getTemplate(
 ): ITemplate | undefined {
   const sandboxConfig =
     modules[SANDBOX_CONFIG] || modules[`/${SANDBOX_CONFIG}`];
-  if (sandboxConfig) {
+  if (sandboxConfig && sandboxConfig.type !== "directory") {
     try {
       const config = JSON.parse(sandboxConfig.content);
 

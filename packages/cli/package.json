@@ -83,5 +83,6 @@
       "<rootDir>/dist/"
     ],
     "testRegex": "(/__tests__/.*|\\.(test|spec))\\.(ts|tsx|js)$"
-  }
+  },
+  "gitHead": "4153cf096bda5dcefed297709f5c71f007ebec73"
 }
