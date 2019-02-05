@@ -1,10 +1,10 @@
 import * as JSZip from "jszip";
 
 import { isText } from "codesandbox-import-utils/lib/is-text";
+import { INormalizedModules } from "codesandbox-import-utils/lib/utils/files/normalize";
 
 import { IGitInfo } from "../push/index";
 import { downloadZip } from "../api";
-import { INormalizedModules } from "../../../utils/sandbox/normalize";
 
 const getFolderName = (zip: JSZip) =>
   `${Object.keys(zip.files)[0].split("/")[0]}/`;

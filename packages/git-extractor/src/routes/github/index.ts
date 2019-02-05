@@ -1,16 +1,16 @@
 import { Context } from "koa";
 import { extname, basename, dirname, join } from "path";
 import createSandbox from "codesandbox-import-utils/lib/create-sandbox";
+import normalizeSandbox, {
+  IModule,
+  INormalizedModules
+} from "codesandbox-import-utils/lib/utils/files/normalize";
 
 import { downloadRepository } from "./pull/download";
 import * as api from "./api";
 
 import * as push from "./push";
 
-import normalizeSandbox, {
-  IModule,
-  INormalizedModules
-} from "../../utils/sandbox/normalize";
 import { IGitInfo } from "./push";
 
 const getUserToken = (ctx: Context) => {

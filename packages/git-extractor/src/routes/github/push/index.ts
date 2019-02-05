@@ -1,5 +1,5 @@
+import { INormalizedModules } from "codesandbox-import-utils/lib/utils/files/normalize";
 import * as api from "../api";
-import { INormalizedModules } from "../../../utils/sandbox/normalize";
 
 import getDelta from "./utils/delta";
 import { createBlobs } from "./utils/create-blobs";

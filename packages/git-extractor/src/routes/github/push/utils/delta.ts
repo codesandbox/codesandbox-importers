@@ -1,5 +1,5 @@
+import { IModule } from "codesandbox-import-utils/lib/utils/files/normalize";
 import { ITree } from "../index";
-import { IModule } from "../../../../utils/sandbox/normalize";
 
 import { createHash } from "crypto";
 

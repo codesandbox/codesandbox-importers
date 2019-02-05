@@ -4,7 +4,7 @@ import {
   ISandbox,
   ITemplate
 } from "codesandbox-import-util-types";
-import denormalize from "./denormalize";
+import denormalize from "../utils/files/denormalize";
 
 import parseHTML from "./html-parser";
 import { getMainFile, getTemplate } from "./templates";

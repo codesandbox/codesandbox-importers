@@ -7,7 +7,7 @@ import {
 } from "codesandbox-import-util-types";
 
 import { generate as generateShortid } from "shortid";
-import { getDirectoryPaths } from "./utils/resolve";
+import { getDirectoryPaths } from "../../create-sandbox/utils/resolve";
 
 function generateSandboxFile(
   module: IModule,

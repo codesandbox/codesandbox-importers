@@ -1,9 +1,9 @@
 import fetch from "node-fetch";
-
 import {
   INormalizedModules,
   IModule
-} from "../../../../utils/sandbox/normalize";
+} from "codesandbox-import-utils/lib/utils/files/normalize";
+
 import { IGitInfo, ITree } from "../index";
 import { createBlob } from "../../api";
 
