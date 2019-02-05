@@ -1,6 +1,6 @@
 {
   "name": "codesandbox-import-utils",
-  "version": "1.3.6",
+  "version": "2.0.0",
   "main": "lib/index.js",
   "files": [
     "lib/**"
@@ -15,7 +15,7 @@
     "rimraf": "^2.6.2"
   },
   "dependencies": {
-    "codesandbox-import-util-types": "^1.3.4",
+    "codesandbox-import-util-types": "^2.0.0",
     "istextorbinary": "^2.2.1",
     "lz-string": "^1.4.4"
   },
