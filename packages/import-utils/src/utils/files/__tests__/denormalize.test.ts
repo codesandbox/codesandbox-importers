@@ -88,4 +88,25 @@ describe("denormalize", () => {
 
     expect(denormalized).toMatchSnapshot();
   });
+
+  it("can create only directory", () => {
+    const paramFiles = {
+      "/src/test/test2": { isDirectory: true }
+    };
+    const existingDirs = [
+      {
+        directoryShortid: null,
+        shortid: "rgkK4",
+        title: "public"
+      },
+      {
+        directoryShortid: null,
+        shortid: "GXOoy",
+        title: "src"
+      }
+    ];
+    const denormalized = denormalize(paramFiles, existingDirs);
+
+    expect(denormalized).toMatchSnapshot();
+  });
 });

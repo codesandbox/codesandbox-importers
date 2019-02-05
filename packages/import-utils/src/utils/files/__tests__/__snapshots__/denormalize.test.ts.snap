@@ -21,6 +21,24 @@ Object {
 }
 `;
 
+exports[`denormalize can create only directory 1`] = `
+Object {
+  "directories": Array [
+    Object {
+      "directoryShortid": "GXOoy",
+      "shortid": "0",
+      "title": "test",
+    },
+    Object {
+      "directoryShortid": "0",
+      "shortid": "1",
+      "title": "test2",
+    },
+  ],
+  "modules": Array [],
+}
+`;
+
 exports[`denormalize can denormalize 1`] = `
 Object {
   "directories": Array [

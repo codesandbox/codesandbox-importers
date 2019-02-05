@@ -60,8 +60,14 @@ function generateSandboxDirectory(
   };
 }
 
+export type NormalizedModulesAndDirectories =
+  | INormalizedModules
+  | {
+      [path: string]: { isDirectory: boolean };
+    };
+
 export default function denormalize(
-  paramFiles: INormalizedModules,
+  paramFiles: NormalizedModulesAndDirectories,
   existingDirs: ISandboxDirectory[] = []
 ) {
   const existingDirPathsParams = getDirectoryPaths(existingDirs);
@@ -74,7 +80,7 @@ export default function denormalize(
     existingDirPaths[path.replace(/^\//, "")] = existingDirPathsParams[path];
   });
 
-  let files: INormalizedModules = {};
+  let files: NormalizedModulesAndDirectories = {};
   Object.keys(paramFiles).forEach(path => {
     files[path.replace(/^\//, "")] = paramFiles[path];
   });
@@ -85,6 +91,11 @@ export default function denormalize(
     if (dir !== "." && !existingDirPaths["/" + dir]) {
       directories.add(dirname(path));
     }
+
+    const file = files[path];
+    if ("isDirectory" in file && file.isDirectory) {
+      directories.add(path);
+    }
   });
 
   const sandboxDirectories: {
@@ -94,12 +105,20 @@ export default function denormalize(
     createDirectoryRecursively(dirPath, sandboxDirectories);
   });
 
-  const sandboxModules: ISandboxFile[] = Object.keys(files).map(path => {
-    const dir = sandboxDirectories[dirname(path)];
-    const parentShortid = dir ? dir.shortid : undefined;
+  const sandboxModules: ISandboxFile[] = Object.keys(files)
+    .map(path => {
+      const dir = sandboxDirectories[dirname(path)];
+      const parentShortid = dir ? dir.shortid : undefined;
 
-    return generateSandboxFile(files[path], path, parentShortid);
-  });
+      const fileOrDirectory = files[path];
+
+      if ("isDirectory" in fileOrDirectory) {
+        return;
+      } else {
+        return generateSandboxFile(fileOrDirectory, path, parentShortid);
+      }
+    })
+    .filter((x): x is ISandboxFile => x !== undefined);
 
   const dirs: unknown = Object.keys(sandboxDirectories)
     .map(s => !existingDirPaths[s] && sandboxDirectories[s])
