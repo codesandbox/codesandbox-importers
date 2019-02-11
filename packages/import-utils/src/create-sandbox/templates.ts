@@ -138,7 +138,8 @@ export function getTemplate(
     return "styleguidist";
   }
 
-  if (totalDependencies.indexOf("parcel-bundler") > -1) {
+  const parcel = ["parcel-bundler", "parcel"];
+  if (totalDependencies.some(dep => parcel.indexOf(dep) > -1)) {
     return "parcel";
   }
 
