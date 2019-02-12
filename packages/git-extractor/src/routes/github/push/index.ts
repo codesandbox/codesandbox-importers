@@ -1,4 +1,4 @@
-import { INormalizedModules } from "codesandbox-import-utils/lib/utils/files/normalize";
+import { INormalizedModules } from "codesandbox-import-util-types";
 import * as api from "../api";
 
 import getDelta from "./utils/delta";

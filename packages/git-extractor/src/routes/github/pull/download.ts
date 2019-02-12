@@ -1,7 +1,7 @@
 import * as JSZip from "jszip";
 
 import { isText } from "codesandbox-import-utils/lib/is-text";
-import { INormalizedModules } from "codesandbox-import-utils/lib/utils/files/normalize";
+import { INormalizedModules } from "codesandbox-import-util-types";
 
 import { IGitInfo } from "../push/index";
 import { downloadZip } from "../api";

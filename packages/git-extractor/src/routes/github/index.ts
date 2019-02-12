@@ -1,9 +1,7 @@
 import { Context } from "koa";
 import createSandbox from "codesandbox-import-utils/lib/create-sandbox";
-import normalizeSandbox, {
-  IModule,
-  INormalizedModules
-} from "codesandbox-import-utils/lib/utils/files/normalize";
+import normalizeSandbox from "codesandbox-import-utils/lib/utils/files/normalize";
+import { IModule, INormalizedModules } from "codesandbox-import-util-types";
 
 import { downloadRepository } from "./pull/download";
 import * as api from "./api";
