@@ -1,4 +1,4 @@
-import { IModule } from "codesandbox-import-util-types";
+import { IModule, IDirectory } from "codesandbox-import-util-types";
 import { ITree } from "../index";
 
 import { createHash } from "crypto";
@@ -12,7 +12,7 @@ function getGitSha(content: string) {
 }
 
 interface INormalizedAndDeletedModules {
-  [path: string]: IModule | null;
+  [path: string]: IModule | IDirectory | null;
 }
 
 export default function getDelta(
@@ -29,7 +29,7 @@ export default function getDelta(
     if (!equivalentModule) {
       deleted.push(file.path);
     } else {
-      if (equivalentModule.isBinary) {
+      if (equivalentModule.type === "directory" || equivalentModule.isBinary) {
         return;
       }
 
