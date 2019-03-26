@@ -45,7 +45,8 @@ export type ITemplate =
   | "ember"
   | "nest"
   | "static"
-  | "styleguidist";
+  | "styleguidist"
+  | "vuepress";
 
 export interface ISandbox {
   title: string;
