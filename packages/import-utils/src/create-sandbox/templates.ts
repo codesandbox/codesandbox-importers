@@ -60,6 +60,10 @@ export function getMainFile(template: ITemplate) {
     return "index.html";
   }
 
+  if (template === "mdx-deck") {
+    return "deck.mdx";
+  }
+
   return "src/index.js";
 }
 
@@ -165,6 +169,10 @@ export function getTemplate(
 
   if (totalDependencies.indexOf("vue") > -1) {
     return "vue-cli";
+  }
+
+  if (totalDependencies.indexOf("mdx-deck") > -1) {
+    return "mdx-deck";
   }
 
   const dojo = ["@dojo/core", "@dojo/framework"];
