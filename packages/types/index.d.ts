@@ -45,7 +45,8 @@ export type ITemplate =
   | "ember"
   | "nest"
   | "static"
-  | "styleguidist";
+  | "styleguidist"
+  | "mdx-deck";
 
 export interface ISandbox {
   title: string;
