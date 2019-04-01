@@ -22,6 +22,10 @@ export function getMainFile(template: ITemplate) {
     return "src/pages/index.js";
   }
 
+  if (template === "gridsome") {
+    return "src/pages/index.vue";
+  }
+
   if (template === "styleguidist") {
     // Wildcard, because styleguidist is not specific on this
     return "package.json";
@@ -173,6 +177,10 @@ export function getTemplate(
 
   if (totalDependencies.indexOf("mdx-deck") > -1) {
     return "mdx-deck";
+  }
+
+  if (totalDependencies.indexOf("gridsome") > -1) {
+    return "gridsome";
   }
 
   const dojo = ["@dojo/core", "@dojo/framework"];

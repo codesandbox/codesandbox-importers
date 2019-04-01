@@ -46,6 +46,7 @@ export type ITemplate =
   | "nest"
   | "static"
   | "styleguidist"
+  | "gridsome"
   | "mdx-deck";
 
 export interface ISandbox {
