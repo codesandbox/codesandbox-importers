@@ -64,6 +64,11 @@ export function getMainFile(template: ITemplate) {
     return "index.html";
   }
 
+  if (template === "vuepress") {
+    // Wildcard, because vuepress is not specific on this
+    return "package.json";
+  }
+  
   if (template === "mdx-deck") {
     return "deck.mdx";
   }
@@ -198,6 +203,10 @@ export function getTemplate(
     totalDependencies.indexOf("@nestjs/common") > -1
   ) {
     return "nest";
+  }
+
+  if (totalDependencies.indexOf("vuepress") > -1) {
+    return "vuepress";
   }
 
   return undefined;
