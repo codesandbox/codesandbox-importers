@@ -46,7 +46,8 @@ export type ITemplate =
   | "nest"
   | "static"
   | "styleguidist"
-  | "vuepress";
+  | "vuepress"
+  | "mdx-deck";
 
 export interface ISandbox {
   title: string;
