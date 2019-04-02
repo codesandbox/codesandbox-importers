@@ -2,78 +2,45 @@ import { INormalizedModules } from "codesandbox-import-util-types";
 import { ITemplate } from "codesandbox-import-util-types";
 
 export function getMainFile(template: ITemplate) {
-  if (template === "vue-cli") {
-    return "src/main.js";
-  }
+  switch (template) {
+    case "vue-cli":
+      return "src/main.js";
+      break;
+    case "angular-cli":
+      return "src/main.ts";
+      break;
+    case "create-react-app-typescript":
+      return "src/main.tsx";
+      break;
+    case "parcel":
+    case "static":
+      return "index.html";
+      break;
+    case "gatsby":
+      return "src/pages/index.js";
+      break;
+    case "gridsome":
+      return "src/pages/Index.vue";
+      break;
+    case "mdx-deck":
+      return "deck.mdx";
+      break;
 
-  if (template === "angular-cli") {
-    return "src/main.ts";
+    case "styleguidist":
+    case "nuxt":
+    case "next":
+    case "apollo":
+    case "reason":
+    case "sapper":
+    case "nest":
+    case "vuepress":
+    case "styleguidist":
+      return "package.json";
+      break;
+    default:
+      return "src/index.js";
+      break;
   }
-
-  if (template === "create-react-app-typescript") {
-    return "src/index.tsx";
-  }
-
-  if (template === "parcel") {
-    return "index.html";
-  }
-
-  if (template === "gatsby") {
-    return "src/pages/index.js";
-  }
-
-  if (template === "gridsome") {
-    return "src/pages/index.vue";
-  }
-
-  if (template === "styleguidist") {
-    // Wildcard, because styleguidist is not specific on this
-    return "package.json";
-  }
-
-  if (template === "nuxt") {
-    // Wildcard, because nuxt is not specific on this
-    return "package.json";
-  }
-
-  if (template === "next") {
-    // Wildcard, because next is not specific on this
-    return "package.json";
-  }
-
-  if (template === "apollo") {
-    // Wildcard, because apollo is not specific on this
-    return "package.json";
-  }
-
-  if (template === "reason") {
-    // Wildcard, because reason is not specific on this
-    return "package.json";
-  }
-
-  if (template === "sapper") {
-    // Wildcard, because sapper is not specific on this
-    return "package.json";
-  }
-
-  if (template === "nest") {
-    return "src/main.ts";
-  }
-
-  if (template === "static") {
-    return "index.html";
-  }
-
-  if (template === "vuepress") {
-    // Wildcard, because vuepress is not specific on this
-    return "package.json";
-  }
-  
-  if (template === "mdx-deck") {
-    return "deck.mdx";
-  }
-
-  return "src/index.js";
 }
 
 const SANDBOX_CONFIG = "sandbox.config.json";
@@ -94,7 +61,7 @@ export function getTemplate(
       if (config.template) {
         return config.template;
       }
-    } catch (e) {}
+    } catch (e) { }
   }
   const { dependencies = {}, devDependencies = {} } = packageJSONPackage;
 
@@ -102,6 +69,7 @@ export function getTemplate(
     ...Object.keys(dependencies),
     ...Object.keys(devDependencies)
   ];
+ const moduleNames = Object.keys(modules);
 
   const nuxt = ["nuxt", "nuxt-edge", "nuxt-ts", "nuxt-ts-edge"];
 
@@ -126,6 +94,19 @@ export function getTemplate(
     return "apollo";
   }
 
+
+  if (totalDependencies.indexOf("mdx-deck") > -1) {
+    return "mdx-deck";
+  }
+
+  if (totalDependencies.indexOf("gridsome") > -1) {
+    return "gridsome";
+  }
+
+  if (totalDependencies.indexOf("vuepress") > -1) {
+    return "vuepress";
+  }
+
   if (totalDependencies.indexOf("ember-cli") > -1) {
     return "ember";
   }
@@ -134,26 +115,35 @@ export function getTemplate(
     return "sapper";
   }
 
-  const moduleNames = Object.keys(modules);
-  if (moduleNames.some(m => m.endsWith(".vue"))) {
-    return "vue-cli";
+  if (totalDependencies.indexOf("gatsby") > -1) {
+    return "gatsby";
   }
+
+  // CLIENT
 
   if (moduleNames.some(m => m.endsWith(".re"))) {
     return "reason";
   }
 
-  if (totalDependencies.indexOf("gatsby") > -1) {
-    return "gatsby";
-  }
-
-  if (totalDependencies.indexOf("react-styleguidist") > -1) {
-    return "styleguidist";
-  }
 
   const parcel = ["parcel-bundler", "parcel"];
   if (totalDependencies.some(dep => parcel.indexOf(dep) > -1)) {
     return "parcel";
+  }
+
+  const dojo = ["@dojo/core", "@dojo/framework"];
+  if (totalDependencies.some(dep => dojo.indexOf(dep) > -1)) {
+    return "@dojo/cli-create-app";
+  }
+  if (
+    totalDependencies.indexOf("@nestjs/core") > -1 ||
+    totalDependencies.indexOf("@nestjs/common") > -1
+  ) {
+    return "nest";
+  }
+
+  if (totalDependencies.indexOf("react-styleguidist") > -1) {
+    return "styleguidist";
   }
 
   if (totalDependencies.indexOf("react-scripts") > -1) {
@@ -180,33 +170,8 @@ export function getTemplate(
     return "vue-cli";
   }
 
-  if (totalDependencies.indexOf("mdx-deck") > -1) {
-    return "mdx-deck";
-  }
-
-  if (totalDependencies.indexOf("gridsome") > -1) {
-    return "gridsome";
-  }
-
-  const dojo = ["@dojo/core", "@dojo/framework"];
-
-  if (totalDependencies.some(dep => dojo.indexOf(dep) > -1)) {
-    return "@dojo/cli-create-app";
-  }
-
   if (totalDependencies.indexOf("cx") > -1) {
     return "cxjs";
-  }
-
-  if (
-    totalDependencies.indexOf("@nestjs/core") > -1 ||
-    totalDependencies.indexOf("@nestjs/common") > -1
-  ) {
-    return "nest";
-  }
-
-  if (totalDependencies.indexOf("vuepress") > -1) {
-    return "vuepress";
   }
 
   return undefined;
