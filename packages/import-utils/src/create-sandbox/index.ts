@@ -65,7 +65,7 @@ export default async function createSandbox(
   let template = getTemplate(packageJsonPackage, directory);
 
   if (template === undefined) {
-    console.log("Got undefined template, defaulting to 'create-react-app");
+    console.log("Got undefined template, defaulting to 'create-react-app'");
 
     template = "create-react-app";
   }
