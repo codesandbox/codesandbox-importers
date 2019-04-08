@@ -21,6 +21,20 @@ export const define = async (ctx: Context, next: () => Promise<any>) => {
       {}
     );
 
+  try {
+    const pkg = normalizedFiles["/package.json"];
+
+    if (pkg && pkg.type === "file") {
+      const parsed = JSON.parse(pkg.content);
+      console.log(
+        `Creating defined sandbox with ${JSON.stringify(
+          parsed.dependencies
+        )} deps, ${JSON.stringify(parsed.devDependencies)} devDeps.`
+      );
+    }
+  } catch (e) {
+    /* nothing */
+  }
   const sandbox = await createSandbox(normalizedFiles);
 
   ctx.body = {

@@ -48,7 +48,8 @@ export type ITemplate =
   | "styleguidist"
   | "gridsome"
   | "vuepress"
-  | "mdx-deck";
+  | "mdx-deck"
+  | "node";
 
 export interface ISandbox {
   title: string;

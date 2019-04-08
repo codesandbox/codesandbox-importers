@@ -5,26 +5,19 @@ export function getMainFile(template: ITemplate) {
   switch (template) {
     case "vue-cli":
       return "src/main.js";
-      break;
     case "angular-cli":
       return "src/main.ts";
-      break;
     case "create-react-app-typescript":
       return "src/main.tsx";
-      break;
     case "parcel":
     case "static":
       return "index.html";
-      break;
     case "gatsby":
       return "src/pages/index.js";
-      break;
     case "gridsome":
       return "src/pages/Index.vue";
-      break;
     case "mdx-deck":
       return "deck.mdx";
-      break;
 
     case "styleguidist":
     case "nuxt":
@@ -36,10 +29,8 @@ export function getMainFile(template: ITemplate) {
     case "vuepress":
     case "styleguidist":
       return "package.json";
-      break;
     default:
       return "src/index.js";
-      break;
   }
 }
 
@@ -61,7 +52,7 @@ export function getTemplate(
       if (config.template) {
         return config.template;
       }
-    } catch (e) { }
+    } catch (e) {}
   }
   const { dependencies = {}, devDependencies = {} } = packageJSONPackage;
 
@@ -69,7 +60,7 @@ export function getTemplate(
     ...Object.keys(dependencies),
     ...Object.keys(devDependencies)
   ];
- const moduleNames = Object.keys(modules);
+  const moduleNames = Object.keys(modules);
 
   const nuxt = ["nuxt", "nuxt-edge", "nuxt-ts", "nuxt-ts-edge"];
 
@@ -93,7 +84,6 @@ export function getTemplate(
   if (totalDependencies.some(dep => apollo.indexOf(dep) > -1)) {
     return "apollo";
   }
-
 
   if (totalDependencies.indexOf("mdx-deck") > -1) {
     return "mdx-deck";
@@ -124,7 +114,6 @@ export function getTemplate(
   if (moduleNames.some(m => m.endsWith(".re"))) {
     return "reason";
   }
-
 
   const parcel = ["parcel-bundler", "parcel"];
   if (totalDependencies.some(dep => parcel.indexOf(dep) > -1)) {
@@ -172,6 +161,11 @@ export function getTemplate(
 
   if (totalDependencies.indexOf("cx") > -1) {
     return "cxjs";
+  }
+
+  const nodeDeps = ["express", "koa"];
+  if (totalDependencies.some(dep => nodeDeps.indexOf(dep) > -1)) {
+    return "node";
   }
 
   return undefined;
