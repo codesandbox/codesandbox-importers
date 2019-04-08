@@ -68,6 +68,8 @@ export default async function createSandbox(
     console.log("Got undefined template, defaulting to 'create-react-app'");
 
     template = "create-react-app";
+  } else {
+    console.log(`Creating sandbox with template '${template}'`);
   }
 
   const mainFileUnix = findMainFile(
