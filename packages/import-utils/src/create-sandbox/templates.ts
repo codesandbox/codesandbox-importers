@@ -163,7 +163,7 @@ export function getTemplate(
     return "cxjs";
   }
 
-  const nodeDeps = ["express", "koa"];
+  const nodeDeps = ["express", "koa", "nodemon"];
   if (totalDependencies.some(dep => nodeDeps.indexOf(dep) > -1)) {
     return "node";
   }
