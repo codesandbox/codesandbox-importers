@@ -66,6 +66,10 @@ export function getTemplate(
 
   const nuxt = ["nuxt", "nuxt-edge", "nuxt-ts", "nuxt-ts-edge"];
 
+  if (totalDependencies.indexOf("@adonisjs/framework") > -1) {
+    return "adonis";
+  }
+
   if (totalDependencies.some(dep => nuxt.indexOf(dep) > -1)) {
     return "nuxt";
   }
