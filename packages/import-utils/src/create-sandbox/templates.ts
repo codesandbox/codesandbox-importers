@@ -3,6 +3,8 @@ import { ITemplate } from "codesandbox-import-util-types";
 
 export function getMainFile(template: ITemplate) {
   switch (template) {
+    case "adonis":
+      return 'server.js';
     case "vue-cli":
       return "src/main.js";
     case "angular-cli":
