@@ -64,11 +64,11 @@ export function getTemplate(
   ];
   const moduleNames = Object.keys(modules);
 
-  const nuxt = ["nuxt", "nuxt-edge", "nuxt-ts", "nuxt-ts-edge"];
-
   if (totalDependencies.indexOf("@adonisjs/framework") > -1) {
     return "adonis";
   }
+
+  const nuxt = ["nuxt", "nuxt-edge", "nuxt-ts", "nuxt-ts-edge"];
 
   if (totalDependencies.some(dep => nuxt.indexOf(dep) > -1)) {
     return "nuxt";
