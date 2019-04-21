@@ -27,6 +27,7 @@ export interface ISandboxDirectory {
 }
 
 export type ITemplate =
+  | "adonis"
   | "vue-cli"
   | "preact-cli"
   | "svelte"

@@ -3,6 +3,8 @@ import { ITemplate } from "codesandbox-import-util-types";
 
 export function getMainFile(template: ITemplate) {
   switch (template) {
+    case "adonis":
+      return 'server.js';
     case "vue-cli":
       return "src/main.js";
     case "angular-cli":
@@ -61,6 +63,10 @@ export function getTemplate(
     ...Object.keys(devDependencies)
   ];
   const moduleNames = Object.keys(modules);
+
+  if (totalDependencies.indexOf("@adonisjs/framework") > -1) {
+    return "adonis";
+  }
 
   const nuxt = ["nuxt", "nuxt-edge", "nuxt-ts", "nuxt-ts-edge"];
 
