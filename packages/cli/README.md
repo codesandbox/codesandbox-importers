@@ -2,7 +2,7 @@
 
 > Upload your templates to codesandbox with a single command 🏖️
 
-[![Build Status](https://travis-ci.org/CompuIves/codesandbox-cli.svg?branch=master)](https://travis-ci.org/CompuIves/codesandbox-cli)
+[![Build Status](https://travis-ci.org/codesandbox/codesandbox-cli.svg?branch=master)](https://travis-ci.org/codesandbox/codesandbox-cli)
 
 This is the command line interface for [CodeSandbox](https://codesandbox.io), an online editor
 tailored for web applications.
