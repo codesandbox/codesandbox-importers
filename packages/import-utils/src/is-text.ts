@@ -16,7 +16,16 @@ export const isText = (filename: string, buffer: Buffer) => {
         return reject(err);
       }
 
-      resolve(result && !FILE_LOADER_REGEX.test(filename) && !isTooBig(buffer));
+      // We don't support null bytes in the database with postgres,
+      // so we need to mark it as binary if there are null bytes
+      const hasNullByte = buffer.toString().includes("\0");
+
+      resolve(
+        result &&
+          !FILE_LOADER_REGEX.test(filename) &&
+          !isTooBig(buffer) &&
+          !hasNullByte
+      );
     });
   });
 };
