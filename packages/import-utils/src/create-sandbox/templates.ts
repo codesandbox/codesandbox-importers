@@ -20,6 +20,8 @@ export function getMainFile(template: ITemplate) {
       return "src/pages/Index.vue";
     case "mdx-deck":
       return "deck.mdx";
+    case "quasar":
+      return "src/pages/Index.vue"
 
     case "styleguidist":
     case "nuxt":
@@ -113,6 +115,10 @@ export function getTemplate(
 
   if (totalDependencies.indexOf("gatsby") > -1) {
     return "gatsby";
+  }
+
+  if (totalDependencies.indexOf("quasar") > -1) {
+    return "quasar";
   }
 
   // CLIENT
