@@ -4,7 +4,7 @@ import { ITemplate } from "codesandbox-import-util-types";
 export function getMainFile(template: ITemplate) {
   switch (template) {
     case "adonis":
-      return 'server.js';
+      return "server.js";
     case "vue-cli":
       return "src/main.js";
     case "angular-cli":
@@ -37,6 +37,7 @@ export function getMainFile(template: ITemplate) {
 }
 
 const SANDBOX_CONFIG = "sandbox.config.json";
+const MAX_CLIENT_DEPENDENCY_COUNT = 50;
 
 export function getTemplate(
   packageJSONPackage: {
@@ -171,6 +172,11 @@ export function getTemplate(
 
   const nodeDeps = ["express", "koa", "nodemon", "ts-node"];
   if (totalDependencies.some(dep => nodeDeps.indexOf(dep) > -1)) {
+    return "node";
+  }
+
+  if (Object.keys(dependencies).length >= MAX_CLIENT_DEPENDENCY_COUNT) {
+    // The dependencies are too much for client sandboxes to handle
     return "node";
   }
 
