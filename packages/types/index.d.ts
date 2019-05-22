@@ -50,6 +50,7 @@ export type ITemplate =
   | "gridsome"
   | "vuepress"
   | "mdx-deck"
+  | "quasar"
   | "node";
 
 export interface ISandbox {
