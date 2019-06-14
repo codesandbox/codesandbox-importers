@@ -1,7 +1,7 @@
 import * as http from "http";
 import * as inquirer from "inquirer";
 import { omit } from "lodash";
-import * as opn from "opn";
+import * as open from "open";
 import ora = require("ora");
 
 import * as cfg from "../cfg";
@@ -23,7 +23,7 @@ import * as Commander from "commander";
 async function handleSignIn() {
   // Open specific url
   info(`Opening ${CLI_LOGIN_URL}`);
-  opn(CLI_LOGIN_URL, { wait: false });
+  open(CLI_LOGIN_URL, { wait: false });
 
   const { authToken } = await inquirer.prompt([
     {
