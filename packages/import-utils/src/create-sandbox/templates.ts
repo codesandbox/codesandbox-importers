@@ -30,6 +30,7 @@ export function getMainFile(template: ITemplate) {
     case "reason":
     case "sapper":
     case "nest":
+    case "unibit":
     case "vuepress":
     case "styleguidist":
       return "package.json";
@@ -100,6 +101,10 @@ export function getTemplate(
 
   if (totalDependencies.indexOf("gridsome") > -1) {
     return "gridsome";
+  }
+
+    if (totalDependencies.indexOf("@stackbit/unibit") > -1) {
+    return "unibit";
   }
 
   if (totalDependencies.indexOf("vuepress") > -1) {
