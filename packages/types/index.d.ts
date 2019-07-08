@@ -51,6 +51,7 @@ export type ITemplate =
   | "vuepress"
   | "mdx-deck"
   | "quasar"
+  | "unibit"
   | "node";
 
 export interface ISandbox {
