@@ -35,6 +35,7 @@ export function getMainFile(template: ITemplate) {
     case "nest":
     case "vuepress":
     case "styleguidist":
+    case "unibit":
       return "package.json";
       break;
     default:
@@ -118,6 +119,13 @@ export function getTemplate(
   if (totalDependencies.indexOf("gatsby") > -1) {
     return "gatsby";
   }
+
+
+  if (totalDependencies.indexOf("@stackbit/unibit") > -1) {
+    return "unibit";
+  }
+
+
 
   // CLIENT
 

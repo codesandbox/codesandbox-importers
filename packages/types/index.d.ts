@@ -48,6 +48,7 @@ export type ITemplate =
   | "styleguidist"
   | "gridsome"
   | "vuepress"
+  | "unibit"
   | "mdx-deck";
 
 export interface ISandbox {
