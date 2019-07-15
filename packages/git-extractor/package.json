@@ -4,6 +4,11 @@
   "description": "",
   "main": "index.js",
   "private": true,
+  "repository": {
+    "type" : "git",
+    "url" : "https://github.com/codesandbox/codesandbox-importers",
+    "directory": "packages/git-extractor"
+  },
   "scripts": {
     "build": "rimraf dist && yarn compile",
     "compile": "tsc",

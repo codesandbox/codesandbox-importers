@@ -1,5 +1,9 @@
 {
   "name": "codesandbox-import-util-types",
   "version": "2.1.9",
-  "gitHead": "3cdcdea389d39f2a92be73dcb73496f68c8ada41"
+  "repository": {
+    "type" : "git",
+    "url" : "https://github.com/codesandbox/codesandbox-importers",
+    "directory": "packages/types"
+  }
 }

@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "description": "",
   "private": true,
+  "repository": {
+    "type" : "git",
+    "url" : "https://github.com/codesandbox/codesandbox-importers"
+  },
   "scripts": {
     "build": "yarn build:dependencies && lerna run build --scope codesandbox --scope git-converter --parallel",
     "build:git-extractor": "yarn build:dependencies && lerna run build --scope git-converter",
