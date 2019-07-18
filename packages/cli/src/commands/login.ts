@@ -64,7 +64,7 @@ export async function login() {
     try {
       const user = await handleSignIn();
 
-      info(`Succesfully signed in as ${user.username}!`);
+      info(`Successfully signed in as ${user.username}!`);
     } catch (e) {
       error("Something went wrong while signing in: " + e.message);
     }

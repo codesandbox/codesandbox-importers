@@ -22,7 +22,7 @@ const MAX_MODULE_COUNT = 250;
 const MAX_DIRECTORY_COUNT = 50;
 
 /**
- * Show warnings for the errors that occured during mapping of files, we
+ * Show warnings for the errors that occurred during mapping of files, we
  * still give the user to continue deployment without those files.
  *
  * @param {string} resolvedPath
@@ -155,7 +155,7 @@ export default function registerCommand(program: typeof Commander) {
           spinner.stop();
 
           success(
-            "Succesfully created the sandbox, you can find the sandbox here:"
+            "Successfully created the sandbox, you can find the sandbox here:"
           );
           success(createSandboxUrl(sandboxData));
         } catch (e) {

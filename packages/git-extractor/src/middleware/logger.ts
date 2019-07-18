@@ -1,4 +1,4 @@
-import { Middleware, Context } from "koa";
+import { Context } from "koa";
 
 interface ILogParams {
   method: string;
