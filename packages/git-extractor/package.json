@@ -1,6 +1,6 @@
 {
   "name": "git-converter",
-  "version": "2.1.4",
+  "version": "2.1.9",
   "description": "",
   "main": "index.js",
   "private": true,
