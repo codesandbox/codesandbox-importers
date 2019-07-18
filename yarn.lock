@@ -335,13 +335,6 @@
   resolved "https://registry.yarnpkg.com/@types/node/-/node-8.9.2.tgz#94bb08914ea1aebbb18ecff4c27dc0930e512934"
   integrity sha512-+IIOUfGkGIUu310djXpOZNR1jHftzr/W7DwoUPiRfzhZWFLXdRt80ePYUjSEYVEs4hJUK4ikXWWo7eHd10RQlA==
 
-"@types/opn@^3.0.28":
-  version "3.0.28"
-  resolved "https://registry.yarnpkg.com/@types/opn/-/opn-3.0.28.tgz#097d0d1c9b5749573a5d96df132387bb6d02118a"
-  integrity sha1-CX0NHJtXSVc6XZbfEyOHu20CEYo=
-  dependencies:
-    "@types/node" "*"
-
 "@types/ora@^0.3.31":
   version "0.3.32"
   resolved "https://registry.yarnpkg.com/@types/ora/-/ora-0.3.32.tgz#60842f56a0676b094780d1a8181df7802753cfc9"
@@ -6633,10 +6626,10 @@ only@0.0.2:
   resolved "https://registry.yarnpkg.com/only/-/only-0.0.2.tgz#2afde84d03e50b9a8edc444e30610a70295edfb4"
   integrity sha1-Kv3oTQPlC5qO3EROMGEKcCle37Q=
 
-opn@^5.1.0:
-  version "5.2.0"
-  resolved "https://registry.yarnpkg.com/opn/-/opn-5.2.0.tgz#71fdf934d6827d676cecbea1531f95d354641225"
-  integrity sha512-Jd/GpzPyHF4P2/aNOVmS3lfMSWV9J7cOhCG1s08XCEAsPkB7lp6ddiU0J7XzyQRDUh8BqJ7PchfINjR8jyofRQ==
+open@^6.3.0:
+  version "6.4.0"
+  resolved "https://registry.yarnpkg.com/open/-/open-6.4.0.tgz#5c13e96d0dc894686164f18965ecfe889ecfc8a9"
+  integrity sha512-IFenVPgF70fSm1keSd2iDBIDIBZkroLeuffXq+wKTzTJlBpesFWojV9lb8mzOfaAzM1sr7HQHuO0vtV0zYekGg==
   dependencies:
     is-wsl "^1.1.0"
 
