@@ -18,7 +18,7 @@ import uploadFiles from "../utils/parse-sandbox/upload-files";
 
 // tslint:disable no-var-requires
 const ora = require("ora");
-const MAX_MODULE_COUNT = 120;
+const MAX_MODULE_COUNT = 250;
 const MAX_DIRECTORY_COUNT = 50;
 
 /**
