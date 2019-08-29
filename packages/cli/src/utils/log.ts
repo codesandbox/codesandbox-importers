@@ -14,12 +14,9 @@ export function logCodeSandbox() {
 }
 
 export function extraHelp() {
+  console.log("");
   console.log("  Notes:");
   console.log();
-  console.log(
-    "    - The CLI currently only works with create-react-app projects"
-  );
-  console.log("    - `public` folder deployment is not possible yet");
   console.log("    - You can only use the CLI if you are logged in");
   console.log();
 

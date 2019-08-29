@@ -5,6 +5,7 @@ import * as path from "path";
 
 import * as api from "./utils/api";
 import { error } from "./utils/log";
+import { IS_STAGING } from "./utils/env";
 
 // tslint:disable no-var-requires
 const ms = require("ms");
@@ -25,9 +26,13 @@ export interface IConfig {
   user?: IUser;
 }
 
+const CONFIG_NAME = IS_STAGING
+  ? ".codesandbox-staging.json"
+  : ".codesandbox.json";
+
 const file = process.env.CODESANDBOX_JSON
   ? path.resolve(process.env.CODESANDBOX_JSON)
-  : path.resolve(homedir(), ".codesandbox.json");
+  : path.resolve(homedir(), CONFIG_NAME);
 
 /**
  * Save config file
