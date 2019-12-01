@@ -1,5 +1,4 @@
-import { INormalizedModules } from "codesandbox-import-util-types";
-import { ITemplate } from "codesandbox-import-util-types";
+import { INormalizedModules, ITemplate } from "codesandbox-import-util-types";
 
 export function getMainFile(template: ITemplate) {
   switch (template) {
@@ -41,11 +40,13 @@ export function getMainFile(template: ITemplate) {
 const SANDBOX_CONFIG = "sandbox.config.json";
 const MAX_CLIENT_DEPENDENCY_COUNT = 50;
 
+type Dependencies = { [name: string]: string };
+type PackageJSON = {
+  dependencies?: Dependencies;
+  devDependencies?: Dependencies;
+};
 export function getTemplate(
-  packageJSONPackage: {
-    dependencies: { [key: string]: string };
-    devDependencies: { [key: string]: string };
-  },
+  { dependencies = {}, devDependencies = {} }: PackageJSON,
   modules: INormalizedModules
 ): ITemplate | undefined {
   const sandboxConfig =
@@ -59,7 +60,6 @@ export function getTemplate(
       }
     } catch (e) {}
   }
-  const { dependencies = {}, devDependencies = {} } = packageJSONPackage;
 
   const totalDependencies = [
     ...Object.keys(dependencies),
