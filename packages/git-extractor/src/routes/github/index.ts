@@ -49,7 +49,7 @@ export const pullInfo = async (ctx: Context, next: () => Promise<any>) => {
     username,
     repo,
     branch,
-    "/",
+    "",
     false,
     userToken
   );
