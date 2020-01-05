@@ -36,6 +36,27 @@ export const info = async (ctx: Context, next: () => Promise<any>) => {
   ctx.body = response;
 };
 
+export const pullInfo = async (ctx: Context, next: () => Promise<any>) => {
+  const userToken = getUserToken(ctx);
+  const { username, repo, branch } = await api.fetchPullInfo(
+    ctx.params.username,
+    ctx.params.repo,
+    ctx.params.pull,
+    userToken
+  );
+
+  const response = await api.fetchRepoInfo(
+    username,
+    repo,
+    branch,
+    "/",
+    false,
+    userToken
+  );
+
+  ctx.body = response;
+};
+
 export const getRights = async (ctx: Context) => {
   const userToken = getUserToken(ctx);
 

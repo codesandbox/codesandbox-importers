@@ -8,7 +8,7 @@ import log from "../../utils/log";
 import { ITree, IGitInfo } from "./push";
 
 const API_URL = "https://api.github.com";
-const BASE_URL = API_URL + "/repos";
+const REPO_BASE_URL = API_URL + "/repos";
 
 const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID;
 const GITHUB_CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET;
@@ -16,8 +16,12 @@ const GITHUB_CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET;
 const NOT_FOUND_MESSAGE =
   "Could not find the specified repository or directory";
 
-function buildApiUrl(username: string, repo: string) {
-  return `${BASE_URL}/${username}/${repo}`;
+function buildRepoApiUrl(username: string, repo: string) {
+  return `${REPO_BASE_URL}/${username}/${repo}`;
+}
+
+function buildPullApiUrl(username: string, repo: string, pull: number) {
+  return `${buildRepoApiUrl(username, repo)}/pulls/${pull}`;
 }
 
 function buildSecretParams() {
@@ -30,7 +34,7 @@ function buildContentsUrl(
   branch: string,
   path: string
 ) {
-  return `${buildApiUrl(
+  return `${buildRepoApiUrl(
     username,
     repo
   )}/contents/${path}${buildSecretParams()}&ref=${branch}`;
@@ -42,7 +46,7 @@ function buildCommitsUrl(
   branch: string,
   path: string
 ) {
-  return `${buildApiUrl(
+  return `${buildRepoApiUrl(
     username,
     repo
   )}/commits/${branch}${buildSecretParams()}&path=${path}`;
@@ -57,7 +61,7 @@ interface IRepoResponse {
 }
 
 export async function getRepo(username: string, repo: string, token: string) {
-  const url = buildApiUrl(username, repo);
+  const url = buildRepoApiUrl(username, repo);
 
   const response: { data: IRepoResponse } = await axios({
     url,
@@ -122,7 +126,7 @@ export async function fetchRights(
   currentUser: string,
   token: string
 ): Promise<"admin" | "write" | "read" | "none"> {
-  const url = `${buildApiUrl(
+  const url = `${buildRepoApiUrl(
     username,
     repo
   )}/collaborators/${currentUser}/permission`;
@@ -158,7 +162,7 @@ export async function fetchTree(
   recursive: boolean = true,
   token?: string
 ): Promise<ITreeResponse> {
-  let url = `${buildApiUrl(
+  let url = `${buildRepoApiUrl(
     username,
     repo
   )}/git/trees/${commitSha}${buildSecretParams()}&path=${path}`;
@@ -191,7 +195,7 @@ export async function createBlob(
   token: string
 ) {
   const response: { data: IBlobResponse } = await axios.post(
-    `${buildApiUrl(username, repo)}/git/blobs${buildSecretParams()}`,
+    `${buildRepoApiUrl(username, repo)}/git/blobs${buildSecretParams()}`,
     { content: content, encoding },
     { headers: { Authorization: `Bearer ${token}` } }
   );
@@ -212,7 +216,7 @@ export async function createTree(
   token: string
 ) {
   const response: { data: ITreeResponse } = await axios.post(
-    `${buildApiUrl(username, repo)}/git/trees${buildSecretParams()}`,
+    `${buildRepoApiUrl(username, repo)}/git/trees${buildSecretParams()}`,
     { base_tree: null, tree },
     { headers: { Authorization: `Bearer ${token}` } }
   );
@@ -248,7 +252,7 @@ export async function createCommit(
   token: string
 ) {
   const response: { data: ICreateCommitResponse } = await axios.post(
-    `${buildApiUrl(username, repo)}/git/commits${buildSecretParams()}`,
+    `${buildRepoApiUrl(username, repo)}/git/commits${buildSecretParams()}`,
     { tree: treeSha, message, parents: [parentCommitSha] },
     { headers: { Authorization: `Bearer ${token}` } }
   );
@@ -276,7 +280,7 @@ export async function createMerge(
 ) {
   try {
     const response: { data: ICreateMergeResponse } = await axios.post(
-      `${buildApiUrl(username, repo)}/merges${buildSecretParams()}`,
+      `${buildRepoApiUrl(username, repo)}/merges${buildSecretParams()}`,
       { base: branch, head: commitSha },
       { headers: { Authorization: `Bearer ${token}` } }
     );
@@ -307,7 +311,7 @@ export async function updateReference(
   token: string
 ) {
   const response: { data: IUpdateReferenceResponse } = await axios.patch(
-    `${buildApiUrl(
+    `${buildRepoApiUrl(
       username,
       repo
     )}/git/refs/heads/${branch}${buildSecretParams()}`,
@@ -336,7 +340,7 @@ export async function createReference(
   token: string
 ) {
   const response: { data: ICreateReferenceResponse } = await axios.post(
-    `${buildApiUrl(username, repo)}/git/refs${buildSecretParams()}`,
+    `${buildRepoApiUrl(username, repo)}/git/refs${buildSecretParams()}`,
     { ref: `refs/heads/${branch}`, sha: refSha },
     { headers: { Authorization: `Bearer ${token}` } }
   );
@@ -358,7 +362,7 @@ export async function createFork(
   token: string
 ) {
   const response: { data: ICreateForkResponse } = await axios.post(
-    `${buildApiUrl(username, repo)}/forks${buildSecretParams()}`,
+    `${buildRepoApiUrl(username, repo)}/forks${buildSecretParams()}`,
     {},
     { headers: { Authorization: `Bearer ${token}` } }
   );
@@ -400,7 +404,7 @@ export async function createRepo(
 export async function doesRepoExist(username: string, repo: string) {
   try {
     const response = await axios.get(
-      buildApiUrl(username, repo) + buildSecretParams()
+      buildRepoApiUrl(username, repo) + buildSecretParams()
     );
 
     return true;
@@ -527,6 +531,35 @@ export async function fetchRepoInfo(
   }
 }
 
+export async function fetchPullInfo(
+  username: string,
+  repo: string,
+  pull: number,
+  userToken?: string
+) {
+  const url = buildPullApiUrl(username, repo, pull);
+
+  try {
+    const response = await axios({
+      url,
+      headers: {
+        Authorization: userToken ? `Bearer ${userToken}` : ""
+      }
+    });
+
+    const data = response.data;
+
+    return {
+      repo: data.head.repo.name,
+      username: data.head.repo.owner.login,
+      branch: data.head.ref
+    };
+  } catch (e) {
+    e.message = "Could not find pull request information";
+    throw e;
+  }
+}
+
 const MAX_ZIP_SIZE = 128 * 1024 * 1024; // 128Mb
 
 export async function downloadZip(
@@ -534,7 +567,7 @@ export async function downloadZip(
   commitSha: string,
   userToken?: string
 ) {
-  const repoUrl = buildApiUrl(gitInfo.username, gitInfo.repo);
+  const repoUrl = buildRepoApiUrl(gitInfo.username, gitInfo.repo);
   const url = `${repoUrl}/zipball/${commitSha}`;
 
   const buffer: Buffer = await fetch(url, {
