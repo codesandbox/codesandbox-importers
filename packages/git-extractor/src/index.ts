@@ -35,7 +35,7 @@ router
   .get("/git/github/rights/:username/:repo", github.getRights)
   .get("/git/github/info/:username/:repo/tree/:branch/:path*", github.info) // allow tree urls
   .get("/git/github/info/:username/:repo/blob/:branch/:path*", github.info) // allow blob urls
-  .get("/git/github/info/:username/:repo/commit/:branch/:path*", github.info) // allow commit urls
+  .get("/git/github/info/:username/:repo/commit/:branch", github.info) // allow commit urls
   .get("/git/github/info/:username/:repo", github.info) // For when tree isn't in path (root path)
   .get("/git/github/info/:username/:repo/pull/:pull", github.pullInfo) // allow pull urls
   // Push
