@@ -25,7 +25,7 @@
     "editor"
   ],
   "dependencies": {
-    "axios": "^0.16.2",
+    "axios": "^0.18.1",
     "chalk": "^2.4.1",
     "codesandbox-import-util-types": "^2.1.9",
     "codesandbox-import-utils": "^2.1.11",
