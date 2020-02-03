@@ -164,8 +164,8 @@ export function getTemplate(
     return "preact-cli";
   }
 
-  if (totalDependencies.indexOf("rax-cli") > -1) {
-    return "rax-cli";
+  if (totalDependencies.indexOf("rax") > -1) {
+    return "rax";
   }
 
   if (totalDependencies.indexOf("svelte") > -1) {
