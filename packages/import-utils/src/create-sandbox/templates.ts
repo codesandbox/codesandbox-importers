@@ -176,7 +176,7 @@ export function getTemplate(
     return "cxjs";
   }
 
-  const nodeDeps = ["express", "koa", "nodemon", "ts-node", "tfjs-node"];
+  const nodeDeps = ["express", "koa", "nodemon", "ts-node", "@tensorflow/tfjs-node"];
   if (totalDependencies.some(dep => nodeDeps.indexOf(dep) > -1)) {
     return "node";
   }
