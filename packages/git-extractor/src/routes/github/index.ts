@@ -67,7 +67,9 @@ export const getRights = async (ctx: Context) => {
     userToken
   );
 
-  return rights;
+  ctx.body = {
+    permission: rights
+  };
 };
 
 /**
