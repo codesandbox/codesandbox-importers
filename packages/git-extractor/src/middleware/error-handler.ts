@@ -5,7 +5,7 @@ const errorHandler = async (ctx: Context, next: () => Promise<any>) => {
   try {
     await next();
   } catch (e) {
-    ctx.status = e.status || e.response?.status || 500;
+    ctx.status = e.status || (e.response && e.response.status) || 500;
     ctx.body = { error: e.message };
     ctx.app.emit("error", e, ctx);
   }
