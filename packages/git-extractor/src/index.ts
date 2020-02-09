@@ -32,7 +32,7 @@ router
     "/git/github/data/:username/:repo/:branch*/commit/:commitSha/path/:path*",
     github.data
   )
-  .get("/git/github/rights/:username/:repo", github.getRights)
+  .get("/git/github/rights/:username/:repo/user/:currentUser", github.getRights)
   .get("/git/github/info/:username/:repo/tree/:branch/:path*", github.info) // allow tree urls
   .get("/git/github/info/:username/:repo/blob/:branch/:path*", github.info) // allow blob urls
   .get("/git/github/info/:username/:repo/commit/:branch", github.info) // allow commit urls
