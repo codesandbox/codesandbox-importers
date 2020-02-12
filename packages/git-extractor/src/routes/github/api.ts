@@ -485,7 +485,7 @@ export async function fetchRepoInfo(
   userToken?: string
 ): Promise<CommitResponse> {
   try {
-    const cacheId = username + repo + branch + path + userToken;
+    const cacheId = username + repo + branch + path;
     // We cache the latest retrieved sha for a limited time, so we don't spam the
     // GitHub API for every request
     let latestSha = shaCache.get(cacheId) as string;
@@ -498,7 +498,7 @@ export async function fetchRepoInfo(
           Authorization: userToken ? `Bearer ${userToken}` : ""
         }
       });
-      latestSha = response.data.sha as string;
+      response.data.latestSha = response.data.sha as string;
 
       shaCache.set(cacheId, latestSha);
     }
