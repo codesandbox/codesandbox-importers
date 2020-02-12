@@ -130,13 +130,7 @@ export const data = async (ctx: Context, next: () => Promise<any>) => {
 };
 
 export const diff = async (ctx: Context, next: () => Promise<any>) => {
-  const {
-    modules,
-    directories,
-    commitSha,
-    currentUser,
-    token
-  } = ctx.request.body;
+  const { modules, directories, commitSha, token } = ctx.request.body;
 
   const { username, repo, branch, path } = ctx.params;
 
@@ -149,7 +143,7 @@ export const diff = async (ctx: Context, next: () => Promise<any>) => {
       normalizedFiles,
       token
     ),
-    api.fetchRights(username, repo, currentUser, token)
+    api.fetchRights(username, repo, token)
   ]);
 
   ctx.body = {
@@ -180,7 +174,7 @@ export const pr = async (ctx: Context, next: () => Promise<any>) => {
     path
   };
 
-  const rights = await api.fetchRights(username, repo, currentUser, token);
+  const rights = await api.fetchRights(username, repo, token);
 
   if (rights === "none" || rights === "read") {
     // Ah, we need to fork...
