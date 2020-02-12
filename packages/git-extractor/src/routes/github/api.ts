@@ -127,14 +127,19 @@ interface RightsResponse {
 export async function fetchRights(
   username: string,
   repo: string,
-  token: string
+  token?: string
 ): Promise<"admin" | "write" | "read" | "none"> {
   const url = buildRepoApiUrl(username, repo);
 
   try {
+    const headers: { Authorization?: string } = {};
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+
     const response: { data: RightsResponse } = await axios({
       url,
-      headers: { Authorization: `Bearer ${token}` }
+      headers
     });
 
     if (response.data.permissions.admin) {
@@ -147,7 +152,10 @@ export async function fetchRights(
 
     return "read";
   } catch (e) {
-    if (e.response && e.response.status === 403) {
+    if (
+      e.response &&
+      (e.response.status === 403 || e.response.status === 401)
+    ) {
       return "none";
     } else {
       throw e;
@@ -492,11 +500,15 @@ export async function fetchRepoInfo(
 
     if (!latestSha || skipCache) {
       const url = buildCommitsUrl(username, repo, branch, path);
+
+      const headers: { Authorization?: string } = {};
+      if (userToken) {
+        headers.Authorization = `Bearer ${userToken}`;
+      }
+
       const response = await axios({
         url,
-        headers: {
-          Authorization: userToken ? `Bearer ${userToken}` : ""
-        }
+        headers
       });
       response.data.latestSha = response.data.sha as string;
 
@@ -549,11 +561,14 @@ export async function fetchPullInfo(
   const url = buildPullApiUrl(username, repo, pull);
 
   try {
+    const headers: { Authorization?: string } = {};
+    if (userToken) {
+      headers.Authorization = `Bearer ${userToken}`;
+    }
+
     const response = await axios({
       url,
-      headers: {
-        Authorization: userToken ? `Bearer ${userToken}` : ""
-      }
+      headers
     });
 
     const data = response.data;
@@ -579,8 +594,14 @@ export async function downloadZip(
   const repoUrl = buildRepoApiUrl(gitInfo.username, gitInfo.repo);
   const url = `${repoUrl}/zipball/${commitSha}`;
 
+  // @ts-ignore
+  const headers: { Authorization: string } = {};
+  if (userToken) {
+    headers.Authorization = `Bearer ${userToken}`;
+  }
+
   const buffer: Buffer = await fetch(url, {
-    headers: { Authorization: userToken ? `Bearer ${userToken}` : "" }
+    headers
   }).then(res => {
     if (+res.headers.get("Content-Length") > MAX_ZIP_SIZE) {
       throw new Error("This repo is too big to import");
