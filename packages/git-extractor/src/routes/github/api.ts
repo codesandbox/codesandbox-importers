@@ -501,6 +501,7 @@ export async function fetchRepoInfo(
       response.data.latestSha = response.data.sha as string;
 
       shaCache.set(cacheId, latestSha);
+      latestSha = response.data.sha;
     }
 
     return {
