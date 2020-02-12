@@ -467,7 +467,7 @@ interface CommitResponse {
 
 const shaCache = LRU({
   max: 500,
-  maxAge: 1000 * 30 // 30 seconds
+  maxAge: 1000 * 2 // 2 seconds
 });
 
 export function resetShaCache(gitInfo: IGitInfo) {
