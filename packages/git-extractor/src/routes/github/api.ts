@@ -114,7 +114,11 @@ export async function fetchContents(
 }
 
 interface RightsResponse {
-  permission: "admin" | "write" | "read" | "none";
+  permissions: {
+    admin: boolean;
+    push: boolean;
+    pull: boolean;
+  };
 }
 
 /**
@@ -123,13 +127,9 @@ interface RightsResponse {
 export async function fetchRights(
   username: string,
   repo: string,
-  currentUser: string,
   token: string
 ): Promise<"admin" | "write" | "read" | "none"> {
-  const url = `${buildRepoApiUrl(
-    username,
-    repo
-  )}/collaborators/${currentUser}/permission`;
+  const url = buildRepoApiUrl(username, repo);
 
   try {
     const response: { data: RightsResponse } = await axios({
@@ -137,7 +137,15 @@ export async function fetchRights(
       headers: { Authorization: `Bearer ${token}` }
     });
 
-    return response.data.permission;
+    if (response.data.permissions.admin) {
+      return "admin";
+    }
+
+    if (response.data.permissions.push) {
+      return "write";
+    }
+
+    return "read";
   } catch (e) {
     if (e.response && e.response.status === 403) {
       return "none";

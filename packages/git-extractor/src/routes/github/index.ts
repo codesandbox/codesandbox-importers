@@ -63,7 +63,6 @@ export const getRights = async (ctx: Context) => {
   const rights = await api.fetchRights(
     ctx.params.username,
     ctx.params.repo,
-    ctx.params.currentUser,
     userToken
   );
 
