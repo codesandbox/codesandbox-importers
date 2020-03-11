@@ -40,6 +40,7 @@
     "gulp-typescript": "3.1.1"
   },
   "dependencies": {
+    "@sentry/node": "5.13.2",
     "acorn": "^5.1.2",
     "acorn-dynamic-import": "^2.0.2",
     "acorn-jsx": "^4.0.1",

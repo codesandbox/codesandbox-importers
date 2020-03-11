@@ -231,7 +231,7 @@ export async function createTree(
   tree: ITree,
   token: string
 ) {
-  const response: { data: ITreeResponse } = await axios.post(
+  const response: { data: ICreateTreeResponse } = await axios.post(
     `${buildRepoApiUrl(username, repo)}/git/trees${buildSecretParams()}`,
     { base_tree: null, tree },
     { headers: { Authorization: `Bearer ${token}` } }

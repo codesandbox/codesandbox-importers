@@ -1,5 +1,6 @@
 import * as Koa from "koa";
 import * as Router from "koa-router";
+import * as Sentry from '@sentry/node';
 
 import * as bodyParser from "koa-bodyparser";
 
@@ -15,6 +16,8 @@ import notFound from "./middleware/not-found";
 // ROUTES
 import * as github from "./routes/github";
 import * as define from "./routes/define";
+
+Sentry.init({ dsn: 'https://4917ce43c4ca42a1acb85b2843b79c6b@sentry.io/4377691' });
 
 const DEFAULT_PORT = process.env.PORT || 2000;
 const app = new Koa();
