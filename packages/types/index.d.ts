@@ -30,6 +30,7 @@ export type ITemplate =
   | "adonis"
   | "vue-cli"
   | "preact-cli"
+  | "rax"
   | "svelte"
   | "create-react-app-typescript"
   | "create-react-app"
