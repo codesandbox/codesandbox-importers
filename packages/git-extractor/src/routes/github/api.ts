@@ -2,6 +2,7 @@ import axios, { AxiosRequestConfig } from "axios";
 import * as LRU from "lru-cache";
 import * as zip from "jszip";
 import fetch from "node-fetch";
+import * as Sentry from "@sentry/node";
 
 import log from "../../utils/log";
 
@@ -547,6 +548,7 @@ export async function fetchRepoInfo(
 
       e.message = NOT_FOUND_MESSAGE;
     }
+    Sentry.captureException(e);
 
     throw e;
   }
