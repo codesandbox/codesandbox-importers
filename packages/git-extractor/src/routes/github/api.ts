@@ -479,6 +479,10 @@ const shaCache = LRU({
   maxAge: 1000 * 2 // 2 seconds
 });
 
+const etagCache = LRU<string, { etag: string; sha: string }>({
+  max: 50000
+});
+
 export function resetShaCache(gitInfo: IGitInfo) {
   const { username, repo, branch = "master", path = "" } = gitInfo;
 
@@ -502,19 +506,35 @@ export async function fetchRepoInfo(
     if (!latestSha || skipCache) {
       const url = buildCommitsUrl(username, repo, branch, path);
 
-      const headers: { Authorization?: string } = {};
+      const headers: { Authorization?: string; "If-None-Match"?: string } = {};
       if (userToken) {
         headers.Authorization = `Bearer ${userToken}`;
+      }
+
+      const etagCacheResponse = etagCache.get(cacheId);
+      if (etagCacheResponse) {
+        headers["If-None-Match"] = etagCacheResponse.etag;
       }
 
       const response = await axios({
         url,
         headers
       });
-      response.data.latestSha = response.data.sha as string;
+
+      if (response.status === 304 && etagCacheResponse) {
+        latestSha = etagCacheResponse.sha;
+      } else {
+        latestSha = response.data.sha;
+
+        if (response.headers.ETag) {
+          etagCache.set(cacheId, {
+            etag: response.headers.ETag,
+            sha: response.data.sha
+          });
+        }
+      }
 
       shaCache.set(cacheId, latestSha);
-      latestSha = response.data.sha;
     }
 
     return {
