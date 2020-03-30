@@ -476,7 +476,7 @@ interface CommitResponse {
 
 const shaCache = LRU({
   max: 500,
-  maxAge: 1000 * 5 // 2 seconds
+  maxAge: 1000 * 5 // 5 seconds
 });
 
 const etagCache = LRU<string, { etag: string; sha: string }>({
