@@ -513,6 +513,7 @@ export async function fetchRepoInfo(
 
       const etagCacheResponse = etagCache.get(cacheId);
       if (etagCacheResponse) {
+        console.log('Using an earlier etag')
         headers["If-None-Match"] = etagCacheResponse.etag;
       }
 
@@ -522,11 +523,14 @@ export async function fetchRepoInfo(
       });
 
       if (response.status === 304 && etagCacheResponse) {
+        console.log('Got a 304, returning', etagCacheResponse.sha)
+        console.log(JSON.stringify(response.data))
         latestSha = etagCacheResponse.sha;
       } else {
         latestSha = response.data.sha;
 
         if (response.headers.ETag) {
+          console.log('Got an ETag', response.headers.ETag)
           etagCache.set(cacheId, {
             etag: response.headers.ETag,
             sha: response.data.sha
