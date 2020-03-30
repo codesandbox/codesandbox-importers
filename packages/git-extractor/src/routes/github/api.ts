@@ -476,7 +476,11 @@ interface CommitResponse {
 
 const shaCache = LRU({
   max: 500,
-  maxAge: 1000 * 2 // 2 seconds
+  maxAge: 1000 * 5 // 5 seconds
+});
+
+const etagCache = LRU<string, { etag: string; sha: string }>({
+  max: 50000
 });
 
 export function resetShaCache(gitInfo: IGitInfo) {
@@ -502,19 +506,44 @@ export async function fetchRepoInfo(
     if (!latestSha || skipCache) {
       const url = buildCommitsUrl(username, repo, branch, path);
 
-      const headers: { Authorization?: string } = {};
+      const headers: { Authorization?: string; "If-None-Match"?: string } = {};
       if (userToken) {
         headers.Authorization = `Bearer ${userToken}`;
       }
 
+      const etagCacheResponse = etagCache.get(cacheId);
+      if (etagCacheResponse) {
+        // Use an ETag header so duplicate requests don't count towards the limit
+        headers["If-None-Match"] = etagCacheResponse.etag;
+      }
+
       const response = await axios({
         url,
-        headers
+        headers,
+        validateStatus: function(status) {
+          // Axios sees 304 (Not Modified) as an error. We don't want that.
+          return status < 400; // Reject only if the status code is greater than or equal to 400
+        }
       });
-      response.data.latestSha = response.data.sha as string;
+
+      if (response.status === 304 && etagCacheResponse) {
+        latestSha = etagCacheResponse.sha;
+      } else {
+        latestSha = response.data.sha;
+
+        const etag = response.headers.etag;
+
+        // Only save towards the cache if there is no userToken. For people with a userToken
+        // we have 12k requests per hour to use. Won't hit that ever.
+        if (etag && !userToken) {
+          etagCache.set(cacheId, {
+            etag,
+            sha: response.data.sha
+          });
+        }
+      }
 
       shaCache.set(cacheId, latestSha);
-      latestSha = response.data.sha;
     }
 
     return {
