@@ -20,7 +20,7 @@ export function getMainFile(template: ITemplate) {
     case "mdx-deck":
       return "deck.mdx";
     case "quasar":
-      return "src/pages/Index.vue"
+      return "src/pages/Index.vue";
 
     case "styleguidist":
     case "nuxt":
@@ -176,7 +176,14 @@ export function getTemplate(
     return "cxjs";
   }
 
-  const nodeDeps = ["express", "koa", "nodemon", "ts-node", "@tensorflow/tfjs-node"];
+  const nodeDeps = [
+    "express",
+    "koa",
+    "nodemon",
+    "ts-node",
+    "@tensorflow/tfjs-node",
+    "@sveltech/routify"
+  ];
   if (totalDependencies.some(dep => nodeDeps.indexOf(dep) > -1)) {
     return "node";
   }
