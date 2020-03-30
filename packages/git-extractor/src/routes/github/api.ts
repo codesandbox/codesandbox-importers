@@ -476,7 +476,7 @@ interface CommitResponse {
 
 const shaCache = LRU({
   max: 500,
-  maxAge: 1000 * 2 // 2 seconds
+  maxAge: 1000 * 5 // 2 seconds
 });
 
 const etagCache = LRU<string, { etag: string; sha: string }>({
@@ -513,26 +513,31 @@ export async function fetchRepoInfo(
 
       const etagCacheResponse = etagCache.get(cacheId);
       if (etagCacheResponse) {
-        console.log('Using an earlier etag')
+        // Use an ETag header so duplicate requests don't count towards the limit
         headers["If-None-Match"] = etagCacheResponse.etag;
       }
 
       const response = await axios({
         url,
-        headers
+        headers,
+        validateStatus: function(status) {
+          // Axios sees 304 (Not Modified) as an error. We don't want that.
+          return status < 400; // Reject only if the status code is greater than or equal to 400
+        }
       });
 
       if (response.status === 304 && etagCacheResponse) {
-        console.log('Got a 304, returning', etagCacheResponse.sha)
-        console.log(JSON.stringify(response.data))
         latestSha = etagCacheResponse.sha;
       } else {
         latestSha = response.data.sha;
 
-        if (response.headers.ETag) {
-          console.log('Got an ETag', response.headers.ETag)
+        const etag = response.headers.etag;
+
+        // Only save towards the cache if there is no userToken. For people with a userToken
+        // we have 12k requests per hour to use. Won't hit that ever.
+        if (etag && !userToken) {
           etagCache.set(cacheId, {
-            etag: response.headers.ETag,
+            etag,
             sha: response.data.sha
           });
         }
