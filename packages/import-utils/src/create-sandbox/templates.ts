@@ -164,6 +164,10 @@ export function getTemplate(
     return "preact-cli";
   }
 
+  if (totalDependencies.indexOf("@sveltech/routify") > -1) {
+    return "node";
+  }
+
   if (totalDependencies.indexOf("svelte") > -1) {
     return "svelte";
   }
@@ -181,8 +185,7 @@ export function getTemplate(
     "koa",
     "nodemon",
     "ts-node",
-    "@tensorflow/tfjs-node",
-    "@sveltech/routify"
+    "@tensorflow/tfjs-node"
   ];
   if (totalDependencies.some(dep => nodeDeps.indexOf(dep) > -1)) {
     return "node";
