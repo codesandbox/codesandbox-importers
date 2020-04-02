@@ -185,7 +185,8 @@ export function getTemplate(
     "koa",
     "nodemon",
     "ts-node",
-    "@tensorflow/tfjs-node"
+    "@tensorflow/tfjs-node",
+    "webpack-dev-server"
   ];
   if (totalDependencies.some(dep => nodeDeps.indexOf(dep) > -1)) {
     return "node";
