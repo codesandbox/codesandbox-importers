@@ -183,11 +183,19 @@ export async function createRepo(
   username: string,
   name: string,
   sandboxFiles: INormalizedModules,
-  userToken: string
+  userToken: string,
+  privateRepo?: boolean
 ) {
-  const data = await api.createRepo(username, name, userToken);
+  const data = await api.createRepo(username, name, userToken, privateRepo);
 
-  const latestData = await api.fetchRepoInfo(username, name);
+  const latestData = await api.fetchRepoInfo(
+    username,
+    name,
+    "master",
+    "",
+    true,
+    userToken
+  );
 
   const gitInfo: IGitInfo = {
     username: latestData.username,

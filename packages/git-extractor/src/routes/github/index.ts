@@ -293,10 +293,12 @@ export const commit = async (ctx: Context, next: () => Promise<any>) => {
 export const repo = async (ctx: Context, next: () => Promise<any>) => {
   const {
     token,
-    normalizedFiles: fileArray
+    normalizedFiles: fileArray,
+    privateRepo
   }: {
     token: string;
     normalizedFiles: Array<IModule & { path: string }>;
+    privateRepo?: boolean;
   } = ctx.request.body;
   const { username, repo } = ctx.params;
 
@@ -312,7 +314,13 @@ export const repo = async (ctx: Context, next: () => Promise<any>) => {
     throw new Error("Repo name cannot be empty");
   }
 
-  const result = await push.createRepo(username, repo, normalizedFiles, token);
+  const result = await push.createRepo(
+    username,
+    repo,
+    normalizedFiles,
+    token,
+    privateRepo
+  );
 
   ctx.body = result;
 };
