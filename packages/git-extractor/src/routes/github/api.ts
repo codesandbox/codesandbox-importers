@@ -28,14 +28,12 @@ function buildCompareApiUrl(
   username: string,
   repo: string,
   branch: string,
-  base: { commitSha: string; username: string }
+  base: { ref: string; username: string }
 ) {
   return `${buildRepoApiUrl(username, repo)}/compare/${
     // We only prefix with username if we are comparing with a source repo of different user (PR)
-    base.username === username
-      ? base.commitSha
-      : `${base.username}:${base.commitSha}`
-  }..${branch}`;
+    base.username === username ? base.ref : `${base.username}:${base.ref}`
+  }...${branch}`;
 }
 
 function buildSecretParams() {
@@ -86,15 +84,21 @@ interface ICompareResponse {
   }>;
 }
 
+interface IContentResponse {
+  content: string;
+  encoding: string;
+}
+
 export async function getComparison(
   username: string,
   repo: string,
   branch: string,
-  head: { commitSha: string; username: string },
+  base: { ref: string; username: string },
   token: string
 ) {
-  const url = buildCompareApiUrl(username, repo, branch, head);
+  const url = buildCompareApiUrl(username, repo, branch, base);
 
+  console.log("GETTING COMPARISON", url);
   const response: { data: ICompareResponse } = await axios({
     url,
     headers: { Authorization: `Bearer ${token}` },
@@ -104,7 +108,7 @@ export async function getComparison(
 }
 
 export async function getContent(url: string, token: string) {
-  const response: { data: IRepoResponse } = await axios({
+  const response: { data: IContentResponse } = await axios({
     url,
     headers: { Authorization: `Bearer ${token}` },
   });
@@ -632,48 +636,6 @@ export async function fetchRepoInfo(
     }
     Sentry.captureException(e);
 
-    throw e;
-  }
-}
-
-export async function fetchBranchDiff(
-  source: {
-    username: string;
-    repo: string;
-    commitSha: string;
-  },
-  target: {
-    username: string;
-    repo: string;
-    commitSha: string;
-  },
-  userToken?: string
-) {
-  const url = buildPullApiUrl(username, repo, pull);
-
-  try {
-    const headers: { Authorization?: string } = {};
-    if (userToken) {
-      headers.Authorization = `Bearer ${userToken}`;
-    }
-
-    const response = await axios({
-      url,
-      headers,
-    });
-
-    const data = response.data;
-
-    return {
-      repo: data.head.repo.name,
-      username: data.head.repo.owner.login,
-      branch: data.head.ref,
-      merged: data.merged,
-      mergeable: data.mergeable,
-      rebaseable: data.rebaseable,
-    };
-  } catch (e) {
-    e.message = "Could not find pull request information";
     throw e;
   }
 }
