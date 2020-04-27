@@ -1,13 +1,11 @@
-import { Context } from "koa";
+import { IModule, INormalizedModules } from "codesandbox-import-util-types";
 import createSandbox from "codesandbox-import-utils/lib/create-sandbox";
 import normalizeSandbox from "codesandbox-import-utils/lib/utils/files/normalize";
-import { IModule, INormalizedModules } from "codesandbox-import-util-types";
+import { Context } from "koa";
 
-import { downloadRepository } from "./pull/download";
 import * as api from "./api";
-
+import { downloadRepository } from "./pull/download";
 import * as push from "./push";
-
 import { IGitInfo } from "./push";
 
 const getUserToken = (ctx: Context) => {
@@ -67,7 +65,7 @@ export const getRights = async (ctx: Context) => {
   );
 
   ctx.body = {
-    permission: rights
+    permission: rights,
   };
 };
 
@@ -95,7 +93,7 @@ export const data = async (ctx: Context, next: () => Promise<any>) => {
       username,
       repo,
       branch,
-      path
+      path,
     },
     commitSha,
     userToken
@@ -125,7 +123,7 @@ export const data = async (ctx: Context, next: () => Promise<any>) => {
     title: finalTitle,
 
     // Privacy 2 is private, privacy 0 is public
-    privacy: isPrivate ? 2 : 0
+    privacy: isPrivate ? 2 : 0,
   };
 };
 
@@ -143,14 +141,14 @@ export const diff = async (ctx: Context, next: () => Promise<any>) => {
       normalizedFiles,
       token
     ),
-    api.fetchRights(username, repo, token)
+    api.fetchRights(username, repo, token),
   ]);
 
   ctx.body = {
     added: delta.added,
     modified: delta.modified,
     deleted: delta.deleted,
-    rights
+    rights,
   };
 };
 
@@ -161,7 +159,8 @@ export const pr = async (ctx: Context, next: () => Promise<any>) => {
     commitSha,
     message,
     currentUser,
-    token
+    token,
+    sandboxId,
   } = ctx.request.body;
   const normalizedFiles = normalizeSandbox(modules, directories);
 
@@ -171,7 +170,7 @@ export const pr = async (ctx: Context, next: () => Promise<any>) => {
     username,
     repo,
     branch,
-    path
+    path,
   };
 
   const rights = await api.fetchRights(username, repo, token);
@@ -189,12 +188,12 @@ export const pr = async (ctx: Context, next: () => Promise<any>) => {
     token
   );
 
-  const res = await push.createBranch(gitInfo, commit.sha, token);
+  const res = await push.createBranch(gitInfo, commit.sha, token, sandboxId);
 
   ctx.body = {
     url: res.url,
     newBranch: res.branchName,
-    sha: commit.sha
+    sha: commit.sha,
   };
 };
 
@@ -208,7 +207,7 @@ export const commit = async (ctx: Context, next: () => Promise<any>) => {
     username,
     repo,
     branch,
-    path
+    path,
   };
 
   const commit = await push.createCommit(
@@ -247,7 +246,7 @@ export const commit = async (ctx: Context, next: () => Promise<any>) => {
       ctx.body = {
         url: res.url,
         sha: commit.sha,
-        merge: false
+        merge: false,
       };
       return;
     } catch (e) {
@@ -270,7 +269,7 @@ export const commit = async (ctx: Context, next: () => Promise<any>) => {
     ctx.body = {
       url: res.url,
       sha: res.sha,
-      merge: true
+      merge: true,
     };
     return;
   } catch (e) {
@@ -281,7 +280,7 @@ export const commit = async (ctx: Context, next: () => Promise<any>) => {
       ctx.body = {
         url: res.url,
         sha: commit.sha,
-        newBranch: res.branchName
+        newBranch: res.branchName,
       };
       return;
     } else {
@@ -294,7 +293,7 @@ export const repo = async (ctx: Context, next: () => Promise<any>) => {
   const {
     token,
     normalizedFiles: fileArray,
-    privateRepo
+    privateRepo,
   }: {
     token: string;
     normalizedFiles: Array<IModule & { path: string }>;
@@ -305,7 +304,7 @@ export const repo = async (ctx: Context, next: () => Promise<any>) => {
   const normalizedFiles: INormalizedModules = fileArray.reduce(
     (total, file) => ({
       ...total,
-      [file.path]: file
+      [file.path]: file,
     }),
     {}
   );
