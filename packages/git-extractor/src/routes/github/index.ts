@@ -4,6 +4,7 @@ import normalizeSandbox from "codesandbox-import-utils/lib/utils/files/normalize
 import { Context } from "koa";
 
 import * as api from "./api";
+import { getComparison } from "./api";
 import { downloadRepository } from "./pull/download";
 import * as push from "./push";
 import { IGitInfo } from "./push";
@@ -36,7 +37,15 @@ export const info = async (ctx: Context, next: () => Promise<any>) => {
 
 export const pullInfo = async (ctx: Context, next: () => Promise<any>) => {
   const userToken = getUserToken(ctx);
-  const { username, repo, branch } = await api.fetchPullInfo(
+  const {
+    username,
+    repo,
+    branch,
+    merged,
+    mergeable,
+    mergeable_state,
+    rebaseable,
+  } = await api.fetchPullInfo(
     ctx.params.username,
     ctx.params.repo,
     ctx.params.pull,
@@ -52,7 +61,13 @@ export const pullInfo = async (ctx: Context, next: () => Promise<any>) => {
     userToken
   );
 
-  ctx.body = response;
+  ctx.body = {
+    ...response,
+    merged,
+    mergeable,
+    mergeable_state,
+    rebaseable,
+  };
 };
 
 export const getRights = async (ctx: Context) => {
@@ -127,11 +142,40 @@ export const data = async (ctx: Context, next: () => Promise<any>) => {
   };
 };
 
+/*
+  Compares a base commit against the branch of the repo. This base commit can be:
+  1. The latest commit SHA in the Sandbox PR vs the PR branch (The Sandbox PR is out of sync with latest commits of PR branch)
+  2. The latest commit SHA in the Sandbox source vs the PR branch (The sandbox PR is not mergable due to "dirty" mergeable_state)
+  3. The original commit SHA forked from the Sandbox source vs the PR branch (All changes made in the PR)
+
+  The combination of 2 and 3 can filter out exactly what files are in conflict with the source.
+
+  type Base {
+    commitSha: string
+    username: string
+  }
+*/
+export const compare = async (ctx: Context) => {
+  const { base, token } = ctx.request.body;
+  const { username, repo, branch } = ctx.params;
+
+  const comparison = await getComparison(username, repo, branch, base, token);
+
+  return Promise.all(
+    comparison.files.map((file) => {
+      return api.getContent(file.contents_url, token).then((content) => {
+        return {
+          ...file,
+          content,
+        };
+      });
+    })
+  );
+};
+
 export const diff = async (ctx: Context, next: () => Promise<any>) => {
   const { modules, directories, commitSha, token } = ctx.request.body;
-
   const { username, repo, branch, path } = ctx.params;
-
   const normalizedFiles = normalizeSandbox(modules, directories);
 
   const [delta, rights] = await Promise.all([
