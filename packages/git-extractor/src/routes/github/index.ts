@@ -210,7 +210,7 @@ export const pr = async (ctx: Context) => {
     commitSha,
     currentUser,
     token,
-    sandboxId,
+    sandbox_id,
   } = ctx.request.body;
   const normalizedFiles = normalizeSandbox(modules, directories);
 
@@ -238,7 +238,7 @@ export const pr = async (ctx: Context) => {
     token
   );
 
-  const res = await push.createBranch(gitInfo, commit.sha, token, sandboxId);
+  const res = await push.createBranch(gitInfo, commit.sha, token, sandbox_id);
 
   ctx.body = await api.createPr(
     {
