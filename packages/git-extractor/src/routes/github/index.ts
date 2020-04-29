@@ -134,12 +134,12 @@ export const data = async (ctx: Context, next: () => Promise<any>) => {
   }
 */
 export const compare = async (ctx: Context) => {
-  const { base, token, includeContents } = ctx.request.body;
+  const { base, token, include_contents } = ctx.request.body;
   const { username, repo, branch } = ctx.params;
 
   const comparison = await getComparison(username, repo, branch, base, token);
 
-  if (includeContents) {
+  if (include_contents) {
     const files = await Promise.all(
       comparison.files.map(
         ({ additions, changes, contents_url, deletions, filename, status }) => {
