@@ -37,37 +37,13 @@ export const info = async (ctx: Context, next: () => Promise<any>) => {
 
 export const pullInfo = async (ctx: Context, next: () => Promise<any>) => {
   const userToken = getUserToken(ctx);
-  const {
-    username,
-    repo,
-    branch,
-    merged,
-    mergeable,
-    mergeable_state,
-    rebaseable,
-  } = await api.fetchPullInfo(
+
+  ctx.body = await api.fetchPullInfo(
     ctx.params.username,
     ctx.params.repo,
     ctx.params.pull,
     userToken
   );
-
-  const response = await api.fetchRepoInfo(
-    username,
-    repo,
-    branch,
-    "",
-    false,
-    userToken
-  );
-
-  ctx.body = {
-    ...response,
-    merged,
-    mergeable,
-    mergeable_state,
-    rebaseable,
-  };
 };
 
 export const getRights = async (ctx: Context) => {
@@ -225,12 +201,14 @@ export const diff = async (ctx: Context, next: () => Promise<any>) => {
   };
 };
 
-export const pr = async (ctx: Context, next: () => Promise<any>) => {
+export const pr = async (ctx: Context) => {
   const {
     modules,
     directories,
-    commitSha,
-    message,
+    base,
+    head,
+    title,
+    description,
     currentUser,
     token,
     sandboxId,
@@ -256,18 +234,14 @@ export const pr = async (ctx: Context, next: () => Promise<any>) => {
   const commit = await push.createCommit(
     gitInfo,
     normalizedFiles,
-    commitSha,
-    message,
+    base.commitSha,
+    "initial commit",
     token
   );
 
-  const res = await push.createBranch(gitInfo, commit.sha, token, sandboxId);
+  await push.createBranch(gitInfo, commit.sha, token, sandboxId);
 
-  ctx.body = {
-    url: res.url,
-    newBranch: res.branchName,
-    sha: commit.sha,
-  };
+  ctx.body = await api.createPr(base, head, title, description, token);
 };
 
 export const commit = async (ctx: Context, next: () => Promise<any>) => {

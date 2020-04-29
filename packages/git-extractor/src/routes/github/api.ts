@@ -89,6 +89,22 @@ interface IContentResponse {
   encoding: string;
 }
 
+interface IPrResponse {
+  number: number;
+  repo: string;
+  username: string;
+  branch: string;
+  merged: boolean;
+  mergeable: boolean;
+  mergeable_state: string;
+  commitSha: string;
+  rebaseable: boolean;
+  commits: number;
+  additions: number;
+  deletions: number;
+  changed_files: number;
+}
+
 export async function getComparison(
   username: string,
   repo: string,
@@ -257,6 +273,52 @@ export async function fetchTree(
 interface IBlobResponse {
   url: string;
   sha: string;
+}
+
+export async function createPr(
+  base: {
+    username: string;
+    repo: string;
+    branch: string;
+  },
+  head: {
+    username: string;
+    repo: string;
+    branch: string;
+  },
+  title: string,
+  body: string,
+  token: string
+): Promise<IPrResponse> {
+  const { data } = await axios.post(
+    `${buildRepoApiUrl(head.username, head.repo)}/pulls`,
+    {
+      base: `${base.username === head.username ? "" : base.username}:${
+        base.branch
+      }`,
+      head: head.branch,
+      title,
+      body,
+      maintainer_can_modify: true,
+    },
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+
+  return {
+    number: data.head.number,
+    repo: data.head.repo.name,
+    username: data.head.repo.owner.login,
+    commitSha: data.head.sha,
+    branch: data.head.ref,
+    merged: data.merged,
+    mergeable: data.mergeable,
+    mergeable_state: data.mergeable_state,
+    rebaseable: data.rebaseable,
+    additions: data.additions,
+    changed_files: data.changed_files,
+    commits: data.commits,
+    deletions: data.deletions,
+  };
 }
 
 export async function createBlob(
@@ -645,7 +707,7 @@ export async function fetchPullInfo(
   repo: string,
   pull: number,
   userToken?: string
-) {
+): Promise<IPrResponse> {
   const url = buildPullApiUrl(username, repo, pull);
 
   try {
@@ -662,13 +724,19 @@ export async function fetchPullInfo(
     const data = response.data;
 
     return {
+      number: data.head.number,
       repo: data.head.repo.name,
       username: data.head.repo.owner.login,
+      commitSha: data.head.sha,
       branch: data.head.ref,
       merged: data.merged,
       mergeable: data.mergeable,
       mergeable_state: data.mergeable_state,
       rebaseable: data.rebaseable,
+      additions: data.additions,
+      changed_files: data.changed_files,
+      commits: data.commits,
+      deletions: data.deletions,
     };
   } catch (e) {
     e.message = "Could not find pull request information";
