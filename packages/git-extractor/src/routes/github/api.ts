@@ -98,6 +98,7 @@ interface IPrResponse {
   mergeable: boolean;
   mergeable_state: string;
   commitSha: string;
+  baseCommitSha: string;
   rebaseable: boolean;
   commits: number;
   additions: number;
@@ -317,6 +318,7 @@ export async function createPr(
     additions: data.additions,
     changed_files: data.changed_files,
     commits: data.commits,
+    baseCommitSha: data.base.sha,
     deletions: data.deletions,
   };
 }
@@ -736,6 +738,7 @@ export async function fetchPullInfo(
       additions: data.additions,
       changed_files: data.changed_files,
       commits: data.commits,
+      baseCommitSha: data.base.sha,
       deletions: data.deletions,
     };
   } catch (e) {
