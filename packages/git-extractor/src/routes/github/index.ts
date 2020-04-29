@@ -205,10 +205,9 @@ export const pr = async (ctx: Context) => {
   const {
     modules,
     directories,
-    base,
-    head,
     title,
     description,
+    commitSha,
     currentUser,
     token,
     sandboxId,
@@ -234,14 +233,28 @@ export const pr = async (ctx: Context) => {
   const commit = await push.createCommit(
     gitInfo,
     normalizedFiles,
-    base.commitSha,
+    commitSha,
     "initial commit",
     token
   );
 
-  await push.createBranch(gitInfo, commit.sha, token, sandboxId);
+  const res = await push.createBranch(gitInfo, commit.sha, token, sandboxId);
 
-  ctx.body = await api.createPr(base, head, title, description, token);
+  ctx.body = await api.createPr(
+    {
+      branch,
+      repo,
+      username,
+    },
+    {
+      branch: res.branchName,
+      repo: gitInfo.repo,
+      username: gitInfo.username,
+    },
+    title,
+    description,
+    token
+  );
 };
 
 export const commit = async (ctx: Context, next: () => Promise<any>) => {
