@@ -137,6 +137,8 @@ export const compare = async (ctx: Context) => {
   const { base, token, include_contents } = ctx.request.body;
   const { username, repo, branch } = ctx.params;
 
+  console.log("WTF?", ctx.params, ctx.request.body);
+
   const comparison = await getComparison(username, repo, branch, base, token);
 
   if (include_contents) {
