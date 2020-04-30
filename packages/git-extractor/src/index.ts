@@ -42,7 +42,6 @@ router
   .get("/git/github/info/:username/:repo/pull/:pull", github.pullInfo) // allow pull urls
   .post("/git/github/compare/:username/:repo/:branch", github.compare) // Compare changes between branches and commits
   // Push
-  .post("/git/github/diff/:username/:repo/:branch*/path/:path*", github.diff)
   .post(
     "/git/github/commit/:username/:repo/:branch*/path/:path*",
     github.commit

@@ -1,13 +1,11 @@
-import { IModule, INormalizedModules } from "codesandbox-import-util-types";
 import createSandbox from "codesandbox-import-utils/lib/create-sandbox";
-import normalizeSandbox from "codesandbox-import-utils/lib/utils/files/normalize";
 import { Context } from "koa";
 
 import * as api from "./api";
 import { getComparison } from "./api";
 import { downloadRepository } from "./pull/download";
 import * as push from "./push";
-import { IGitInfo } from "./push";
+import { IChanges, IGitInfo } from "./push";
 
 const getUserToken = (ctx: Context) => {
   const header = ctx.header.authorization;
@@ -177,42 +175,24 @@ export const compare = async (ctx: Context) => {
   }
 };
 
-export const diff = async (ctx: Context, next: () => Promise<any>) => {
-  const { modules, directories, commitSha, token } = ctx.request.body;
-  const { username, repo, branch, path } = ctx.params;
-  const normalizedFiles = normalizeSandbox(modules, directories);
-
-  const [delta, rights] = await Promise.all([
-    push.getFileDifferences(
-      { username, repo, branch, path },
-      commitSha,
-      normalizedFiles,
-      token
-    ),
-    api.fetchRights(username, repo, token),
-  ]);
-
-  ctx.body = {
-    added: delta.added,
-    modified: delta.modified,
-    deleted: delta.deleted,
-    rights,
-  };
-};
-
 export const pr = async (ctx: Context) => {
   const {
-    modules,
-    directories,
+    changes,
     title,
     description,
-    commitSha,
+    parentCommitSha,
     currentUser,
     token,
-    sandbox_id,
+    sandboxId,
+  }: {
+    changes: IChanges;
+    title: string;
+    description: string;
+    parentCommitSha: string;
+    currentUser: string;
+    token: string;
+    sandboxId: string;
   } = ctx.request.body;
-  const normalizedFiles = normalizeSandbox(modules, directories);
-
   const { username, repo, branch, path } = ctx.params;
 
   let gitInfo: IGitInfo = {
@@ -222,6 +202,20 @@ export const pr = async (ctx: Context) => {
     path,
   };
 
+  const relativeChanges: IChanges = {
+    added: changes.added.map((change) => ({
+      ...change,
+      path: `${gitInfo.path ? gitInfo.path : ""}${change.path}`,
+    })),
+    modified: changes.modified.map((change) => ({
+      ...change,
+      path: `${gitInfo.path ? gitInfo.path : ""}${change.path}`,
+    })),
+    deleted: changes.deleted.map(
+      (path) => `${gitInfo.path ? gitInfo.path : ""}${path}`
+    ),
+  };
+
   const rights = await api.fetchRights(username, repo, token);
 
   if (rights === "none" || rights === "read") {
@@ -229,37 +223,30 @@ export const pr = async (ctx: Context) => {
     gitInfo = await push.createFork(gitInfo, currentUser, token);
   }
 
-  const commit = await push.createCommit(
+  const commit = await push.createInitialCommit(
     gitInfo,
-    normalizedFiles,
-    commitSha,
-    "initial commit",
+    relativeChanges,
+    parentCommitSha,
     token
   );
 
-  const res = await push.createBranch(gitInfo, commit.sha, token, sandbox_id);
+  const res = await push.createBranch(gitInfo, commit.sha, token, sandboxId);
+  const base = {
+    branch,
+    repo,
+    username,
+  };
+  const head = {
+    branch: res.branchName,
+    repo: gitInfo.repo,
+    username: gitInfo.username,
+  };
 
-  ctx.body = await api.createPr(
-    {
-      branch,
-      repo,
-      username,
-    },
-    {
-      branch: res.branchName,
-      repo: gitInfo.repo,
-      username: gitInfo.username,
-    },
-    title,
-    description,
-    token
-  );
+  ctx.body = await api.createPr(base, head, title, description, token);
 };
 
-export const commit = async (ctx: Context, next: () => Promise<any>) => {
-  const { modules, directories, commitSha, message, token } = ctx.request.body;
-  const normalizedFiles = normalizeSandbox(modules, directories);
-
+export const commit = async (ctx: Context) => {
+  const { changes, parentCommitSha, message, token } = ctx.request.body;
   const { username, repo, branch, path } = ctx.params;
 
   const gitInfo: IGitInfo = {
@@ -269,104 +256,43 @@ export const commit = async (ctx: Context, next: () => Promise<any>) => {
     path,
   };
 
-  const commit = await push.createCommit(
-    gitInfo,
-    normalizedFiles,
-    commitSha,
-    message,
-    token
-  );
-
-  // On the client we redirect to the original git sandbox, so we want to
-  // reset the cache so the user sees the latest version
-  api.resetShaCache({ username, repo, branch, path });
-
-  const lastInfo = await api.fetchRepoInfo(
-    username,
-    repo,
-    branch,
+  const response = await api.fetchRepoInfo(
+    gitInfo.username,
+    gitInfo.repo,
+    gitInfo.branch,
     path,
     true,
     token
   );
 
-  // If we're up to date we just move the head, if that's not the cache we create
-  // a merge
-  if (lastInfo.commitSha === commitSha) {
-    try {
-      const res = await api.updateReference(
-        username,
-        repo,
-        branch,
-        commit.sha,
-        token
-      );
-
-      ctx.body = {
-        url: res.url,
-        sha: commit.sha,
-        merge: false,
-      };
-      return;
-    } catch (e) {
-      if (process.env.NODE_ENV === "development") {
-        console.error(e);
-      }
-      /* Let's try to create the merge then */
-    }
+  if (response.commitSha !== parentCommitSha) {
+    return ctx.throw("out of sync", 403);
   }
 
-  try {
-    const res = await api.createMerge(
-      username,
-      repo,
-      branch,
-      commit.sha,
-      token
-    );
+  const commit = await push.createCommit(
+    gitInfo,
+    changes,
+    parentCommitSha,
+    message,
+    token
+  );
 
-    ctx.body = {
-      url: res.url,
-      sha: res.sha,
-      merge: true,
-    };
-    return;
-  } catch (e) {
-    if (e.response && e.response.status === 409) {
-      // Merge conflict, create branch
-      const res = await push.createBranch(gitInfo, commit.sha, token);
+  await api.updateReference(username, repo, branch, commit.sha, token);
 
-      ctx.body = {
-        url: res.url,
-        sha: commit.sha,
-        newBranch: res.branchName,
-      };
-      return;
-    } else {
-      throw e;
-    }
-  }
+  ctx.body = commit;
 };
 
 export const repo = async (ctx: Context, next: () => Promise<any>) => {
   const {
     token,
-    normalizedFiles: fileArray,
+    changes,
     privateRepo,
   }: {
     token: string;
-    normalizedFiles: Array<IModule & { path: string }>;
+    changes: IChanges;
     privateRepo?: boolean;
   } = ctx.request.body;
   const { username, repo } = ctx.params;
-
-  const normalizedFiles: INormalizedModules = fileArray.reduce(
-    (total, file) => ({
-      ...total,
-      [file.path]: file,
-    }),
-    {}
-  );
 
   if (!repo) {
     throw new Error("Repo name cannot be empty");
@@ -375,7 +301,7 @@ export const repo = async (ctx: Context, next: () => Promise<any>) => {
   const result = await push.createRepo(
     username,
     repo,
-    normalizedFiles,
+    changes,
     token,
     privateRepo
   );

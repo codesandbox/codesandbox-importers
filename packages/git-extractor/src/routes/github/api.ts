@@ -24,6 +24,18 @@ function buildPullApiUrl(username: string, repo: string, pull: number) {
   return `${buildRepoApiUrl(username, repo)}/pulls/${pull}`;
 }
 
+function buildCommitApiUrl(username: string, repo: string, commitSha: string) {
+  return `${REPO_BASE_URL}/${username}/${repo}/commits/${commitSha}`;
+}
+
+function buildTreesApiUrl(username: string, repo: string, treeSha: string) {
+  return `${REPO_BASE_URL}/${username}/${repo}/git/trees/${treeSha}`;
+}
+
+function buildContentsApiUrl(username: string, repo: string, path: string) {
+  return `${REPO_BASE_URL}/${username}/${repo}/contents/${path}`;
+}
+
 function buildCompareApiUrl(
   username: string,
   repo: string,
@@ -87,6 +99,15 @@ interface ICompareResponse {
 interface IContentResponse {
   content: string;
   encoding: string;
+  sha: string;
+}
+
+interface ICommitResponse {
+  commit: {
+    tree: {
+      sha: string;
+    };
+  };
 }
 
 interface IPrResponse {
@@ -104,6 +125,12 @@ interface IPrResponse {
   additions: number;
   deletions: number;
   changed_files: number;
+}
+
+interface IDeleteContentResponse {
+  commit: {
+    sha: string;
+  };
 }
 
 export async function getComparison(
@@ -144,6 +171,79 @@ export async function getRepo(username: string, repo: string, token: string) {
   return response.data;
 }
 
+export async function getTreeWithDeletedFiles(
+  username: string,
+  repo: string,
+  treeSha: string,
+  deletedFiles: string[],
+  token: string,
+  path = []
+) {
+  async function fetchTree(sha: string) {
+    const url = buildTreesApiUrl(username, repo, sha);
+
+    const response: { data: ITreeResponse } = await axios({
+      url,
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    return response.data.tree;
+  }
+
+  let tree = await fetchTree(treeSha);
+
+  await Promise.all(
+    deletedFiles.map(async (file) => {
+      const parts = file.split("/");
+      parts.pop();
+      const dirs = parts.reduce<string[]>((aggr, part, index) => {
+        return aggr.concat(
+          aggr[index - 1] ? aggr[index - 1] + "/" + part : part
+        );
+      }, []);
+
+      await Promise.all(
+        dirs.map(async (dir) => {
+          const treeIndex = tree.findIndex(
+            (item) => item.type === "tree" && item.path === dir
+          );
+
+          if (treeIndex >= 0) {
+            const nestedTree = await fetchTree(tree[treeIndex].sha);
+            tree = tree.concat(
+              nestedTree.map((item) => ({
+                ...item,
+                path: dir + "/" + item.path,
+              }))
+            );
+            tree.splice(treeIndex, 1);
+          }
+        })
+      );
+
+      tree = tree.filter((item) => item.path !== file);
+    })
+  );
+
+  return tree;
+}
+
+export async function getCommitTreeSha(
+  username: string,
+  repo: string,
+  commitSha: string,
+  token: string
+) {
+  const url = buildCommitApiUrl(username, repo, commitSha);
+
+  const response: { data: ICommitResponse } = await axios({
+    url,
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  return response.data.commit.tree.sha;
+}
+
 export async function isRepoPrivate(
   username: string,
   repo: string,
@@ -152,38 +252,6 @@ export async function isRepoPrivate(
   const data = await getRepo(username, repo, token);
 
   return data.private;
-}
-
-type Response = Array<Module>;
-
-/**
- * Fetch all directories (flat) and files that exist in this repo by path and branch
- *
- * @export
- * @param {string} username
- * @param {string} repo
- * @param {string} [branch='master']
- * @param {string} [path='']
- * @returns {Promise<Response>}
- */
-export async function fetchContents(
-  username: string,
-  repo: string,
-  branch: string = "master",
-  path: string = ""
-): Promise<Response | Module> {
-  try {
-    const url = buildContentsUrl(username, repo, branch, path);
-    const response = await axios.get(url);
-
-    return response.data;
-  } catch (e) {
-    if (e.response && e.response.status === 404) {
-      e.message = NOT_FOUND_MESSAGE;
-    }
-
-    throw e;
-  }
 }
 
 interface RightsResponse {
@@ -243,34 +311,6 @@ interface ITreeResponse {
   url: string;
 }
 
-export async function fetchTree(
-  username: string,
-  repo: string,
-  path: string = "",
-  commitSha: string,
-  recursive: boolean = true,
-  token?: string
-): Promise<ITreeResponse> {
-  let url = `${buildRepoApiUrl(
-    username,
-    repo
-  )}/git/trees/${commitSha}${buildSecretParams()}&path=${path}`;
-
-  if (recursive) {
-    url += "&recursive=1";
-  }
-
-  const options: AxiosRequestConfig = { url };
-
-  if (token) {
-    options.headers = { Authorization: `Bearer ${token}` };
-  }
-
-  const response: { data: ITreeResponse } = await axios(options);
-
-  return response.data;
-}
-
 interface IBlobResponse {
   url: string;
   sha: string;
@@ -294,7 +334,7 @@ export async function createPr(
   const { data } = await axios.post(
     `${buildRepoApiUrl(head.username, head.repo)}/pulls`,
     {
-      base: `${base.username === head.username ? "" : base.username}:${
+      base: `${base.username === head.username ? "" : base.username + ":"}${
         base.branch
       }`,
       head: head.branch,
@@ -349,11 +389,12 @@ export async function createTree(
   username: string,
   repo: string,
   tree: ITree,
+  baseTreeSha: string | null,
   token: string
 ) {
   const response: { data: ICreateTreeResponse } = await axios.post(
     `${buildRepoApiUrl(username, repo)}/git/trees${buildSecretParams()}`,
-    { base_tree: null, tree },
+    { base_tree: baseTreeSha, tree },
     { headers: { Authorization: `Bearer ${token}` } }
   );
 
@@ -383,55 +424,17 @@ export async function createCommit(
   username: string,
   repo: string,
   treeSha: string,
-  parentCommitSha: string,
+  parentCommitShas: string[],
   message: string,
   token: string
 ) {
   const response: { data: ICreateCommitResponse } = await axios.post(
     `${buildRepoApiUrl(username, repo)}/git/commits${buildSecretParams()}`,
-    { tree: treeSha, message, parents: [parentCommitSha] },
+    { tree: treeSha, message, parents: parentCommitShas },
     { headers: { Authorization: `Bearer ${token}` } }
   );
 
   return response.data;
-}
-
-interface ICreateMergeResponse {
-  sha: string;
-  url: string;
-}
-
-/**
- * Create a merge for the specified commit
- *
- * @param branch The branch to merge into
- * @param commitSha The sha to merge
- */
-export async function createMerge(
-  username: string,
-  repo: string,
-  branch: string,
-  commitSha: string,
-  token: string
-) {
-  try {
-    const response: { data: ICreateMergeResponse } = await axios.post(
-      `${buildRepoApiUrl(username, repo)}/merges${buildSecretParams()}`,
-      { base: branch, head: commitSha },
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-
-    return response.data;
-  } catch (e) {
-    if (process.env.NODE_ENV === "development") {
-      console.error(e);
-    }
-    if (e.response) {
-      e.message = `Merging went wrong: '${e.response.data.message}'`;
-    }
-
-    throw e;
-  }
 }
 
 interface IUpdateReferenceResponse {
@@ -451,7 +454,7 @@ export async function updateReference(
       username,
       repo
     )}/git/refs/heads/${branch}${buildSecretParams()}`,
-    { sha: commitSha, force: false },
+    { sha: commitSha, force: true },
     { headers: { Authorization: `Bearer ${token}` } }
   );
 
@@ -553,38 +556,6 @@ export async function doesRepoExist(username: string, repo: string) {
 
     throw e;
   }
-}
-
-/**
- * Download the code of a github file
- *
- * @export
- * @param {Module} file
- * @returns {Promise<string>}
- */
-export async function fetchCode(file: Module): Promise<string> {
-  const response: { data: any } = await axios({
-    url: file.download_url,
-    responseType: "text",
-    headers: {
-      Accept: "text/plain",
-    },
-    // We need to tell axios not to do anything (don't parse)
-    transformResponse: [(d) => d],
-  }).catch((e) => {
-    if (e.response && e.response.status === 404) {
-      // Maybe it is not yet added to github api, let's try the raw git object
-      return axios({
-        url: file.git_url + buildSecretParams(),
-      }).then((res) => ({
-        data: new Buffer(res.data.content, "base64").toString(),
-      }));
-    }
-
-    throw e;
-  });
-
-  return response.data;
 }
 
 interface CommitResponse {

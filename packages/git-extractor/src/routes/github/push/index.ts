@@ -1,10 +1,6 @@
-import { INormalizedModules } from "codesandbox-import-util-types";
-import * as api from "../api";
-
-import getDelta from "./utils/delta";
-import { createBlobs } from "./utils/create-blobs";
-import { join } from "path";
 import delay from "../../../utils/delay";
+import * as api from "../api";
+import { createBlobs } from "./utils/create-blobs";
 
 export interface IGitInfo {
   username: string;
@@ -22,50 +18,21 @@ export interface ITreeFile {
   url: string;
 }
 
+export interface IChanges {
+  added: Array<{
+    path: string;
+    content: string;
+    encoding: "base64" | "utf-8";
+  }>;
+  deleted: string[];
+  modified: Array<{
+    path: string;
+    content: string;
+    encoding: "base64" | "utf-8";
+  }>;
+}
+
 export type ITree = ITreeFile[];
-
-async function getNormalizedTree(
-  { username, repo, branch, path }: IGitInfo,
-  commitSha: string,
-  makeRelative = true,
-  token?: string
-) {
-  // 1. Get commit tree from GitHub based on path
-  let { tree, truncated } = await api.fetchTree(
-    username,
-    repo,
-    path,
-    commitSha,
-    true,
-    token
-  );
-
-  if (truncated) {
-    throw new Error("This repository is too big to make a commit.");
-  }
-
-  if (path && makeRelative) {
-    tree = tree
-      .filter(t => t.path.startsWith(path + "/"))
-      .map(t => ({ ...t, path: t.path.replace(path + "/", "") }));
-  }
-
-  // 2. Filter tree on files only (check for size property)
-  tree = tree.filter(t => t.size);
-
-  return tree;
-}
-
-export async function getFileDifferences(
-  gitInfo: IGitInfo,
-  commitSha: string,
-  sandboxFiles: INormalizedModules,
-  token?: string
-) {
-  const tree = await getNormalizedTree(gitInfo, commitSha, true, token);
-
-  return getDelta(tree, sandboxFiles);
-}
 
 function generateBranchName() {
   const id = Date.now();
@@ -128,52 +95,61 @@ export async function createFork(
   return forkGitInfo;
 }
 
+export async function createInitialCommit(
+  gitInfo: IGitInfo,
+  changes: IChanges,
+  parentSha: string,
+  userToken: string
+) {
+  return createCommit(gitInfo, changes, parentSha, "initial commit", userToken);
+}
+
 export async function createCommit(
   gitInfo: IGitInfo,
-  sandboxFiles: INormalizedModules,
-  commitSha: string,
+  changes: IChanges,
+  parentSha: string,
   message: string,
   userToken: string
 ) {
-  const { username, repo, branch, path = "" } = gitInfo;
+  const { username, repo } = gitInfo;
 
-  const tree = await getNormalizedTree(gitInfo, commitSha, false, userToken);
-  let absoluteSandboxFiles = sandboxFiles;
+  const treeSha = await api.getCommitTreeSha(
+    username,
+    repo,
+    parentSha,
+    userToken
+  );
+  let tree: ITree = [];
 
-  if (path) {
-    absoluteSandboxFiles = Object.keys(sandboxFiles).reduce(
-      (total, next) => ({
-        ...total,
-        [join(path, next)]: sandboxFiles[next]
-      }),
-      {}
+  if (changes.deleted.length) {
+    tree = await api.getTreeWithDeletedFiles(
+      username,
+      repo,
+      treeSha,
+      changes.deleted,
+      userToken
     );
   }
-
-  const delta = getDelta(tree, absoluteSandboxFiles);
-  // Remove the files from removed that are out of scope
-  const relevantRemovedFiles = delta.deleted.filter(p => p.startsWith(path));
-
-  // Now create blobs for all modified/new files
   const createdBlobs = await createBlobs(
-    [...delta.modified, ...delta.added],
-    absoluteSandboxFiles,
+    [...changes.modified, ...changes.added],
     gitInfo,
     userToken
   );
+  const updatedTree = tree.concat(createdBlobs);
 
-  // Create new tree with deleted blobs
-  const newTree = [...tree, ...createdBlobs].filter(
-    t => relevantRemovedFiles.indexOf(t.path) === -1
+  const treeResponse = await api.createTree(
+    username,
+    repo,
+    updatedTree,
+    changes.deleted.length ? null : treeSha,
+    userToken
   );
-
-  const treeResponse = await api.createTree(username, repo, newTree, userToken);
 
   return await api.createCommit(
     gitInfo.username,
     gitInfo.repo,
     treeResponse.sha,
-    commitSha,
+    [parentSha],
     message,
     userToken
   );
@@ -182,7 +158,7 @@ export async function createCommit(
 export async function createRepo(
   username: string,
   name: string,
-  sandboxFiles: INormalizedModules,
+  changes: IChanges,
   userToken: string,
   privateRepo?: boolean
 ) {
@@ -201,12 +177,12 @@ export async function createRepo(
     username: latestData.username,
     repo: latestData.repo,
     branch: latestData.branch,
-    path: latestData.path
+    path: latestData.path,
   };
 
   const commit = await createCommit(
     gitInfo,
-    sandboxFiles,
+    changes,
     latestData.commitSha,
     "Initial commit",
     userToken
