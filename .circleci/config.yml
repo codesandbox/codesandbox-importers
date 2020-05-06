@@ -12,9 +12,9 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-          - v1-dependencies-{{ checksum "yarn.lock" }}
-          # fallback to using the latest cache if no exact match is found
-          - v1-dependencies-
+            - v1-dependencies-{{ checksum "yarn.lock" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-dependencies-
 
       - run: yarn install
 
@@ -59,6 +59,47 @@ jobs:
           name: Push Image
           command: "if [ -n $DOCKER_USER ]; then docker push codesandbox/importers:${CIRCLE_SHA1:0:7}; else exit 0; fi"
 
+  deploy-to-staging:
+    requires:
+      - deploy-staging-approval
+    docker:
+      - image: curlimages/curl:7.65.3
+    steps:
+      - run:
+          name: Deploy Image
+          command: |
+            curl --show-error --fail -X POST \
+            https://deploy-api.ops.csb.dev/image \
+            -H 'Accept: */*' \
+            -H 'Authorization: Bearer '$DEPLOY_TOKEN'' \
+            -H 'Content-Type: application/json' \
+            -d '{
+              "env": "staging",
+              "image": "githubImporters",
+              "tag": "'${CIRCLE_SHA1:0:7}'",
+              "deploy": true
+            }'
+  deploy-to-production:
+    requires:
+      - deploy-production-approval
+    docker:
+      - image: curlimages/curl:7.65.3
+    steps:
+      - run:
+          name: Deploy Image
+          command: |
+            curl --show-error --fail -X POST \
+            https://deploy-api.ops.csb.dev/image \
+            -H 'Accept: */*' \
+            -H 'Authorization: Bearer '$DEPLOY_TOKEN'' \
+            -H 'Content-Type: application/json' \
+            -d '{
+              "env": "prod",
+              "image": "githubImporters",
+              "tag": "'${CIRCLE_SHA1:0:7}'",
+              "deploy": true
+            }'
+
 workflows:
   version: 2
   build-and-test:
@@ -67,5 +108,16 @@ workflows:
       - create-docker-image:
           requires:
             - build-dependencies
-
-
+      - deploy-staging-approval:
+        type: approval
+      - deploy-to-staging:
+          requires:
+            - deploy-staging-approval
+            - create-docker-image
+      - deploy-production-approval:
+          type: approval
+      - deploy-to-production:
+          requires:
+            - deploy-production-approval
+            - build-dependencies
+            - create-docker-image
