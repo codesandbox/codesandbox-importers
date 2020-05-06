@@ -109,7 +109,7 @@ workflows:
           requires:
             - build-dependencies
       - deploy-staging-approval:
-        type: approval
+          type: approval
       - deploy-to-staging:
           requires:
             - deploy-staging-approval
