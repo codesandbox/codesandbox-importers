@@ -39,13 +39,10 @@ function buildContentsApiUrl(username: string, repo: string, path: string) {
 function buildCompareApiUrl(
   username: string,
   repo: string,
-  branch: string,
-  base: { ref: string; username: string }
+  baseRef: string,
+  headRef: string
 ) {
-  return `${buildRepoApiUrl(username, repo)}/compare/${
-    // We only prefix with username if we are comparing with a source repo of different user (PR)
-    base.username === username ? base.ref : `${base.username}:${base.ref}`
-  }...${branch}`;
+  return `${buildRepoApiUrl(username, repo)}/compare/${baseRef}...${headRef}`;
 }
 
 function buildSecretParams() {
@@ -94,6 +91,12 @@ interface ICompareResponse {
     changes: number;
     contents_url: string;
   }>;
+  base_commit: {
+    sha: string;
+  };
+  merge_base_commit: {
+    sha: string;
+  };
 }
 
 interface IContentResponse {
@@ -136,11 +139,11 @@ interface IDeleteContentResponse {
 export async function getComparison(
   username: string,
   repo: string,
-  branch: string,
-  base: { ref: string; username: string },
+  baseRef: string,
+  headRef: string,
   token: string
 ) {
-  const url = buildCompareApiUrl(username, repo, branch, base);
+  const url = buildCompareApiUrl(username, repo, baseRef, headRef);
 
   console.log("GETTING COMPARISON", url);
   const response: { data: ICompareResponse } = await axios({

@@ -132,9 +132,15 @@ export const data = async (ctx: Context, next: () => Promise<any>) => {
   }
 */
 export const compare = async (ctx: Context) => {
-  const { base, token, include_contents } = ctx.request.body;
-  const { username, repo, branch } = ctx.params;
-  const comparison = await getComparison(username, repo, branch, base, token);
+  const { baseRef, headRef, token, include_contents } = ctx.request.body;
+  const { username, repo } = ctx.params;
+  const comparison = await getComparison(
+    username,
+    repo,
+    baseRef,
+    headRef,
+    token
+  );
 
   if (include_contents) {
     const files = await Promise.all(
@@ -159,6 +165,8 @@ export const compare = async (ctx: Context) => {
 
     ctx.body = {
       files,
+      baseCommitSha: comparison.base_commit.sha,
+      headCommitSha: comparison.merge_base_commit.sha,
     };
   } else {
     ctx.body = {
@@ -171,6 +179,8 @@ export const compare = async (ctx: Context) => {
           changes,
         })
       ),
+      baseCommitSha: comparison.base_commit.sha,
+      headCommitSha: comparison.merge_base_commit.sha,
     };
   }
 };

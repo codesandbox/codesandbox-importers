@@ -40,7 +40,7 @@ router
   .get("/git/github/info/:username/:repo/commit/:branch", github.info) // allow commit urls
   .get("/git/github/info/:username/:repo", github.info) // For when tree isn't in path (root path)
   .get("/git/github/info/:username/:repo/pull/:pull", github.pullInfo) // allow pull urls
-  .post("/git/github/compare/:username/:repo/:branch", github.compare) // Compare changes between branches and commits
+  .post("/git/github/compare/:username/:repo", github.compare) // Compare changes between branches and commits
   // Push
   .post(
     "/git/github/commit/:username/:repo/:branch*/path/:path*",
