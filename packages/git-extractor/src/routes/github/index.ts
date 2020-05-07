@@ -244,7 +244,7 @@ export const pr = async (ctx: Context) => {
 };
 
 export const commit = async (ctx: Context) => {
-  const { changes, parentCommitSha, message, token } = ctx.request.body;
+  const { changes, message, token } = ctx.request.body;
   const { username, repo, branch, path } = ctx.params;
 
   const gitInfo: IGitInfo = {
@@ -263,14 +263,10 @@ export const commit = async (ctx: Context) => {
     token
   );
 
-  if (response.commitSha !== parentCommitSha) {
-    return ctx.throw("out of sync", 403);
-  }
-
   const commit = await push.createCommit(
     gitInfo,
     changes,
-    parentCommitSha,
+    response.commitSha,
     message,
     token
   );
