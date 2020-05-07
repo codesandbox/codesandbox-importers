@@ -162,7 +162,7 @@ export async function createRepo(
   userToken: string,
   privateRepo?: boolean
 ) {
-  const data = await api.createRepo(username, name, userToken, privateRepo);
+  await api.createRepo(username, name, userToken, privateRepo);
 
   const latestData = await api.fetchRepoInfo(
     username,
@@ -188,7 +188,7 @@ export async function createRepo(
     userToken
   );
 
-  const res = await api.updateReference(
+  await api.updateReference(
     username,
     gitInfo.repo,
     gitInfo.branch,
