@@ -117,19 +117,7 @@ export const data = async (ctx: Context, next: () => Promise<any>) => {
 };
 
 /*
-  Compares a base commit against the branch of the repo. This base commit can be:
-  1. The latest commit SHA in the Sandbox PR vs the PR branch (The Sandbox PR is out of sync with latest commits of PR branch)
-  2. The branch of the Sandbox source vs the PR branch (The sandbox PR is not mergable due to "dirty" mergeable_state)
-  3. The original commit SHA forked from the Sandbox source vs the PR branch (All changes made in the PR)
-
-  The combination of 2 and 3 can filter out exactly what files are in conflict with the source.
-
-  type Base {
-    // We use commitSha when checking Sandbox PR against Github
-    // We use branch when checking conflicts
-    ref: string
-    username: string
-  }
+  Compares two refs on the repo
 */
 export const compare = async (ctx: Context) => {
   const { baseRef, headRef, token, include_contents } = ctx.request.body;
