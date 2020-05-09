@@ -178,7 +178,7 @@ export const pr = async (ctx: Context) => {
     changes,
     title,
     description,
-    parentCommitSha,
+    commitSha,
     currentUser,
     token,
     sandboxId,
@@ -186,7 +186,7 @@ export const pr = async (ctx: Context) => {
     changes: IChanges;
     title: string;
     description: string;
-    parentCommitSha: string;
+    commitSha: string;
     currentUser: string;
     token: string;
     sandboxId: string;
@@ -224,7 +224,7 @@ export const pr = async (ctx: Context) => {
   const commit = await push.createInitialCommit(
     gitInfo,
     relativeChanges,
-    parentCommitSha,
+    commitSha,
     token
   );
 
