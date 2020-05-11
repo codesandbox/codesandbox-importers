@@ -349,7 +349,7 @@ export async function createPr(
   );
 
   return {
-    number: data.id,
+    number: data.number,
     repo: data.head.repo.name,
     username: data.head.repo.owner.login,
     commitSha: data.head.sha,
