@@ -244,7 +244,7 @@ export const pr = async (ctx: Context) => {
 };
 
 export const commit = async (ctx: Context) => {
-  const { parentCommitShas, changes, message, token } = ctx.request.body;
+  const { parent_commit_shas, changes, message, token } = ctx.request.body;
   const { username, repo, branch, path } = ctx.params;
 
   const gitInfo: IGitInfo = {
@@ -257,7 +257,7 @@ export const commit = async (ctx: Context) => {
   const commit = await push.createCommit(
     gitInfo,
     changes,
-    parentCommitShas,
+    parent_commit_shas,
     message,
     token
   );
