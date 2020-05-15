@@ -224,7 +224,7 @@ export const pr = async (ctx: Context) => {
   const commit = await push.createInitialCommit(
     gitInfo,
     relativeChanges,
-    commitSha,
+    [commitSha],
     token
   );
 
