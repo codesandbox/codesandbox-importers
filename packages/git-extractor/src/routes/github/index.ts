@@ -244,7 +244,7 @@ export const pr = async (ctx: Context) => {
 };
 
 export const commit = async (ctx: Context) => {
-  const { changes, message, token } = ctx.request.body;
+  const { parentCommitShas, changes, message, token } = ctx.request.body;
   const { username, repo, branch, path } = ctx.params;
 
   const gitInfo: IGitInfo = {
@@ -254,19 +254,10 @@ export const commit = async (ctx: Context) => {
     path,
   };
 
-  const response = await api.fetchRepoInfo(
-    gitInfo.username,
-    gitInfo.repo,
-    gitInfo.branch,
-    path,
-    true,
-    token
-  );
-
   const commit = await push.createCommit(
     gitInfo,
     changes,
-    response.commitSha,
+    parentCommitShas,
     message,
     token
   );
