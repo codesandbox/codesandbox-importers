@@ -98,13 +98,13 @@ export async function createFork(
 export async function createInitialCommit(
   gitInfo: IGitInfo,
   changes: IChanges,
-  parentSha: string,
+  parentShas: string[],
   userToken: string
 ) {
   return createCommit(
     gitInfo,
     changes,
-    [parentSha],
+    parentShas,
     "initial commit",
     userToken
   );
@@ -119,44 +119,35 @@ export async function createCommit(
 ) {
   const { username, repo } = gitInfo;
 
+  const treeSha = await api.getCommitTreeSha(
+    username,
+    repo,
+    parentShas[0],
+    userToken
+  );
   let tree: ITree = [];
-  let existingTreeSha: string | null = null;
 
-  if (
-    changes.added.length ||
-    changes.deleted.length ||
-    changes.modified.length
-  ) {
-    const treeSha = await api.getCommitTreeSha(
+  if (changes.deleted.length) {
+    tree = await api.getTreeWithDeletedFiles(
       username,
       repo,
-      parentShas[0],
+      treeSha,
+      changes.deleted,
       userToken
     );
-
-    if (changes.deleted.length) {
-      existingTreeSha = treeSha;
-      tree = await api.getTreeWithDeletedFiles(
-        username,
-        repo,
-        treeSha,
-        changes.deleted,
-        userToken
-      );
-    }
-    const createdBlobs = await createBlobs(
-      [...changes.modified, ...changes.added],
-      gitInfo,
-      userToken
-    );
-    tree = tree.concat(createdBlobs);
   }
+  const createdBlobs = await createBlobs(
+    [...changes.modified, ...changes.added],
+    gitInfo,
+    userToken
+  );
+  const updatedTree = tree.concat(createdBlobs);
 
   const treeResponse = await api.createTree(
     username,
     repo,
-    tree,
-    existingTreeSha,
+    updatedTree,
+    changes.deleted.length ? null : treeSha,
     userToken
   );
 
