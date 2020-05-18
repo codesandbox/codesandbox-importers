@@ -156,7 +156,7 @@ export const compare = async (ctx: Context) => {
       baseCommitSha: comparison.base_commit.sha,
       headCommitSha: comparison.commits.length
         ? comparison.commits[0].sha
-        : comparison.merge_base_commit,
+        : comparison.merge_base_commit.sha,
     };
   } else {
     ctx.body = {
@@ -172,7 +172,7 @@ export const compare = async (ctx: Context) => {
       baseCommitSha: comparison.base_commit.sha,
       headCommitSha: comparison.commits.length
         ? comparison.commits[0].sha
-        : comparison.merge_base_commit,
+        : comparison.merge_base_commit.sha,
     };
   }
 };
