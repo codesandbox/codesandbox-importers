@@ -118,8 +118,7 @@ export async function createCommit(
   userToken: string
 ) {
   const { username, repo } = gitInfo;
-
-  const treeSha = await api.getCommitTreeSha(
+  let treeSha = await api.getCommitTreeSha(
     username,
     repo,
     parentShas[0],
@@ -127,34 +126,40 @@ export async function createCommit(
   );
   let tree: ITree = [];
 
-  if (changes.deleted.length) {
-    tree = await api.getTreeWithDeletedFiles(
-      username,
-      repo,
-      treeSha,
-      changes.deleted,
+  if (
+    changes.added.length ||
+    changes.deleted.length ||
+    changes.modified.length
+  ) {
+    if (changes.deleted.length) {
+      tree = await api.getTreeWithDeletedFiles(
+        username,
+        repo,
+        treeSha,
+        changes.deleted,
+        userToken
+      );
+    }
+    const createdBlobs = await createBlobs(
+      [...changes.modified, ...changes.added],
+      gitInfo,
       userToken
     );
+    const updatedTree = tree.concat(createdBlobs);
+    const treeResponse = await api.createTree(
+      username,
+      repo,
+      updatedTree,
+      changes.deleted.length ? null : treeSha,
+      userToken
+    );
+    treeSha = treeResponse.sha;
   }
-  const createdBlobs = await createBlobs(
-    [...changes.modified, ...changes.added],
-    gitInfo,
-    userToken
-  );
-  const updatedTree = tree.concat(createdBlobs);
-
-  const treeResponse = await api.createTree(
-    username,
-    repo,
-    updatedTree,
-    changes.deleted.length ? null : treeSha,
-    userToken
-  );
 
   return await api.createCommit(
     gitInfo.username,
     gitInfo.repo,
-    treeResponse.sha,
+    treeSha,
     parentShas,
     message,
     userToken
