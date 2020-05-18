@@ -97,6 +97,7 @@ interface ICompareResponse {
   merge_base_commit: {
     sha: string;
   };
+  commits: Array<{ sha: string }>;
 }
 
 interface IContentResponse {
