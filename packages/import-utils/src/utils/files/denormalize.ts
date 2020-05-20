@@ -3,20 +3,22 @@ import {
   INormalizedModules,
   IModule,
   ISandboxFile,
-  ISandboxDirectory
+  ISandboxDirectory,
+  IBinaryModule
 } from "codesandbox-import-util-types";
 
 import { generate as generateShortid } from "shortid";
 import { getDirectoryPaths } from "../../create-sandbox/utils/resolve";
 
 function generateSandboxFile(
-  module: IModule,
+  module: IModule | IBinaryModule,
   path: string,
   parentDirectoryShortid?: string
 ): ISandboxFile {
   return {
     shortid: generateShortid(),
     code: module.content,
+    binaryContent: "binaryContent" in module ? module.binaryContent : undefined,
     directoryShortid: parentDirectoryShortid,
     title: basename(path),
     isBinary: module.isBinary

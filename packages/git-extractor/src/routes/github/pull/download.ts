@@ -28,6 +28,7 @@ const rawGitUrl = (gitInfo: IGitInfo, filePath: string, commitSha: string) => {
 export async function downloadRepository(
   gitInfo: IGitInfo,
   commitSha: string,
+  isPrivate: boolean,
   userToken?: string
 ): Promise<INormalizedModules> {
   const zip = await downloadZip(gitInfo, commitSha, userToken);
@@ -50,13 +51,21 @@ export async function downloadRepository(
           const bufferContents = await file.async("nodebuffer");
           const text = await isText(file.name, bufferContents);
 
-          const contents = await file.async("text");
           if (!text) {
-            result[relativePath] = {
-              content: rawGitUrl(gitInfo, relativePath, commitSha),
-              isBinary: true
-            };
+            if (isPrivate) {
+              result[relativePath] = {
+                binaryContent: bufferContents.toString("base64"),
+                content: "",
+                isBinary: true
+              };
+            } else {
+              result[relativePath] = {
+                content: rawGitUrl(gitInfo, relativePath, commitSha),
+                isBinary: true
+              };
+            }
           } else {
+            const contents = await file.async("text");
             result[relativePath] = {
               content: contents || "",
               isBinary: false

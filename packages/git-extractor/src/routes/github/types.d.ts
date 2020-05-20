@@ -1,4 +1,4 @@
-type Module = {
+export type Module = {
   name: string;
   path: string;
   sha: string;
@@ -10,14 +10,14 @@ type Module = {
   type: "file" | "dir";
 };
 
-type NormalizedDirectory = {
+export type NormalizedDirectory = {
   path: string;
   name: string;
   files: Array<Module>;
   directories: Array<NormalizedDirectory>;
 };
 
-type DownloadedFile = Module & {
+export type DownloadedFile = Module & {
   code: string;
   isBinary: boolean;
 };

@@ -7,6 +7,7 @@ import * as Sentry from "@sentry/node";
 import log from "../../utils/log";
 
 import { ITree, IGitInfo } from "./push";
+import { Module } from "./types";
 
 const API_URL = "https://api.github.com";
 const REPO_BASE_URL = API_URL + "/repos";
@@ -66,7 +67,7 @@ export async function getRepo(username: string, repo: string, token: string) {
 
   const response: { data: IRepoResponse } = await axios({
     url,
-    headers: { Authorization: `Bearer ${token}` }
+    headers: { Authorization: `Bearer ${token}` },
   });
 
   return response.data;
@@ -140,7 +141,7 @@ export async function fetchRights(
 
     const response: { data: RightsResponse } = await axios({
       url,
-      headers
+      headers,
     });
 
     if (response.data.permissions.admin) {
@@ -409,7 +410,7 @@ export async function createRepo(
       description: "Created with CodeSandbox",
       homepage: `https://codesandbox.io/s/github/${username}/${repo}`,
       auto_init: true,
-      private: privateRepo
+      private: privateRepo,
     },
     { headers: { Authorization: `Bearer ${token}` } }
   );
@@ -448,17 +449,17 @@ export async function fetchCode(file: Module): Promise<string> {
     url: file.download_url,
     responseType: "text",
     headers: {
-      Accept: "text/plain"
+      Accept: "text/plain",
     },
     // We need to tell axios not to do anything (don't parse)
-    transformResponse: [d => d]
-  }).catch(e => {
+    transformResponse: [(d) => d],
+  }).catch((e) => {
     if (e.response && e.response.status === 404) {
       // Maybe it is not yet added to github api, let's try the raw git object
       return axios({
-        url: file.git_url + buildSecretParams()
-      }).then(res => ({
-        data: new Buffer(res.data.content, "base64").toString()
+        url: file.git_url + buildSecretParams(),
+      }).then((res) => ({
+        data: new Buffer(res.data.content, "base64").toString(),
       }));
     }
 
@@ -478,11 +479,11 @@ interface CommitResponse {
 
 const shaCache = LRU({
   max: 500,
-  maxAge: 1000 * 5 // 5 seconds
+  maxAge: 1000 * 5, // 5 seconds
 });
 
 const etagCache = LRU<string, { etag: string; sha: string }>({
-  max: 50000
+  max: 50000,
 });
 
 export function resetShaCache(gitInfo: IGitInfo) {
@@ -522,10 +523,10 @@ export async function fetchRepoInfo(
       const response = await axios({
         url,
         headers,
-        validateStatus: function(status) {
+        validateStatus: function (status) {
           // Axios sees 304 (Not Modified) as an error. We don't want that.
           return status < 400; // Reject only if the status code is greater than or equal to 400
-        }
+        },
       });
 
       if (response.status === 304 && etagCacheResponse) {
@@ -540,7 +541,7 @@ export async function fetchRepoInfo(
         if (etag && !userToken) {
           etagCache.set(cacheId, {
             etag,
-            sha: response.data.sha
+            sha: response.data.sha,
           });
         }
       }
@@ -553,7 +554,7 @@ export async function fetchRepoInfo(
       username,
       repo,
       branch,
-      path
+      path,
     };
   } catch (e) {
     // There is a chance that the branch contains slashes, we try to fix this
@@ -601,7 +602,7 @@ export async function fetchPullInfo(
 
     const response = await axios({
       url,
-      headers
+      headers,
     });
 
     const data = response.data;
@@ -609,7 +610,7 @@ export async function fetchPullInfo(
     return {
       repo: data.head.repo.name,
       username: data.head.repo.owner.login,
-      branch: data.head.ref
+      branch: data.head.ref,
     };
   } catch (e) {
     e.message = "Could not find pull request information";
@@ -634,8 +635,8 @@ export async function downloadZip(
   }
 
   const buffer: Buffer = await fetch(url, {
-    headers
-  }).then(res => {
+    headers,
+  }).then((res) => {
     if (+res.headers.get("Content-Length") > MAX_ZIP_SIZE) {
       throw new Error("This repo is too big to import");
     }

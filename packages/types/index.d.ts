@@ -1,7 +1,11 @@
 export interface IModule {
-  content: string;
+  content: string; // If isBinary is true this will be a URL
   isBinary: boolean;
   type?: "file";
+}
+
+export interface IBinaryModule extends IModule {
+  binaryContent: string;
 }
 
 export interface IDirectory {
@@ -9,7 +13,7 @@ export interface IDirectory {
 }
 
 export interface INormalizedModules {
-  [path: string]: IModule | IDirectory;
+  [path: string]: IModule | IBinaryModule | IDirectory;
 }
 
 export interface ISandboxFile {
@@ -17,6 +21,7 @@ export interface ISandboxFile {
   code: string;
   shortid: string;
   isBinary: boolean;
+  binaryContent?: string;
   directoryShortid: string | undefined | null;
 }
 
