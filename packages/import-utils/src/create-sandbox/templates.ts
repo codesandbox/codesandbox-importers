@@ -46,7 +46,7 @@ type PackageJSON = {
   devDependencies?: Dependencies;
 };
 export function getTemplate(
-  { dependencies = {}, devDependencies = {} }: PackageJSON,
+  pkg: PackageJSON | null,
   modules: INormalizedModules
 ): ITemplate | undefined {
   const sandboxConfig =
@@ -61,9 +61,15 @@ export function getTemplate(
     } catch (e) {}
   }
 
+  if (!pkg) {
+    return "static";
+  }
+
+  const { dependencies = {}, devDependencies = {} } = pkg;
+
   const totalDependencies = [
     ...Object.keys(dependencies),
-    ...Object.keys(devDependencies)
+    ...Object.keys(devDependencies),
   ];
   const moduleNames = Object.keys(modules);
 
@@ -73,7 +79,7 @@ export function getTemplate(
 
   const nuxt = ["nuxt", "nuxt-edge", "nuxt-ts", "nuxt-ts-edge"];
 
-  if (totalDependencies.some(dep => nuxt.indexOf(dep) > -1)) {
+  if (totalDependencies.some((dep) => nuxt.indexOf(dep) > -1)) {
     return "nuxt";
   }
 
@@ -87,10 +93,10 @@ export function getTemplate(
     "apollo-server-hapi",
     "apollo-server-koa",
     "apollo-server-lambda",
-    "apollo-server-micro"
+    "apollo-server-micro",
   ];
 
-  if (totalDependencies.some(dep => apollo.indexOf(dep) > -1)) {
+  if (totalDependencies.some((dep) => apollo.indexOf(dep) > -1)) {
     return "apollo";
   }
 
@@ -124,17 +130,17 @@ export function getTemplate(
 
   // CLIENT
 
-  if (moduleNames.some(m => m.endsWith(".re"))) {
+  if (moduleNames.some((m) => m.endsWith(".re"))) {
     return "reason";
   }
 
   const parcel = ["parcel-bundler", "parcel"];
-  if (totalDependencies.some(dep => parcel.indexOf(dep) > -1)) {
+  if (totalDependencies.some((dep) => parcel.indexOf(dep) > -1)) {
     return "parcel";
   }
 
   const dojo = ["@dojo/core", "@dojo/framework"];
-  if (totalDependencies.some(dep => dojo.indexOf(dep) > -1)) {
+  if (totalDependencies.some((dep) => dojo.indexOf(dep) > -1)) {
     return "@dojo/cli-create-app";
   }
   if (
@@ -186,9 +192,9 @@ export function getTemplate(
     "nodemon",
     "ts-node",
     "@tensorflow/tfjs-node",
-    "webpack-dev-server"
+    "webpack-dev-server",
   ];
-  if (totalDependencies.some(dep => nodeDeps.indexOf(dep) > -1)) {
+  if (totalDependencies.some((dep) => nodeDeps.indexOf(dep) > -1)) {
     return "node";
   }
 
