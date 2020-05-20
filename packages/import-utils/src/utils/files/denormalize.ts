@@ -4,7 +4,7 @@ import {
   IModule,
   ISandboxFile,
   ISandboxDirectory,
-  IBinaryModule
+  IBinaryModule,
 } from "codesandbox-import-util-types";
 
 import { generate as generateShortid } from "shortid";
@@ -15,14 +15,19 @@ function generateSandboxFile(
   path: string,
   parentDirectoryShortid?: string
 ): ISandboxFile {
-  return {
+  const sandboxFile: ISandboxFile = {
     shortid: generateShortid(),
     code: module.content,
-    binaryContent: "binaryContent" in module ? module.binaryContent : undefined,
     directoryShortid: parentDirectoryShortid,
     title: basename(path),
-    isBinary: module.isBinary
+    isBinary: module.isBinary,
   };
+
+  if ("binaryContent" in module) {
+    sandboxFile.binaryContent = module.binaryContent;
+  }
+
+  return sandboxFile;
 }
 
 function createDirectoryRecursively(
@@ -58,7 +63,7 @@ function generateSandboxDirectory(
   return {
     shortid: generateShortid(),
     directoryShortid: parentDirectoryShortid,
-    title
+    title,
   };
 }
 
@@ -72,17 +77,17 @@ export default function denormalize(
   let existingDirPaths: {
     [p: string]: ISandboxDirectory;
   } = {};
-  Object.keys(existingDirPathsParams).forEach(path => {
+  Object.keys(existingDirPathsParams).forEach((path) => {
     existingDirPaths[path.replace(/^\//, "")] = existingDirPathsParams[path];
   });
 
   let files: INormalizedModules = {};
-  Object.keys(paramFiles).forEach(path => {
+  Object.keys(paramFiles).forEach((path) => {
     files[path.replace(/^\//, "")] = paramFiles[path];
   });
 
   const directories: Set<string> = new Set();
-  Object.keys(files).forEach(path => {
+  Object.keys(files).forEach((path) => {
     const dir = dirname(path);
     if (dir !== "." && !existingDirPaths["/" + dir]) {
       directories.add(dirname(path));
@@ -97,12 +102,12 @@ export default function denormalize(
   const sandboxDirectories: {
     [path: string]: ISandboxDirectory;
   } = { ...existingDirPaths };
-  Array.from(directories).forEach(dirPath => {
+  Array.from(directories).forEach((dirPath) => {
     createDirectoryRecursively(dirPath, sandboxDirectories);
   });
 
   const sandboxModules: ISandboxFile[] = Object.keys(files)
-    .map(path => {
+    .map((path) => {
       const dir = sandboxDirectories[dirname(path)];
       const parentShortid = dir ? dir.shortid : undefined;
 
@@ -117,11 +122,11 @@ export default function denormalize(
     .filter((x): x is ISandboxFile => x !== undefined);
 
   const dirs: unknown = Object.keys(sandboxDirectories)
-    .map(s => !existingDirPaths[s] && sandboxDirectories[s])
+    .map((s) => !existingDirPaths[s] && sandboxDirectories[s])
     .filter(Boolean);
 
   return {
     modules: sandboxModules,
-    directories: dirs as ISandboxDirectory[]
+    directories: dirs as ISandboxDirectory[],
   };
 }
