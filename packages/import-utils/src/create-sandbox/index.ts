@@ -56,7 +56,7 @@ export default async function createSandbox(
   directory: INormalizedModules
 ): Promise<ISandbox> {
   const packageJson = directory["package.json"];
-  if (packageJson.type === "directory") {
+  if (packageJson && packageJson.type === "directory") {
     throw new Error("package.json is a directory");
   }
 
