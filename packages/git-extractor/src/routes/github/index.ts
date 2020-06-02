@@ -77,6 +77,12 @@ export const data = async (ctx: Context, next: () => Promise<any>) => {
     title = title + `: ${splittedPath[splittedPath.length - 1]}`;
   }
 
+  let isPrivate = false;
+
+  if (userToken) {
+    isPrivate = await api.isRepoPrivate(username, repo, userToken);
+  }
+
   const downloadedFiles = await downloadRepository(
     {
       username,
@@ -85,14 +91,9 @@ export const data = async (ctx: Context, next: () => Promise<any>) => {
       path,
     },
     commitSha,
+    isPrivate,
     userToken
   );
-
-  let isPrivate = false;
-
-  if (userToken) {
-    isPrivate = await api.isRepoPrivate(username, repo, userToken);
-  }
 
   if (isPrivate) {
     api.resetShaCache({ branch, username, repo, path });

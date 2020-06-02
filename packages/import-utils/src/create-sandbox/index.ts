@@ -2,7 +2,7 @@ import {
   INormalizedModules,
   IModule,
   ISandbox,
-  ITemplate
+  ITemplate,
 } from "codesandbox-import-util-types";
 import denormalize from "../utils/files/denormalize";
 
@@ -56,12 +56,11 @@ export default async function createSandbox(
   directory: INormalizedModules
 ): Promise<ISandbox> {
   const packageJson = directory["package.json"];
-  if (!packageJson) throw new Error("Could not find package.json");
-  if (packageJson.type === "directory")
+  if (packageJson && packageJson.type === "directory") {
     throw new Error("package.json is a directory");
+  }
 
-  const packageJsonPackage = JSON.parse(packageJson.content);
-
+  let packageJsonPackage = packageJson ? JSON.parse(packageJson.content) : null;
   let template = getTemplate(packageJsonPackage, directory);
 
   if (template === undefined) {
@@ -71,6 +70,8 @@ export default async function createSandbox(
   } else {
     console.log(`Creating sandbox with template '${template}'`);
   }
+
+  packageJsonPackage = { main: "/index.html" };
 
   const mainFileUnix = findMainFile(
     directory,
@@ -95,6 +96,6 @@ export default async function createSandbox(
     directories,
     externalResources: [],
     template,
-    entry: mainFile
+    entry: mainFile,
   };
 }
