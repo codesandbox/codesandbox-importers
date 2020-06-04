@@ -1,3 +1,4 @@
+import { IModule, INormalizedModules } from "codesandbox-import-util-types";
 import createSandbox from "codesandbox-import-utils/lib/create-sandbox";
 import { Context } from "koa";
 
@@ -275,14 +276,22 @@ export const commit = async (ctx: Context) => {
 export const repo = async (ctx: Context, next: () => Promise<any>) => {
   const {
     token,
-    changes,
+    normalizedFiles: fileArray,
     privateRepo,
   }: {
     token: string;
-    changes: IChanges;
+    normalizedFiles: Array<IModule & { path: string }>;
     privateRepo?: boolean;
   } = ctx.request.body;
   const { username, repo } = ctx.params;
+
+  const normalizedFiles: INormalizedModules = fileArray.reduce(
+    (total, file) => ({
+      ...total,
+      [file.path]: file,
+    }),
+    {}
+  );
 
   if (!repo) {
     throw new Error("Repo name cannot be empty");
@@ -291,7 +300,7 @@ export const repo = async (ctx: Context, next: () => Promise<any>) => {
   const result = await push.createRepo(
     username,
     repo,
-    changes,
+    normalizedFiles,
     token,
     privateRepo
   );
