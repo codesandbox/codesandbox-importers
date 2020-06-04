@@ -1,3 +1,9 @@
+import {
+  IBinaryModule,
+  IModule,
+  INormalizedModules,
+} from "codesandbox-import-util-types";
+
 import delay from "../../../utils/delay";
 import * as api from "../api";
 import { createBlobs } from "./utils/create-blobs";
@@ -169,11 +175,11 @@ export async function createCommit(
 export async function createRepo(
   username: string,
   name: string,
-  changes: IChanges,
+  sandboxFiles: INormalizedModules,
   userToken: string,
   privateRepo?: boolean
 ) {
-  await api.createRepo(username, name, userToken, privateRepo);
+  const data = await api.createRepo(username, name, userToken, privateRepo);
 
   const latestData = await api.fetchRepoInfo(
     username,
@@ -191,6 +197,31 @@ export async function createRepo(
     path: latestData.path,
   };
 
+  const changes: IChanges = {
+    added: Object.keys(sandboxFiles)
+      .filter((path) => sandboxFiles[path].type !== "directory")
+      .map((path) => {
+        if ("binaryContent" in sandboxFiles[path]) {
+          const file = sandboxFiles[path] as IBinaryModule;
+          return {
+            content: file.binaryContent,
+            encoding: "base64",
+            path,
+          };
+        }
+
+        const file = sandboxFiles[path] as IModule;
+
+        return {
+          content: file.content,
+          encoding: file.isBinary ? "base64" : "utf-8",
+          path,
+        };
+      }),
+    deleted: [],
+    modified: [],
+  };
+
   const commit = await createCommit(
     gitInfo,
     changes,
@@ -199,7 +230,7 @@ export async function createRepo(
     userToken
   );
 
-  await api.updateReference(
+  const res = await api.updateReference(
     username,
     gitInfo.repo,
     gitInfo.branch,
