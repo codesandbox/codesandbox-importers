@@ -335,23 +335,13 @@ export async function createPr(
   body: string,
   token: string
 ): Promise<IPrResponse> {
-  console.log("Calling CREATE PR");
-  console.log({
-    base: `${base.username === head.username ? "" : base.username + ":"}${
-      base.branch
-    }`,
-    head: head.branch,
-    title,
-    body,
-    maintainer_can_modify: true,
-  });
   const { data } = await axios.post(
     `${buildRepoApiUrl(head.username, head.repo)}/pulls`,
     {
-      base: `${base.username === head.username ? "" : base.username + ":"}${
+      base: base.branch,
+      head: `${base.username === head.username ? "" : base.username + ":"}${
         base.branch
       }`,
-      head: head.branch,
       title,
       body,
       maintainer_can_modify: true,
