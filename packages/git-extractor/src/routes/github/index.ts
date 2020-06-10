@@ -221,12 +221,12 @@ export const pr = async (ctx: Context) => {
   );
 
   const res = await push.createBranch(gitInfo, commit.sha, token, sandboxId);
-  const base = {
+  const head = {
     branch,
     repo,
     username,
   };
-  const head = {
+  const base = {
     branch: res.branchName,
     repo: gitInfo.repo,
     username: gitInfo.username,
