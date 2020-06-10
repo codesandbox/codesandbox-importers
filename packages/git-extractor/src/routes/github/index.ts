@@ -206,20 +206,6 @@ export const pr = async (ctx: Context) => {
     path,
   };
 
-  const relativeChanges: IChanges = {
-    added: changes.added.map((change) => ({
-      ...change,
-      path: `${gitInfo.path ? gitInfo.path : ""}${change.path}`,
-    })),
-    modified: changes.modified.map((change) => ({
-      ...change,
-      path: `${gitInfo.path ? gitInfo.path : ""}${change.path}`,
-    })),
-    deleted: changes.deleted.map(
-      (path) => `${gitInfo.path ? gitInfo.path : ""}${path}`
-    ),
-  };
-
   const rights = await api.fetchRights(username, repo, token);
 
   if (rights === "none" || rights === "read") {
@@ -229,7 +215,7 @@ export const pr = async (ctx: Context) => {
 
   const commit = await push.createInitialCommit(
     gitInfo,
-    relativeChanges,
+    changes,
     [commitSha],
     token
   );
