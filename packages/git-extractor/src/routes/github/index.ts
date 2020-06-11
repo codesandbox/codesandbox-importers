@@ -34,6 +34,29 @@ export const info = async (ctx: Context, next: () => Promise<any>) => {
   ctx.body = response;
 };
 
+// We receive paths as "/src/index.js" and root path as "src", and Git takes
+// "src/index.js", so we need to ensure we produce the correct paths
+const changesWithRootPath = (changes: IChanges, rootPath = ""): IChanges => {
+  const convertPath = (path: string) => {
+    if (rootPath) {
+      return rootPath + path;
+    }
+
+    return path.substr(1);
+  };
+  return {
+    added: changes.added.map((change) => ({
+      ...change,
+      path: convertPath(change.path),
+    })),
+    deleted: changes.deleted.map(convertPath),
+    modified: changes.modified.map((change) => ({
+      ...change,
+      path: convertPath(change.path),
+    })),
+  };
+};
+
 export const pullInfo = async (ctx: Context, next: () => Promise<any>) => {
   const userToken = getUserToken(ctx);
 
@@ -215,7 +238,7 @@ export const pr = async (ctx: Context) => {
 
   const commit = await push.createInitialCommit(
     gitInfo,
-    changes,
+    changesWithRootPath(changes, path),
     [commitSha],
     token
   );
@@ -248,7 +271,7 @@ export const commit = async (ctx: Context) => {
 
   const commit = await push.createCommit(
     gitInfo,
-    changes,
+    changesWithRootPath(changes, path),
     parentCommitShas,
     message,
     token
