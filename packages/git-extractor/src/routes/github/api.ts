@@ -336,7 +336,7 @@ export async function createPr(
   token: string
 ): Promise<IPrResponse> {
   const { data } = await axios.post(
-    `${buildRepoApiUrl(head.username, head.repo)}/pulls`,
+    `${buildRepoApiUrl(base.username, base.repo)}/pulls`,
     {
       base: base.branch,
       head: `${base.username === head.username ? "" : head.username + ":"}${
