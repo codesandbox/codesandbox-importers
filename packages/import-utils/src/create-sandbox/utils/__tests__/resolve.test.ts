@@ -7,13 +7,13 @@ describe("resolve", () => {
         {
           directoryShortid: undefined,
           title: "world",
-          shortid: "dir1"
+          shortid: "dir1",
         },
         {
           directoryShortid: "dir1",
           title: "hello",
-          shortid: "dir2"
-        }
+          shortid: "dir2",
+        },
       ];
 
       expect(getDirectoryPaths(existingDirs)).toMatchSnapshot();

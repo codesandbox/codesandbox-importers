@@ -53,8 +53,8 @@ function getJsResource(line: string): string | undefined {
 function getExternalResources(html: string) {
   return html
     .split("\n")
-    .map(line => getCssResource(line) || getJsResource(line))
-    .filter(x => x);
+    .map((line) => getCssResource(line) || getJsResource(line))
+    .filter((x) => x);
 }
 
 /**
@@ -84,6 +84,6 @@ export default function parseHTML(html: string) {
 
   return {
     body: bodyContent || '<div id="root"></div>',
-    externalResources
+    externalResources,
   };
 }

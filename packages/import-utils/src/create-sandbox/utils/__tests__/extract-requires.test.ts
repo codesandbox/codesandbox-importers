@@ -40,7 +40,7 @@ describe("extractRequires", () => {
       "angular",
       "./test",
       "react",
-      "./test2"
+      "./test2",
     ]);
   });
 

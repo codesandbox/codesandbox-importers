@@ -17,8 +17,8 @@ const config = {
     require("babel-plugin-transform-object-rest-spread"),
     require("babel-plugin-transform-class-properties"),
     require("babel-plugin-transform-decorators-legacy").default,
-    require("babel-plugin-dynamic-import-node").default
-  ]
+    require("babel-plugin-dynamic-import-node").default,
+  ],
 };
 
 export default function exportRequires(code: string) {
@@ -38,7 +38,7 @@ export default function exportRequires(code: string) {
               requires.push(path.node.arguments[0].value);
             }
           }
-        }
+        },
       });
     }
   } catch (e) {
