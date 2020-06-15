@@ -119,6 +119,7 @@ interface IPrResponse {
   repo: string;
   username: string;
   branch: string;
+  state: string;
   merged: boolean;
   mergeable: boolean;
   mergeable_state: string;
@@ -356,6 +357,7 @@ export async function createPr(
     commitSha: data.head.sha,
     branch: data.head.ref,
     merged: data.merged,
+    state: data.state,
     mergeable: data.mergeable,
     mergeable_state: data.mergeable_state,
     rebaseable: data.rebaseable,
@@ -706,6 +708,7 @@ export async function fetchPullInfo(
       username: data.head.repo.owner.login,
       commitSha: data.head.sha,
       branch: data.head.ref,
+      state: data.state,
       merged: data.merged,
       mergeable: data.mergeable,
       mergeable_state: data.mergeable_state,
