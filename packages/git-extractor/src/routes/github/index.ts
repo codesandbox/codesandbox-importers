@@ -243,7 +243,12 @@ export const pr = async (ctx: Context) => {
     token
   );
 
-  const res = await push.createBranch(gitInfo, commit.sha, token, sandboxId);
+  const res = await push.createBranch(
+    gitInfo,
+    commit.sha,
+    token,
+    `csb-${sandboxId}`
+  );
   const base = {
     branch,
     repo,
