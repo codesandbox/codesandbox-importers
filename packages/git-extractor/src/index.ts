@@ -1,24 +1,21 @@
-import * as Koa from "koa";
-import * as Router from "koa-router";
 import * as Sentry from "@sentry/node";
-
+import * as Koa from "koa";
 import * as bodyParser from "koa-bodyparser";
+import * as Router from "koa-router";
 
-import log from "./utils/log";
-
+import camelize from "./middleware/camelize";
+import decamelize from "./middleware/decamelize";
+import errorHandler from "./middleware/error-handler";
 // MIDDLEWARE
 import logger from "./middleware/logger";
-import errorHandler from "./middleware/error-handler";
-import decamelize from "./middleware/decamelize";
-import camelize from "./middleware/camelize";
 import notFound from "./middleware/not-found";
-
+import * as define from "./routes/define";
 // ROUTES
 import * as github from "./routes/github";
-import * as define from "./routes/define";
+import log from "./utils/log";
 
 Sentry.init({
-  dsn: "https://4917ce43c4ca42a1acb85b2843b79c6b@sentry.io/4377691"
+  dsn: "https://4917ce43c4ca42a1acb85b2843b79c6b@sentry.io/4377691",
 });
 
 const DEFAULT_PORT = process.env.PORT || 2000;
@@ -43,8 +40,8 @@ router
   .get("/git/github/info/:username/:repo/commit/:branch", github.info) // allow commit urls
   .get("/git/github/info/:username/:repo", github.info) // For when tree isn't in path (root path)
   .get("/git/github/info/:username/:repo/pull/:pull", github.pullInfo) // allow pull urls
+  .post("/git/github/compare/:username/:repo", github.compare) // Compare changes between branches and commits
   // Push
-  .post("/git/github/diff/:username/:repo/:branch*/path/:path*", github.diff)
   .post(
     "/git/github/commit/:username/:repo/:branch*/path/:path*",
     github.commit
