@@ -24,7 +24,7 @@ const router = new Router();
 
 app.use(errorHandler);
 app.use(logger);
-app.use(bodyParser());
+app.use(bodyParser({ jsonLimit: "50mb" }));
 app.use(camelize);
 app.use(decamelize);
 app.use(notFound);
