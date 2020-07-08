@@ -54,3 +54,12 @@ app.use(router.routes()).use(router.allowedMethods());
 
 log(`Listening on ${DEFAULT_PORT}`);
 app.listen(DEFAULT_PORT);
+
+app.on("error", (err, ctx) => {
+  Sentry.withScope(function (scope) {
+    scope.addEventProcessor(function (event) {
+      return Sentry.Handlers.parseRequest(event, ctx.request);
+    });
+    Sentry.captureException(err);
+  });
+});
