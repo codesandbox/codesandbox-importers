@@ -73,7 +73,9 @@ export function getTemplate(
   ];
   const moduleNames = Object.keys(modules);
 
-  if (totalDependencies.indexOf("@adonisjs/framework") > -1) {
+  const adonis = ["@adonisjs/framework", "@adonisjs/core"]
+
+  if (totalDependencies.some(dep => adonis.indexOf(dep) > -1) {
     return "adonis";
   }
 
