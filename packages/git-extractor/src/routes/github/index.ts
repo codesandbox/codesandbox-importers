@@ -1,5 +1,6 @@
 import { IModule, INormalizedModules } from "codesandbox-import-util-types";
 import createSandbox from "codesandbox-import-utils/lib/create-sandbox";
+import * as Sentry from "@sentry/node";
 import { Context } from "koa";
 
 import * as api from "./api";
@@ -92,6 +93,13 @@ export const data = async (ctx: Context, next: () => Promise<any>) => {
   // we can retrieve if this is the case from this method
   const { username, repo, branch, commitSha, currentUsername } = ctx.params;
   const userToken = getUserToken(ctx);
+
+  Sentry.setContext("repo", {
+    username,
+    repo,
+    branch,
+    commitSha,
+  });
 
   const path = ctx.params.path && ctx.params.path.replace("+", " ");
 
