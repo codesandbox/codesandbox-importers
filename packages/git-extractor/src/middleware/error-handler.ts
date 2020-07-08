@@ -14,6 +14,8 @@ const errorHandler = async (ctx: Context, next: () => Promise<any>) => {
     if (e.response && e.response.data) {
       console.log("ERROR: " + e.response.data.message);
     }
+
+    ctx.app.emit("error", e, ctx);
   }
 };
 
