@@ -1,6 +1,6 @@
+import * as Sentry from "@sentry/node";
 import { IModule, INormalizedModules } from "codesandbox-import-util-types";
 import createSandbox from "codesandbox-import-utils/lib/create-sandbox";
-import * as Sentry from "@sentry/node";
 import { Context } from "koa";
 
 import * as api from "./api";
@@ -188,7 +188,7 @@ export const compare = async (ctx: Context) => {
       files,
       baseCommitSha: comparison.base_commit.sha,
       headCommitSha: comparison.commits.length
-        ? comparison.commits[0].sha
+        ? comparison.commits[comparison.commits.length - 1].sha
         : comparison.merge_base_commit.sha,
     };
   } else {
