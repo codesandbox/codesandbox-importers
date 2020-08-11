@@ -175,6 +175,10 @@ export function getTemplate(
   if (totalDependencies.indexOf("@sveltech/routify") > -1) {
     return "node";
   }
+  
+  if (totalDependencies.indexOf("vite") > -1) {
+    return "node";
+  }
 
   if (totalDependencies.indexOf("svelte") > -1) {
     return "svelte";
