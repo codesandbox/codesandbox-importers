@@ -13,7 +13,7 @@ export default async function uploadFiles(uploads: IUploads) {
 
     files[uploadPath] = {
       content: res.url,
-      isBinary: true
+      isBinary: true,
     };
   }
 

@@ -3,7 +3,7 @@ import { join } from "path";
 import {
   ISandboxFile,
   ISandboxDirectory,
-  INormalizedModules
+  INormalizedModules,
 } from "codesandbox-import-util-types";
 
 function findSandboxFiles(
@@ -15,18 +15,18 @@ function findSandboxFiles(
   let result: INormalizedModules = {};
 
   const modulesInDirectory = modules.filter(
-    m => m.directoryShortid === currentDir
+    (m) => m.directoryShortid === currentDir
   );
 
-  modulesInDirectory.forEach(m => {
+  modulesInDirectory.forEach((m) => {
     const newPath = join(path, m.title);
 
     result[newPath] = { content: m.code || "", isBinary: m.isBinary };
   });
 
   const childrenFiles = directories
-    .filter(d => d.directoryShortid === currentDir)
-    .forEach(dir => {
+    .filter((d) => d.directoryShortid === currentDir)
+    .forEach((dir) => {
       const newPath = join(path, dir.title);
       const dirResult = findSandboxFiles(
         modules,

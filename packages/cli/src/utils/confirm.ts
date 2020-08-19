@@ -6,8 +6,8 @@ export default async function confirm(question: string, defaultNo = false) {
       default: !defaultNo,
       message: question,
       name: "confirmed",
-      type: "confirm"
-    }
+      type: "confirm",
+    },
   ]);
   return confirmed;
 }

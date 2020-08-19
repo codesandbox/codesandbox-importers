@@ -7,8 +7,8 @@ describe("template detection", () => {
         {
           dependencies: {},
           devDependencies: {
-            "react-scripts": "latest"
-          }
+            "react-scripts": "latest",
+          },
         },
         {}
       )
@@ -21,8 +21,8 @@ describe("template detection", () => {
         {
           dependencies: {},
           devDependencies: {
-            nuxt: "latest"
-          }
+            nuxt: "latest",
+          },
         },
         {}
       )
@@ -35,8 +35,8 @@ describe("template detection", () => {
         {
           dependencies: {},
           devDependencies: {
-            "apollo-server": "latest"
-          }
+            "apollo-server": "latest",
+          },
         },
         {}
       )

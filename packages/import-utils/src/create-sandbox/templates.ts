@@ -73,7 +73,9 @@ export function getTemplate(
   ];
   const moduleNames = Object.keys(modules);
 
-  if (totalDependencies.indexOf("@adonisjs/framework") > -1) {
+  const adonis = ["@adonisjs/framework", "@adonisjs/core"];
+
+  if (totalDependencies.some((dep) => adonis.indexOf(dep) > -1)) {
     return "adonis";
   }
 
@@ -171,6 +173,10 @@ export function getTemplate(
   }
 
   if (totalDependencies.indexOf("@sveltech/routify") > -1) {
+    return "node";
+  }
+  
+  if (totalDependencies.indexOf("vite") > -1) {
     return "node";
   }
 

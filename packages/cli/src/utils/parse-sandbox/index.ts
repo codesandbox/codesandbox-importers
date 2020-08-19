@@ -26,7 +26,7 @@ async function normalizeFilesInDirectory(
   let uploads: IUploads = {};
 
   await Promise.all(
-    entries.map(async e => {
+    entries.map(async (e) => {
       const absolutePath = path.join(p, e);
       const stat = await fs.stat(absolutePath);
 
@@ -40,10 +40,12 @@ async function normalizeFilesInDirectory(
     })
   );
 
-  const recursiveDirs: { [path: string]: IModule } = (await Promise.all(
-    dirs.map(d => normalizeFilesInDirectory(d, startingPath))
-  )).reduce((prev, next) => {
-    next.errors.forEach(e => {
+  const recursiveDirs: { [path: string]: IModule } = (
+    await Promise.all(
+      dirs.map((d) => normalizeFilesInDirectory(d, startingPath))
+    )
+  ).reduce((prev, next) => {
+    next.errors.forEach((e) => {
       errors.push(e);
     });
 
@@ -52,38 +54,40 @@ async function normalizeFilesInDirectory(
     return { ...prev, ...next.files };
   }, {});
 
-  const fileData = (await Promise.all(
-    files.map(async t => {
-      const code = await fs.readFile(t);
+  const fileData = (
+    await Promise.all(
+      files.map(async (t) => {
+        const code = await fs.readFile(t);
 
-      const relativePath = t.replace(startingPath + "/", "");
-      const isBinary = !(await isText(t, code));
-      if (isBinary) {
-        if (code.byteLength > MAX_FILE_SIZE) {
-          errors.push(
-            new FileError(
-              isTooBig(code) ? "Is too big" : "Is a binary file",
-              relativePath,
-              true
-            )
-          );
-          return false;
-        } else {
-          uploads[relativePath] = code;
-          return false;
+        const relativePath = t.replace(startingPath + "/", "");
+        const isBinary = !(await isText(t, code));
+        if (isBinary) {
+          if (code.byteLength > MAX_FILE_SIZE) {
+            errors.push(
+              new FileError(
+                isTooBig(code) ? "Is too big" : "Is a binary file",
+                relativePath,
+                true
+              )
+            );
+            return false;
+          } else {
+            uploads[relativePath] = code;
+            return false;
+          }
         }
-      }
 
-      return { path: relativePath, code: code.toString() };
-    })
-  )).reduce((prev, next) => {
+        return { path: relativePath, code: code.toString() };
+      })
+    )
+  ).reduce((prev, next) => {
     if (next === false) {
       return prev;
     }
 
     return {
       ...prev,
-      [next.path]: { content: next.code }
+      [next.path]: { content: next.code },
     };
   }, {});
 

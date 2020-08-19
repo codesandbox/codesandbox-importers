@@ -8,7 +8,7 @@ export function getDirectoryPaths(directories: ISandboxDirectory[]) {
     directoryShortid: string | undefined
   ) => {
     const dir = directories.find(
-      d => d.directoryShortid === directoryShortid && d.title === d.title
+      (d) => d.directoryShortid === directoryShortid && d.title === d.title
     );
 
     if (dir) {
@@ -18,11 +18,13 @@ export function getDirectoryPaths(directories: ISandboxDirectory[]) {
     }
   };
 
-  directories.filter(x => x.directoryShortid == null).forEach(dir => {
-    paths["/" + dir.title] = dir;
+  directories
+    .filter((x) => x.directoryShortid == null)
+    .forEach((dir) => {
+      paths["/" + dir.title] = dir;
 
-    addDirectory("/" + dir.title, dir.shortid);
-  });
+      addDirectory("/" + dir.title, dir.shortid);
+    });
 
   return paths;
 }
