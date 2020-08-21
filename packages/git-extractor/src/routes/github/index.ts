@@ -23,10 +23,16 @@ const getUserToken = (ctx: Context) => {
 
 export const info = async (ctx: Context, next: () => Promise<any>) => {
   const userToken = getUserToken(ctx);
+  let branch = ctx.params.branch;
+  
+  if (!branch) {
+    branch = await api.getDefaultBranch(ctx.params.username, ctx.params.repo, userToken)
+  }
+  
   const response = await api.fetchRepoInfo(
     ctx.params.username,
     ctx.params.repo,
-    ctx.params.branch ? ctx.params.branch : await api.getDefaultBranch(ctx.params.username, ctx.params.repo, userToken),
+    branch,
     ctx.params.path,
     false,
     userToken
