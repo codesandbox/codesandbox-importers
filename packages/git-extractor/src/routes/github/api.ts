@@ -79,7 +79,6 @@ interface IRepoResponse {
   name: string;
   full_name: string;
   private: boolean;
-  default_branch: string;
 }
 
 interface ICompareResponse {
@@ -343,7 +342,7 @@ export async function createPr(
       base: base.branch,
       head: `${base.username === head.username ? "" : head.username + ":"}${
         head.branch
-        }`,
+      }`,
       title,
       body,
       maintainer_can_modify: true,
@@ -523,17 +522,6 @@ interface ICreateRepoResponse {
   private: false;
   fork: false;
   url: string;
-  default_branch: string;
-}
-
-export async function getDefaultBranch(
-  username: string,
-  repo: string,
-  token: string
-) {
-  const data = await getRepo(username, repo, token);
-
-  return data.default_branch;
 }
 
 export async function createRepo(
@@ -594,7 +582,7 @@ const etagCache = LRU<string, { etag: string; sha: string }>({
 });
 
 export function resetShaCache(gitInfo: IGitInfo) {
-  const { username, repo, branch, path = "" } = gitInfo;
+  const { username, repo, branch = "master", path = "" } = gitInfo;
 
   return shaCache.del(username + repo + branch + path);
 }
@@ -602,7 +590,7 @@ export function resetShaCache(gitInfo: IGitInfo) {
 export async function fetchRepoInfo(
   username: string,
   repo: string,
-  branch: string,
+  branch: string = "master",
   path: string = "",
   skipCache: boolean = false,
   userToken?: string
