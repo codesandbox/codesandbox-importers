@@ -167,7 +167,7 @@ export async function getContent(url: string, token: string) {
 }
 
 export async function getRepo(username: string, repo: string, token: string) {
-  const url = buildRepoApiUrl(username, repo);
+  const url = buildRepoApiUrl(username, repo) + buildSecretParams();
 
   const response: { data: IRepoResponse } = await axios({
     url,
