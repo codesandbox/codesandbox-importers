@@ -23,10 +23,16 @@ const getUserToken = (ctx: Context) => {
 
 export const info = async (ctx: Context, next: () => Promise<any>) => {
   const userToken = getUserToken(ctx);
+  let branch = ctx.params.branch;
+  
+  if (!branch) {
+    branch = await api.getDefaultBranch(ctx.params.username, ctx.params.repo, userToken)
+  }
+  
   const response = await api.fetchRepoInfo(
     ctx.params.username,
     ctx.params.repo,
-    ctx.params.branch,
+    branch,
     ctx.params.path,
     false,
     userToken
@@ -91,7 +97,7 @@ export const getRights = async (ctx: Context) => {
 export const data = async (ctx: Context, next: () => Promise<any>) => {
   // We get branch, etc from here because there could be slashes in a branch name,
   // we can retrieve if this is the case from this method
-  const { username, repo, branch, commitSha, currentUsername } = ctx.params;
+  let { username, repo, branch, commitSha, currentUsername } = ctx.params;
   const userToken = getUserToken(ctx);
 
   Sentry.setContext("repo", {
@@ -113,6 +119,10 @@ export const data = async (ctx: Context, next: () => Promise<any>) => {
 
   if (userToken) {
     isPrivate = await api.isRepoPrivate(username, repo, userToken);
+  }
+
+  if (!branch) {
+    branch = await api.getDefaultBranch(username, repo, userToken)
   }
 
   const downloadedFiles = await downloadRepository(

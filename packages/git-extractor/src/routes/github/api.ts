@@ -79,6 +79,7 @@ interface IRepoResponse {
   name: string;
   full_name: string;
   private: boolean;
+  default_branch: string;
 }
 
 interface ICompareResponse {
@@ -166,11 +167,11 @@ export async function getContent(url: string, token: string) {
 }
 
 export async function getRepo(username: string, repo: string, token: string) {
-  const url = buildRepoApiUrl(username, repo);
+  const url = buildRepoApiUrl(username, repo) + buildSecretParams();
 
   const response: { data: IRepoResponse } = await axios({
     url,
-    headers: { Authorization: `Bearer ${token}` },
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
   });
 
   return response.data;
@@ -521,6 +522,17 @@ interface ICreateRepoResponse {
   private: false;
   fork: false;
   url: string;
+  default_branch: string;
+}
+
+export async function getDefaultBranch(
+  username: string,
+  repo: string,
+  token: string
+) {
+  const data = await getRepo(username, repo, token);
+
+  return data.default_branch;
 }
 
 export async function createRepo(
@@ -581,7 +593,7 @@ const etagCache = LRU<string, { etag: string; sha: string }>({
 });
 
 export function resetShaCache(gitInfo: IGitInfo) {
-  const { username, repo, branch = "master", path = "" } = gitInfo;
+  const { username, repo, branch, path = "" } = gitInfo;
 
   return shaCache.del(username + repo + branch + path);
 }
@@ -589,7 +601,7 @@ export function resetShaCache(gitInfo: IGitInfo) {
 export async function fetchRepoInfo(
   username: string,
   repo: string,
-  branch: string = "master",
+  branch: string,
   path: string = "",
   skipCache: boolean = false,
   userToken?: string
