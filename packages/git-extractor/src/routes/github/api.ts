@@ -197,40 +197,39 @@ export async function getTreeWithDeletedFiles(
 
   let tree = await fetchTree(treeSha);
 
-  await Promise.all(
-    deletedFiles.map(async (file) => {
-      const parts = file.split("/");
-      parts.pop();
-      const dirs = parts.reduce<string[]>((aggr, part, index) => {
-        return aggr.concat(
-          aggr[index - 1] ? aggr[index - 1] + "/" + part : part
-        );
-      }, []);
+  return deletedFiles.reduce((aggr, file) => aggr.then(async (tree) => {
+    const parts = file.split("/");
+    parts.pop();
+    const dirs = parts.reduce<string[]>((aggr, part, index) => {
+      return aggr.concat(
+        aggr[index - 1] ? aggr[index - 1] + "/" + part : part
+      );
+    }, []);
 
-      await Promise.all(
-        dirs.map(async (dir) => {
-          const treeIndex = tree.findIndex(
-            (item) => item.type === "tree" && item.path === dir
-          );
-
-          if (treeIndex >= 0) {
-            const nestedTree = await fetchTree(tree[treeIndex].sha);
-            tree = tree.concat(
-              nestedTree.map((item) => ({
-                ...item,
-                path: dir + "/" + item.path,
-              }))
-            );
-            tree.splice(treeIndex, 1);
-          }
-        })
+    const newTree = await dirs.reduce((subaggr, dir) => subaggr.then(async (tree) => {
+      const treeIndex = tree.findIndex(
+        (item) => item.type === "tree" && item.path === dir
       );
 
-      tree = tree.filter((item) => item.path !== file);
-    })
-  );
+      if (treeIndex >= 0) {
+        const nestedTree = await fetchTree(tree[treeIndex].sha);
+        const newTree = tree.concat(
+          nestedTree.map((item) => ({
+            ...item,
+            path: dir + "/" + item.path,
+          }))
+        );
+        newTree.splice(treeIndex, 1);
 
-  return tree;
+        return newTree
+      }
+
+      return tree
+    }), Promise.resolve(tree))
+
+
+    return newTree.filter((item) => item.path !== file);
+  }), Promise.resolve(tree))
 }
 
 export async function getCommitTreeSha(
@@ -342,7 +341,7 @@ export async function createPr(
       base: base.branch,
       head: `${base.username === head.username ? "" : head.username + ":"}${
         head.branch
-      }`,
+        }`,
       title,
       body,
       maintainer_can_modify: true,
