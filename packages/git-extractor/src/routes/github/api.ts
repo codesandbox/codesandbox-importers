@@ -171,7 +171,7 @@ export async function getRepo(username: string, repo: string, token: string) {
 
   const response: { data: IRepoResponse } = await axios({
     url,
-    headers: { Authorization: `Bearer ${token}` },
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
   });
 
   return response.data;
