@@ -3,7 +3,7 @@ import axios, { AxiosRequestConfig } from "axios";
 import * as zip from "jszip";
 import * as LRU from "lru-cache";
 import fetch from "node-fetch";
-
+import { encode } from 'base-64'
 import log from "../../utils/log";
 import { IGitInfo, ITree } from "./push";
 
@@ -45,8 +45,17 @@ function buildCompareApiUrl(
   return `${buildRepoApiUrl(username, repo)}/compare/${baseRef}...${headRef}`;
 }
 
-function buildSecretParams() {
-  return `?client_id=${GITHUB_CLIENT_ID}&client_secret=${GITHUB_CLIENT_SECRET}`;
+function createAxiosRequestConfig(token?: string): AxiosRequestConfig {
+  const Accept = 'application/vnd.github.v3+json'
+  return token ? {
+    headers: { Accept, Authorization: `Bearer ${token}` }
+  } : {
+      auth: {
+        username: GITHUB_CLIENT_ID!,
+        password: GITHUB_CLIENT_SECRET!
+      },
+      headers: { Accept },
+    }
 }
 
 function buildContentsUrl(
@@ -58,7 +67,7 @@ function buildContentsUrl(
   return `${buildRepoApiUrl(
     username,
     repo
-  )}/contents/${path}${buildSecretParams()}&ref=${branch}`;
+  )}/contents/${path}?ref=${branch}`;
 }
 
 function buildCommitsUrl(
@@ -70,7 +79,7 @@ function buildCommitsUrl(
   return `${buildRepoApiUrl(
     username,
     repo
-  )}/commits/${branch}${buildSecretParams()}&path=${path}`;
+  )}/commits/${branch}?path=${path}`;
 }
 
 interface IRepoResponse {
@@ -91,6 +100,7 @@ interface ICompareResponse {
     deletions: number;
     changes: number;
     contents_url: string;
+    patch?: string
   }>;
   base_commit: {
     sha: string;
@@ -148,10 +158,9 @@ export async function getComparison(
 ) {
   const url = buildCompareApiUrl(username, repo, baseRef, headRef);
 
-  console.log("GETTING COMPARISON", url);
   const response: { data: ICompareResponse } = await axios({
     url,
-    headers: { Authorization: `Bearer ${token}` },
+    ...createAxiosRequestConfig(token)
   });
 
   return response.data;
@@ -160,18 +169,18 @@ export async function getComparison(
 export async function getContent(url: string, token: string) {
   const response: { data: IContentResponse } = await axios({
     url,
-    headers: { Authorization: `Bearer ${token}` },
+    ...createAxiosRequestConfig(token)
   });
 
   return response.data;
 }
 
 export async function getRepo(username: string, repo: string, token: string) {
-  const url = buildRepoApiUrl(username, repo) + buildSecretParams();
+  const url = buildRepoApiUrl(username, repo)
 
   const response: { data: IRepoResponse } = await axios({
     url,
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    ...createAxiosRequestConfig(token)
   });
 
   return response.data;
@@ -190,7 +199,7 @@ export async function getTreeWithDeletedFiles(
 
     const response: { data: ITreeResponse } = await axios({
       url,
-      headers: { Authorization: `Bearer ${token}` },
+      ...createAxiosRequestConfig(token)
     });
 
     return response.data.tree;
@@ -243,10 +252,21 @@ export async function getCommitTreeSha(
 
   const response: { data: ICommitResponse } = await axios({
     url,
-    headers: { Authorization: `Bearer ${token}` },
+    ...createAxiosRequestConfig(token)
   });
 
   return response.data.commit.tree.sha;
+}
+
+export async function getLatestCommitShaOfFile(username: string, repo: string, branch: string, path: string, token?: string) {
+  const url = buildCommitsUrl(username, repo, branch, path);
+
+  const response: { data: { files: { sha: string }[] } } = await axios({
+    url,
+    ...createAxiosRequestConfig(token)
+  });
+
+  return response.data.files[0].sha
 }
 
 export async function isRepoPrivate(
@@ -278,15 +298,16 @@ export async function fetchRights(
   const url = buildRepoApiUrl(username, repo);
 
   try {
-    const headers: { Authorization?: string } = {};
-    if (token) {
-      headers.Authorization = `Bearer ${token}`;
-    }
 
     const response: { data: RightsResponse } = await axios({
       url,
-      headers,
+      ...createAxiosRequestConfig(token)
     });
+
+    // No token
+    if (!response.data.permissions) {
+      return "none"
+    }
 
     if (response.data.permissions.admin) {
       return "admin";
@@ -347,7 +368,7 @@ export async function createPr(
       body,
       maintainer_can_modify: true,
     },
-    { headers: { Authorization: `Bearer ${token}` } }
+    createAxiosRequestConfig(token)
   );
 
   return {
@@ -377,9 +398,9 @@ export async function createBlob(
   token: string
 ) {
   const response: { data: IBlobResponse } = await axios.post(
-    `${buildRepoApiUrl(username, repo)}/git/blobs${buildSecretParams()}`,
+    `${buildRepoApiUrl(username, repo)}/git/blobs`,
     { content: content, encoding },
-    { headers: { Authorization: `Bearer ${token}` } }
+    createAxiosRequestConfig(token)
   );
 
   return response.data;
@@ -399,9 +420,9 @@ export async function createTree(
   token: string
 ) {
   const response: { data: ICreateTreeResponse } = await axios.post(
-    `${buildRepoApiUrl(username, repo)}/git/trees${buildSecretParams()}`,
+    `${buildRepoApiUrl(username, repo)}/git/trees`,
     { base_tree: baseTreeSha, tree },
-    { headers: { Authorization: `Bearer ${token}` } }
+    createAxiosRequestConfig(token)
   );
 
   return response.data;
@@ -435,9 +456,9 @@ export async function createCommit(
   token: string
 ) {
   const response: { data: ICreateCommitResponse } = await axios.post(
-    `${buildRepoApiUrl(username, repo)}/git/commits${buildSecretParams()}`,
+    `${buildRepoApiUrl(username, repo)}/git/commits`,
     { tree: treeSha, message, parents: parentCommitShas },
-    { headers: { Authorization: `Bearer ${token}` } }
+    createAxiosRequestConfig(token)
   );
 
   return response.data;
@@ -459,9 +480,9 @@ export async function updateReference(
     `${buildRepoApiUrl(
       username,
       repo
-    )}/git/refs/heads/${branch}${buildSecretParams()}`,
+    )}/git/refs/heads/${branch}`,
     { sha: commitSha, force: true },
-    { headers: { Authorization: `Bearer ${token}` } }
+    createAxiosRequestConfig(token)
   );
 
   return response.data;
@@ -485,9 +506,9 @@ export async function createReference(
   token: string
 ) {
   const response: { data: ICreateReferenceResponse } = await axios.post(
-    `${buildRepoApiUrl(username, repo)}/git/refs${buildSecretParams()}`,
+    `${buildRepoApiUrl(username, repo)}/git/refs`,
     { ref: `refs/heads/${branch}`, sha: refSha },
-    { headers: { Authorization: `Bearer ${token}` } }
+    createAxiosRequestConfig(token)
   );
 
   return response.data;
@@ -507,9 +528,9 @@ export async function createFork(
   token: string
 ) {
   const response: { data: ICreateForkResponse } = await axios.post(
-    `${buildRepoApiUrl(username, repo)}/forks${buildSecretParams()}`,
+    `${buildRepoApiUrl(username, repo)}/forks`,
     {},
-    { headers: { Authorization: `Bearer ${token}` } }
+    createAxiosRequestConfig(token)
   );
 
   return response.data;
@@ -542,7 +563,7 @@ export async function createRepo(
   privateRepo: boolean = false
 ) {
   const response: { data: ICreateRepoResponse } = await axios.post(
-    `${API_URL}/user/repos${buildSecretParams()}`,
+    `${API_URL}/user/repos`,
     {
       name: repo,
       description: "Created with CodeSandbox",
@@ -550,7 +571,7 @@ export async function createRepo(
       auto_init: true,
       private: privateRepo,
     },
-    { headers: { Authorization: `Bearer ${token}` } }
+    createAxiosRequestConfig(token)
   );
 
   return response.data;
@@ -562,7 +583,8 @@ export async function createRepo(
 export async function doesRepoExist(username: string, repo: string) {
   try {
     const response = await axios.get(
-      buildRepoApiUrl(username, repo) + buildSecretParams()
+      buildRepoApiUrl(username, repo),
+      createAxiosRequestConfig()
     );
 
     return true;
@@ -615,10 +637,8 @@ export async function fetchRepoInfo(
     if (!latestSha || skipCache) {
       const url = buildCommitsUrl(username, repo, branch, path);
 
-      const headers: { Authorization?: string; "If-None-Match"?: string } = {};
-      if (userToken) {
-        headers.Authorization = `Bearer ${userToken}`;
-      }
+      const headers: { "If-None-Match"?: string } = {};
+
 
       const etagCacheResponse = etagCache.get(cacheId);
       if (etagCacheResponse) {
@@ -626,13 +646,18 @@ export async function fetchRepoInfo(
         headers["If-None-Match"] = etagCacheResponse.etag;
       }
 
+      const defaultConfig = createAxiosRequestConfig(userToken)
       const response = await axios({
         url,
-        headers,
         validateStatus: function (status) {
           // Axios sees 304 (Not Modified) as an error. We don't want that.
           return status < 400; // Reject only if the status code is greater than or equal to 400
         },
+        ...defaultConfig,
+        headers: {
+          ...defaultConfig.headers,
+          ...headers
+        }
       });
 
       if (response.status === 304 && etagCacheResponse) {
@@ -701,14 +726,10 @@ export async function fetchPullInfo(
   const url = buildPullApiUrl(username, repo, pull);
 
   try {
-    const headers: { Authorization?: string } = {};
-    if (userToken) {
-      headers.Authorization = `Bearer ${userToken}`;
-    }
 
     const response = await axios({
       url,
-      headers,
+      ...createAxiosRequestConfig(userToken)
     });
 
     const data = response.data;
@@ -745,15 +766,12 @@ export async function downloadZip(
 ) {
   const repoUrl = buildRepoApiUrl(gitInfo.username, gitInfo.repo);
   const url = `${repoUrl}/zipball/${commitSha}`;
-
-  // @ts-ignore
-  const headers: { Authorization: string } = {};
-  if (userToken) {
-    headers.Authorization = `Bearer ${userToken}`;
-  }
-
+  const Accept = 'application/vnd.github.v3+json'
   const buffer: Buffer = await fetch(url, {
-    headers,
+    headers: {
+      Authorization: userToken ? `Bearer ${userToken}` : `Basic ${encode(`${GITHUB_CLIENT_ID}:${GITHUB_CLIENT_SECRET}`)}`,
+      Accept
+    }
   }).then((res) => {
     if (+res.headers.get("Content-Length") > MAX_ZIP_SIZE) {
       throw new Error("This repo is too big to import");
