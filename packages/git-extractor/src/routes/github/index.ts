@@ -166,6 +166,7 @@ export const data = async (ctx: Context, next: () => Promise<any>) => {
 export const compare = async (ctx: Context) => {
   const { baseRef, headRef, token, includeContents } = ctx.request.body;
   const { username, repo } = ctx.params;
+
   const comparison = await getComparison(
     username,
     repo,
@@ -188,7 +189,7 @@ export const compare = async (ctx: Context) => {
             if (patch) {
               stringContent = buffer.toString("utf-8")
             } else {
-              stringContent = rawGitUrl({ username, repo, branch: "" }, filename, sha)
+              stringContent = buffer.toString("base64")
             }
 
             return {
@@ -198,6 +199,7 @@ export const compare = async (ctx: Context) => {
               filename,
               status,
               content: stringContent,
+              isBinary: !patch
             };
           });
         }
