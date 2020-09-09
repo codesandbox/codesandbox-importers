@@ -4,7 +4,7 @@ import { isText } from "codesandbox-import-utils/lib/is-text";
 import { INormalizedModules } from "codesandbox-import-util-types";
 
 import { IGitInfo } from "../push/index";
-import { downloadZip, getLatestCommitShaOfFile } from "../api";
+import { downloadZip, getLatestCommitShaOfFile, getDefaultBranch } from "../api";
 
 const getFolderName = (zip: JSZip) =>
   `${Object.keys(zip.files)[0].split("/")[0]}/`;
@@ -59,6 +59,10 @@ export async function downloadRepository(
                 isBinary: true
               };
             } else {
+              let branch = gitInfo.branch
+              if (!branch) {
+                branch = await getDefaultBranch(gitInfo.username, gitInfo.repo, userToken)
+              }
               const fileSha = await getLatestCommitShaOfFile(gitInfo.username, gitInfo.repo, gitInfo.branch, relativePath)
               result[relativePath] = {
                 content: rawGitUrl(gitInfo, relativePath, fileSha),
