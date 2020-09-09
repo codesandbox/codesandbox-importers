@@ -82,6 +82,18 @@ function buildCommitsUrl(
   )}/commits/${branch}?path=${path}`;
 }
 
+function buildCommitsByPathUrl(
+  username: string,
+  repo: string,
+  branch: string,
+  path: string
+) {
+  return `${buildRepoApiUrl(
+    username,
+    repo
+  )}/commits?sha=${branch}&path=${path}`;
+}
+
 interface IRepoResponse {
   id: number;
   node_id: string;
@@ -175,7 +187,7 @@ export async function getContent(url: string, token: string) {
   return response.data;
 }
 
-export async function getRepo(username: string, repo: string, token: string) {
+export async function getRepo(username: string, repo: string, token?: string) {
   const url = buildRepoApiUrl(username, repo)
 
   const response: { data: IRepoResponse } = await axios({
@@ -259,14 +271,13 @@ export async function getCommitTreeSha(
 }
 
 export async function getLatestCommitShaOfFile(username: string, repo: string, branch: string, path: string, token?: string) {
-  const url = buildCommitsUrl(username, repo, branch, path);
-
-  const response: { data: { files: { sha: string }[] } } = await axios({
+  const url = buildCommitsByPathUrl(username, repo, branch, path);
+  const response: { data: { sha: string }[] } = await axios({
     url,
     ...createAxiosRequestConfig(token)
   });
 
-  return response.data.files[0].sha
+  return response.data[0].sha
 }
 
 export async function isRepoPrivate(
@@ -549,7 +560,7 @@ interface ICreateRepoResponse {
 export async function getDefaultBranch(
   username: string,
   repo: string,
-  token: string
+  token?: string
 ) {
   const data = await getRepo(username, repo, token);
 
