@@ -30,9 +30,9 @@ export interface IOptions {
 function optionsToParameterizedUrl(options: { [option: string]: any }) {
   const keyValues = Object.keys(options)
     .sort()
-    .filter(x => options[x])
+    .filter((x) => options[x])
     .map(
-      key => `${encodeURIComponent(key)}=${encodeURIComponent(options[key])}`
+      (key) => `${encodeURIComponent(key)}=${encodeURIComponent(options[key])}`
     )
     .join("&");
 
@@ -51,7 +51,7 @@ function getUrlOptions(options: IOptions) {
     useCodeMirror,
     expandDevTools,
     forceRefresh,
-    openedModule
+    openedModule,
   } = options;
 
   const results: { [option: string]: any } = {};
@@ -109,7 +109,7 @@ function findGitRoot() {
   let currentPath = __dirname;
 
   while (
-    !fs.readdirSync(currentPath).find(f => basename(f) === ".git") &&
+    !fs.readdirSync(currentPath).find((f) => basename(f) === ".git") &&
     currentPath !== "/"
   ) {
     currentPath = dirname(currentPath);

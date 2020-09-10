@@ -29,8 +29,8 @@ async function handleSignIn() {
     {
       message: "Token:",
       name: "authToken",
-      type: "input"
-    }
+      type: "input",
+    },
   ]);
 
   // We got the token! Ask the server on authorization
@@ -75,10 +75,16 @@ export default function registerCLI(program: typeof Commander) {
   program
     .command("login")
     .description("sign in to your CodeSandbox account or create a new one")
-    .action(async () => {
+    .option("-s", "don't ask for sign in if you're already signed in")
+    .action(async (cmd) => {
       const user = await cfg.getUser();
+      const silent = !!cmd.S;
 
       if (user) {
+        if (silent) {
+          return;
+        }
+
         const confirmed = await confirm(
           "You are already logged in, would you like to sign out first?"
         );

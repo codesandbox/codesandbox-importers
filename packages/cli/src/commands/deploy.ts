@@ -18,8 +18,8 @@ import uploadFiles from "../utils/parse-sandbox/upload-files";
 
 // tslint:disable no-var-requires
 const ora = require("ora");
-const MAX_MODULE_COUNT = 250;
-const MAX_DIRECTORY_COUNT = 50;
+const MAX_MODULE_COUNT = 500;
+const MAX_DIRECTORY_COUNT = 500;
 
 /**
  * Show warnings for the errors that occurred during mapping of files, we
@@ -57,7 +57,7 @@ async function showUploads(resolvedPath: string, uploads: IUploads) {
         } static files to your CodeSandbox upload storage:`
       )
     );
-    Object.keys(uploads).forEach(path => {
+    Object.keys(uploads).forEach((path) => {
       const relativePath = path.replace(resolvedPath, "");
       log(
         `${chalk.yellow.bold(relativePath)}: ${filesize(
@@ -76,7 +76,7 @@ export default function registerCommand(program: typeof Commander) {
     .description(
       `deploy an application to CodeSandbox ${chalk.bold("(default)")}`
     )
-    .action(async path => {
+    .action(async (path) => {
       const user = await getUser();
 
       if (!user) {
@@ -133,17 +133,13 @@ export default function registerCommand(program: typeof Commander) {
 
         if (sandbox.modules.length > MAX_MODULE_COUNT) {
           throw new Error(
-            `This project is too big, it contains ${
-              sandbox.modules.length
-            } files which is more than the max of ${MAX_MODULE_COUNT}.`
+            `This project is too big, it contains ${sandbox.modules.length} files which is more than the max of ${MAX_MODULE_COUNT}.`
           );
         }
 
         if (sandbox.directories.length > MAX_DIRECTORY_COUNT) {
           throw new Error(
-            `This project is too big, it contains ${
-              sandbox.directories.length
-            } directories which is more than the max of ${MAX_DIRECTORY_COUNT}.`
+            `This project is too big, it contains ${sandbox.directories.length} directories which is more than the max of ${MAX_DIRECTORY_COUNT}.`
           );
         }
 

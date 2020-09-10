@@ -1,7 +1,8 @@
-export const BASE_URL =
-  process.env.CODESANDBOX_NODE_ENV === "development"
-    ? "https://codesandbox.stream"
-    : "https://codesandbox.io";
+import { IS_STAGING } from "./env";
+
+export const BASE_URL = IS_STAGING
+  ? "https://codesandbox.stream"
+  : "https://codesandbox.io";
 
 export const CREATE_SANDBOX_URL = BASE_URL + "/api/v1/sandboxes";
 export const CREATE_UPLOAD_URL =

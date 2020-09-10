@@ -1,3 +1,4 @@
 #!/bin/bash
 yarn
-yarn start
+yarn build:git-extractor
+yarn dev

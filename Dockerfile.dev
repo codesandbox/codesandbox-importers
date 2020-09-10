@@ -1,0 +1,7 @@
+FROM node:9.8
+MAINTAINER Ives van Hoorne
+
+ADD .git /workspace/.git
+
+WORKDIR /workspace
+RUN git reset --hard

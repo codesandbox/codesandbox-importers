@@ -1,6 +1,6 @@
 {
   "name": "codesandbox-import-utils",
-  "version": "2.1.9",
+  "version": "2.1.16",
   "main": "lib/index.js",
   "files": [
     "lib/**"
@@ -12,7 +12,7 @@
     "prepublish": "yarn build"
   },
   "dependencies": {
-    "codesandbox-import-util-types": "^2.1.9",
+    "codesandbox-import-util-types": "^2.1.15",
     "istextorbinary": "^2.2.1",
     "lz-string": "^1.4.4",
     "shortid": "^2.2.14"
@@ -35,7 +35,8 @@
     ],
     "testPathIgnorePatterns": [
       "<rootDir>/node_modules/",
-      "<rootDir>/dist/"
+      "<rootDir>/dist/",
+      "<rootDir>/lib/"
     ],
     "testRegex": "(/__tests__/.*|\\.(test|spec))\\.(ts|tsx|js)$"
   },

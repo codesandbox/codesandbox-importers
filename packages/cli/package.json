@@ -1,6 +1,6 @@
 {
   "name": "codesandbox",
-  "version": "2.1.9",
+  "version": "2.1.16",
   "description": "The CLI used for communicating with CodeSandbox",
   "main": "lib/index.js",
   "bin": {
@@ -27,8 +27,8 @@
   "dependencies": {
     "axios": "^0.19.0",
     "chalk": "^2.4.1",
-    "codesandbox-import-util-types": "^2.1.9",
-    "codesandbox-import-utils": "^2.1.9",
+    "codesandbox-import-util-types": "^2.1.15",
+    "codesandbox-import-utils": "^2.1.16",
     "commander": "^2.20.0",
     "datauri": "^1.1.0",
     "filesize": "^3.6.1",

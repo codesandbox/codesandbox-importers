@@ -1,14 +1,13 @@
-import { Context } from "koa";
-import createSandbox from "codesandbox-import-utils/lib/create-sandbox";
-import normalizeSandbox from "codesandbox-import-utils/lib/utils/files/normalize";
+import * as Sentry from "@sentry/node";
 import { IModule, INormalizedModules } from "codesandbox-import-util-types";
+import createSandbox from "codesandbox-import-utils/lib/create-sandbox";
+import { Context } from "koa";
 
-import { downloadRepository } from "./pull/download";
 import * as api from "./api";
-
+import { getComparison } from "./api";
+import { downloadRepository, rawGitUrl } from "./pull/download";
 import * as push from "./push";
-
-import { IGitInfo } from "./push";
+import { IChanges, IGitInfo } from "./push";
 
 const getUserToken = (ctx: Context) => {
   const header = ctx.header.authorization;
@@ -24,10 +23,16 @@ const getUserToken = (ctx: Context) => {
 
 export const info = async (ctx: Context, next: () => Promise<any>) => {
   const userToken = getUserToken(ctx);
+  let branch = ctx.params.branch;
+
+  if (!branch) {
+    branch = await api.getDefaultBranch(ctx.params.username, ctx.params.repo, userToken)
+  }
+
   const response = await api.fetchRepoInfo(
     ctx.params.username,
     ctx.params.repo,
-    ctx.params.branch,
+    branch,
     ctx.params.path,
     false,
     userToken
@@ -36,17 +41,52 @@ export const info = async (ctx: Context, next: () => Promise<any>) => {
   ctx.body = response;
 };
 
+// We receive paths as "/src/index.js" and root path as "src", and Git takes
+// "src/index.js", so we need to ensure we produce the correct paths
+const changesWithRootPath = (changes: IChanges, rootPath = ""): IChanges => {
+  const convertPath = (path: string) => {
+    if (rootPath) {
+      return rootPath + path;
+    }
+
+    return path.substr(1);
+  };
+  return {
+    added: changes.added.map((change) => ({
+      ...change,
+      path: convertPath(change.path),
+    })),
+    deleted: changes.deleted.map(convertPath),
+    modified: changes.modified.map((change) => ({
+      ...change,
+      path: convertPath(change.path),
+    })),
+  };
+};
+
+export const pullInfo = async (ctx: Context, next: () => Promise<any>) => {
+  const userToken = getUserToken(ctx);
+
+  ctx.body = await api.fetchPullInfo(
+    ctx.params.username,
+    ctx.params.repo,
+    ctx.params.pull,
+    userToken
+  );
+};
+
 export const getRights = async (ctx: Context) => {
   const userToken = getUserToken(ctx);
 
   const rights = await api.fetchRights(
     ctx.params.username,
     ctx.params.repo,
-    ctx.params.currentUser,
     userToken
   );
 
-  return rights;
+  ctx.body = {
+    permission: rights,
+  };
 };
 
 /**
@@ -57,8 +97,15 @@ export const getRights = async (ctx: Context) => {
 export const data = async (ctx: Context, next: () => Promise<any>) => {
   // We get branch, etc from here because there could be slashes in a branch name,
   // we can retrieve if this is the case from this method
-  const { username, repo, branch, commitSha, currentUsername } = ctx.params;
+  let { username, repo, branch, commitSha, currentUsername } = ctx.params;
   const userToken = getUserToken(ctx);
+
+  Sentry.setContext("repo", {
+    username,
+    repo,
+    branch,
+    commitSha,
+  });
 
   const path = ctx.params.path && ctx.params.path.replace("+", " ");
 
@@ -68,22 +115,28 @@ export const data = async (ctx: Context, next: () => Promise<any>) => {
     title = title + `: ${splittedPath[splittedPath.length - 1]}`;
   }
 
+  let isPrivate = false;
+
+
+  if (userToken) {
+    isPrivate = await api.isRepoPrivate(username, repo, userToken);
+  }
+
+  if (!branch) {
+    branch = await api.getDefaultBranch(username, repo, userToken)
+  }
+
   const downloadedFiles = await downloadRepository(
     {
       username,
       repo,
       branch,
-      path
+      path,
     },
     commitSha,
+    isPrivate,
     userToken
   );
-
-  let isPrivate = false;
-
-  if (userToken) {
-    isPrivate = await api.isRepoPrivate(username, repo, userToken);
-  }
 
   if (isPrivate) {
     api.resetShaCache({ branch, username, repo, path });
@@ -103,191 +156,185 @@ export const data = async (ctx: Context, next: () => Promise<any>) => {
     title: finalTitle,
 
     // Privacy 2 is private, privacy 0 is public
-    privacy: isPrivate ? 2 : 0
+    privacy: isPrivate ? 2 : 0,
   };
 };
 
-export const diff = async (ctx: Context, next: () => Promise<any>) => {
-  const {
-    modules,
-    directories,
-    commitSha,
-    currentUser,
+/*
+  Compares two refs on the repo
+*/
+export const compare = async (ctx: Context) => {
+  const { baseRef, headRef, token, includeContents } = ctx.request.body;
+  const { username, repo } = ctx.params;
+
+  const comparison = await getComparison(
+    username,
+    repo,
+    baseRef,
+    headRef,
     token
-  } = ctx.request.body;
+  );
 
-  const { username, repo, branch, path } = ctx.params;
+  if (includeContents) {
+    const files = await Promise.all(
+      comparison.files.map(
+        ({ additions, changes, contents_url, deletions, filename, status, patch, sha }) => {
+          return api.getContent(contents_url, token).then((content) => {
+            const data = content.content;
+            const buffer = Buffer.from(data, content.encoding);
 
-  const normalizedFiles = normalizeSandbox(modules, directories);
+            let stringContent: string
 
-  const [delta, rights] = await Promise.all([
-    push.getFileDifferences(
-      { username, repo, branch, path },
-      commitSha,
-      normalizedFiles,
-      token
-    ),
-    api.fetchRights(username, repo, currentUser, token)
-  ]);
+            // If patch it is a text file, if not it is a binary
+            if (patch) {
+              stringContent = buffer.toString("utf-8")
+            } else {
+              // When we include binary files, we include them as base64. This will allow a "merge commit", related to
+              // a PR being out of sync with its source branch (ex. "master"), to add binary files
+              stringContent = buffer.toString("base64")
+            }
 
-  ctx.body = {
-    added: delta.added,
-    modified: delta.modified,
-    deleted: delta.deleted,
-    rights
-  };
+            return {
+              additions,
+              changes,
+              deletions,
+              filename,
+              status,
+              content: stringContent,
+              isBinary: !patch
+            };
+          });
+        }
+      )
+    );
+
+    ctx.body = {
+      files,
+      baseCommitSha: comparison.base_commit.sha,
+      headCommitSha: comparison.commits.length
+        ? comparison.commits[comparison.commits.length - 1].sha
+        : comparison.merge_base_commit.sha,
+    };
+  } else {
+    ctx.body = {
+      files: comparison.files.map(
+        ({ additions, status, filename, deletions, changes }) => ({
+          additions,
+          status,
+          filename,
+          deletions,
+          changes,
+        })
+      ),
+      baseCommitSha: comparison.base_commit.sha,
+      headCommitSha: comparison.commits.length
+        ? comparison.commits[0].sha
+        : comparison.merge_base_commit.sha,
+    };
+  }
 };
 
-export const pr = async (ctx: Context, next: () => Promise<any>) => {
+export const pr = async (ctx: Context) => {
   const {
-    modules,
-    directories,
+    changes,
+    title,
+    description,
     commitSha,
-    message,
     currentUser,
-    token
+    token,
+    sandboxId,
+  }: {
+    changes: IChanges;
+    title: string;
+    description: string;
+    commitSha: string;
+    currentUser: string;
+    token: string;
+    sandboxId: string;
   } = ctx.request.body;
-  const normalizedFiles = normalizeSandbox(modules, directories);
-
   const { username, repo, branch, path } = ctx.params;
 
   let gitInfo: IGitInfo = {
     username,
     repo,
     branch,
-    path
+    path,
   };
 
-  const rights = await api.fetchRights(username, repo, currentUser, token);
+  const rights = await api.fetchRights(username, repo, token);
 
   if (rights === "none" || rights === "read") {
     // Ah, we need to fork...
     gitInfo = await push.createFork(gitInfo, currentUser, token);
   }
 
-  const commit = await push.createCommit(
+  const commit = await push.createInitialCommit(
     gitInfo,
-    normalizedFiles,
-    commitSha,
-    message,
+    changesWithRootPath(changes, path),
+    [commitSha],
     token
   );
 
-  const res = await push.createBranch(gitInfo, commit.sha, token);
-
-  ctx.body = {
-    url: res.url,
-    newBranch: res.branchName,
-    sha: commit.sha
+  const res = await push.createBranch(
+    gitInfo,
+    commit.sha,
+    token,
+    `csb-${sandboxId}`
+  );
+  const base = {
+    branch,
+    repo,
+    username,
   };
+  const head = {
+    branch: res.branchName,
+    repo: gitInfo.repo,
+    username: gitInfo.username,
+  };
+
+  ctx.body = await api.createPr(base, head, title, description, token);
 };
 
-export const commit = async (ctx: Context, next: () => Promise<any>) => {
-  const { modules, directories, commitSha, message, token } = ctx.request.body;
-  const normalizedFiles = normalizeSandbox(modules, directories);
-
+export const commit = async (ctx: Context) => {
+  const { parentCommitShas, changes, message, token } = ctx.request.body;
   const { username, repo, branch, path } = ctx.params;
 
   const gitInfo: IGitInfo = {
     username,
     repo,
     branch,
-    path
+    path,
   };
 
   const commit = await push.createCommit(
     gitInfo,
-    normalizedFiles,
-    commitSha,
+    changesWithRootPath(changes, path),
+    parentCommitShas,
     message,
     token
   );
 
-  // On the client we redirect to the original git sandbox, so we want to
-  // reset the cache so the user sees the latest version
-  api.resetShaCache({ username, repo, branch, path });
+  await api.updateReference(username, repo, branch, commit.sha, token);
 
-  const lastInfo = await api.fetchRepoInfo(
-    username,
-    repo,
-    branch,
-    path,
-    true,
-    token
-  );
-
-  // If we're up to date we just move the head, if that's not the cache we create
-  // a merge
-  if (lastInfo.commitSha === commitSha) {
-    try {
-      const res = await api.updateReference(
-        username,
-        repo,
-        branch,
-        commit.sha,
-        token
-      );
-
-      ctx.body = {
-        url: res.url,
-        sha: commit.sha,
-        merge: false
-      };
-      return;
-    } catch (e) {
-      if (process.env.NODE_ENV === "development") {
-        console.error(e);
-      }
-      /* Let's try to create the merge then */
-    }
-  }
-
-  try {
-    const res = await api.createMerge(
-      username,
-      repo,
-      branch,
-      commit.sha,
-      token
-    );
-
-    ctx.body = {
-      url: res.url,
-      sha: res.sha,
-      merge: true
-    };
-    return;
-  } catch (e) {
-    if (e.response && e.response.status === 409) {
-      // Merge conflict, create branch
-      const res = await push.createBranch(gitInfo, commit.sha, token);
-
-      ctx.body = {
-        url: res.url,
-        sha: commit.sha,
-        newBranch: res.branchName
-      };
-      return;
-    } else {
-      throw e;
-    }
-  }
+  ctx.body = commit;
 };
 
 export const repo = async (ctx: Context, next: () => Promise<any>) => {
   const {
     token,
-    normalizedFiles: fileArray
+    normalizedFiles: fileArray,
+    privateRepo,
   }: {
     token: string;
     normalizedFiles: Array<IModule & { path: string }>;
+    privateRepo?: boolean;
   } = ctx.request.body;
   const { username, repo } = ctx.params;
 
   const normalizedFiles: INormalizedModules = fileArray.reduce(
     (total, file) => ({
       ...total,
-      [file.path]: file
+      [file.path]: file,
     }),
     {}
   );
@@ -296,7 +343,13 @@ export const repo = async (ctx: Context, next: () => Promise<any>) => {
     throw new Error("Repo name cannot be empty");
   }
 
-  const result = await push.createRepo(username, repo, normalizedFiles, token);
+  const result = await push.createRepo(
+    username,
+    repo,
+    normalizedFiles,
+    token,
+    privateRepo
+  );
 
   ctx.body = result;
 };
