@@ -189,6 +189,8 @@ export const compare = async (ctx: Context) => {
             if (patch) {
               stringContent = buffer.toString("utf-8")
             } else {
+              // When we include binary files, we include them as base64. This will allow a "merge commit", related to
+              // a PR being out of sync with its source branch (ex. "master"), to add binary files
               stringContent = buffer.toString("base64")
             }
 
