@@ -20,6 +20,7 @@ function generateSandboxFile(
     code: module.content,
     directoryShortid: parentDirectoryShortid,
     title: basename(path),
+    uploadId: module.uploadId,
     isBinary: module.isBinary,
   };
 

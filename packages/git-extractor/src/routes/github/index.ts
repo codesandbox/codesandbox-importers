@@ -5,7 +5,7 @@ import { Context } from "koa";
 
 import * as api from "./api";
 import { getComparison } from "./api";
-import { downloadRepository } from "./pull/download";
+import { downloadRepository, rawGitUrl } from "./pull/download";
 import * as push from "./push";
 import { IChanges, IGitInfo } from "./push";
 
@@ -24,11 +24,11 @@ const getUserToken = (ctx: Context) => {
 export const info = async (ctx: Context, next: () => Promise<any>) => {
   const userToken = getUserToken(ctx);
   let branch = ctx.params.branch;
-  
+
   if (!branch) {
     branch = await api.getDefaultBranch(ctx.params.username, ctx.params.repo, userToken)
   }
-  
+
   const response = await api.fetchRepoInfo(
     ctx.params.username,
     ctx.params.repo,
@@ -117,6 +117,7 @@ export const data = async (ctx: Context, next: () => Promise<any>) => {
 
   let isPrivate = false;
 
+
   if (userToken) {
     isPrivate = await api.isRepoPrivate(username, repo, userToken);
   }
@@ -165,6 +166,7 @@ export const data = async (ctx: Context, next: () => Promise<any>) => {
 export const compare = async (ctx: Context) => {
   const { baseRef, headRef, token, includeContents } = ctx.request.body;
   const { username, repo } = ctx.params;
+
   const comparison = await getComparison(
     username,
     repo,
@@ -176,10 +178,21 @@ export const compare = async (ctx: Context) => {
   if (includeContents) {
     const files = await Promise.all(
       comparison.files.map(
-        ({ additions, changes, contents_url, deletions, filename, status }) => {
+        ({ additions, changes, contents_url, deletions, filename, status, patch, sha }) => {
           return api.getContent(contents_url, token).then((content) => {
             const data = content.content;
             const buffer = Buffer.from(data, content.encoding);
+
+            let stringContent: string
+
+            // If patch it is a text file, if not it is a binary
+            if (patch) {
+              stringContent = buffer.toString("utf-8")
+            } else {
+              // When we include binary files, we include them as base64. This will allow a "merge commit", related to
+              // a PR being out of sync with its source branch (ex. "master"), to add binary files
+              stringContent = buffer.toString("base64")
+            }
 
             return {
               additions,
@@ -187,7 +200,8 @@ export const compare = async (ctx: Context) => {
               deletions,
               filename,
               status,
-              content: buffer.toString("utf-8"),
+              content: stringContent,
+              isBinary: !patch
             };
           });
         }

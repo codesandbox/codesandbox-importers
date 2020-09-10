@@ -16,6 +16,7 @@ Object {
       "isBinary": false,
       "shortid": "1",
       "title": "new-file.js",
+      "uploadId": undefined,
     },
   ],
 }
@@ -60,6 +61,7 @@ Object {
       "isBinary": false,
       "shortid": "2",
       "title": "index.js",
+      "uploadId": undefined,
     },
     Object {
       "code": "hello2",
@@ -67,6 +69,7 @@ Object {
       "isBinary": false,
       "shortid": "3",
       "title": "index.js",
+      "uploadId": undefined,
     },
     Object {
       "code": "hello3",
@@ -74,6 +77,7 @@ Object {
       "isBinary": false,
       "shortid": "4",
       "title": "index.js",
+      "uploadId": "123",
     },
   ],
 }
@@ -89,6 +93,7 @@ Object {
       "isBinary": false,
       "shortid": "0",
       "title": "index.js",
+      "uploadId": undefined,
     },
     Object {
       "code": "hello2",
@@ -96,6 +101,7 @@ Object {
       "isBinary": false,
       "shortid": "1",
       "title": "index.js",
+      "uploadId": undefined,
     },
     Object {
       "code": "hello3",
@@ -103,6 +109,7 @@ Object {
       "isBinary": false,
       "shortid": "2",
       "title": "index.js",
+      "uploadId": undefined,
     },
   ],
 }
