@@ -22,6 +22,7 @@ function generateSandboxFile(
     title: basename(path),
     uploadId: module.uploadId,
     isBinary: module.isBinary,
+    sha: module.sha,
   };
 
   if ("binaryContent" in module) {
