@@ -2,7 +2,8 @@ export interface IModule {
   content: string; // If isBinary is true this will be a URL
   isBinary: boolean;
   type?: "file";
-  uploadId?: string
+  uploadId?: string;
+  sha?: string;
 }
 
 export interface IBinaryModule extends IModule {
@@ -23,8 +24,9 @@ export interface ISandboxFile {
   shortid: string;
   isBinary: boolean;
   binaryContent?: string;
-  uploadId?: string
+  uploadId?: string;
   directoryShortid: string | undefined | null;
+  sha?: string;
 }
 
 export interface ISandboxDirectory {
