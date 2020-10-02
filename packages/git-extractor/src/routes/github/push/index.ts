@@ -184,7 +184,7 @@ export async function createRepo(
   const latestData = await api.fetchRepoInfo(
     username,
     name,
-    "master",
+    "main",
     "",
     true,
     userToken
