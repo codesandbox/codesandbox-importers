@@ -3,7 +3,7 @@ import axios, { AxiosRequestConfig } from "axios";
 import * as zip from "jszip";
 import * as LRU from "lru-cache";
 import fetch from "node-fetch";
-import { encode } from 'base-64'
+import { encode } from "base-64";
 import log from "../../utils/log";
 import { IGitInfo, ITree } from "./push";
 
@@ -46,16 +46,18 @@ function buildCompareApiUrl(
 }
 
 function createAxiosRequestConfig(token?: string): AxiosRequestConfig {
-  const Accept = 'application/vnd.github.v3+json'
-  return token ? {
-    headers: { Accept, Authorization: `Bearer ${token}` }
-  } : {
-      auth: {
-        username: GITHUB_CLIENT_ID!,
-        password: GITHUB_CLIENT_SECRET!
-      },
-      headers: { Accept },
-    }
+  const Accept = "application/vnd.github.v3+json";
+  return token
+    ? {
+        headers: { Accept, Authorization: `Bearer ${token}` },
+      }
+    : {
+        auth: {
+          username: GITHUB_CLIENT_ID!,
+          password: GITHUB_CLIENT_SECRET!,
+        },
+        headers: { Accept },
+      };
 }
 
 function buildContentsUrl(
@@ -64,10 +66,7 @@ function buildContentsUrl(
   branch: string,
   path: string
 ) {
-  return `${buildRepoApiUrl(
-    username,
-    repo
-  )}/contents/${path}?ref=${branch}`;
+  return `${buildRepoApiUrl(username, repo)}/contents/${path}?ref=${branch}`;
 }
 
 function buildCommitsUrl(
@@ -76,10 +75,7 @@ function buildCommitsUrl(
   branch: string,
   path: string
 ) {
-  return `${buildRepoApiUrl(
-    username,
-    repo
-  )}/commits/${branch}?path=${path}`;
+  return `${buildRepoApiUrl(username, repo)}/commits/${branch}?path=${path}`;
 }
 
 function buildCommitsByPathUrl(
@@ -112,7 +108,7 @@ interface ICompareResponse {
     deletions: number;
     changes: number;
     contents_url: string;
-    patch?: string
+    patch?: string;
   }>;
   base_commit: {
     sha: string;
@@ -172,7 +168,7 @@ export async function getComparison(
 
   const response: { data: ICompareResponse } = await axios({
     url,
-    ...createAxiosRequestConfig(token)
+    ...createAxiosRequestConfig(token),
   });
 
   return response.data;
@@ -181,18 +177,18 @@ export async function getComparison(
 export async function getContent(url: string, token: string) {
   const response: { data: IContentResponse } = await axios({
     url,
-    ...createAxiosRequestConfig(token)
+    ...createAxiosRequestConfig(token),
   });
 
   return response.data;
 }
 
 export async function getRepo(username: string, repo: string, token?: string) {
-  const url = buildRepoApiUrl(username, repo)
+  const url = buildRepoApiUrl(username, repo);
 
   const response: { data: IRepoResponse } = await axios({
     url,
-    ...createAxiosRequestConfig(token)
+    ...createAxiosRequestConfig(token),
   });
 
   return response.data;
@@ -211,7 +207,7 @@ export async function getTreeWithDeletedFiles(
 
     const response: { data: ITreeResponse } = await axios({
       url,
-      ...createAxiosRequestConfig(token)
+      ...createAxiosRequestConfig(token),
     });
 
     return response.data.tree;
@@ -219,39 +215,46 @@ export async function getTreeWithDeletedFiles(
 
   let tree = await fetchTree(treeSha);
 
-  return deletedFiles.reduce((aggr, file) => aggr.then(async (tree) => {
-    const parts = file.split("/");
-    parts.pop();
-    const dirs = parts.reduce<string[]>((aggr, part, index) => {
-      return aggr.concat(
-        aggr[index - 1] ? aggr[index - 1] + "/" + part : part
-      );
-    }, []);
+  return deletedFiles.reduce(
+    (aggr, file) =>
+      aggr.then(async (tree) => {
+        const parts = file.split("/");
+        parts.pop();
+        const dirs = parts.reduce<string[]>((aggr, part, index) => {
+          return aggr.concat(
+            aggr[index - 1] ? aggr[index - 1] + "/" + part : part
+          );
+        }, []);
 
-    const newTree = await dirs.reduce((subaggr, dir) => subaggr.then(async (tree) => {
-      const treeIndex = tree.findIndex(
-        (item) => item.type === "tree" && item.path === dir
-      );
+        const newTree = await dirs.reduce(
+          (subaggr, dir) =>
+            subaggr.then(async (tree) => {
+              const treeIndex = tree.findIndex(
+                (item) => item.type === "tree" && item.path === dir
+              );
 
-      if (treeIndex >= 0) {
-        const nestedTree = await fetchTree(tree[treeIndex].sha);
-        const newTree = tree.concat(
-          nestedTree.map((item) => ({
-            ...item,
-            path: dir + "/" + item.path,
-          }))
+              if (treeIndex >= 0) {
+                const nestedTree = await fetchTree(tree[treeIndex].sha);
+                const newTree = tree.concat(
+                  nestedTree.map((item) => ({
+                    ...item,
+                    path: dir + "/" + item.path,
+                  }))
+                );
+                newTree.splice(treeIndex, 1);
+
+                return newTree;
+              }
+
+              return tree;
+            }),
+          Promise.resolve(tree)
         );
-        newTree.splice(treeIndex, 1);
 
-        return newTree
-      }
-
-      return tree
-    }), Promise.resolve(tree))
-
-
-    return newTree.filter((item) => item.path !== file);
-  }), Promise.resolve(tree))
+        return newTree.filter((item) => item.path !== file);
+      }),
+    Promise.resolve(tree)
+  );
 }
 
 export async function getCommitTreeSha(
@@ -264,20 +267,30 @@ export async function getCommitTreeSha(
 
   const response: { data: ICommitResponse } = await axios({
     url,
-    ...createAxiosRequestConfig(token)
+    ...createAxiosRequestConfig(token),
   });
 
   return response.data.commit.tree.sha;
 }
 
-export async function getLatestCommitShaOfFile(username: string, repo: string, branch: string, path: string, token?: string) {
+export async function getLatestCommitShaOfFile(
+  username: string,
+  repo: string,
+  branch: string,
+  path: string,
+  token?: string
+): Promise<string | undefined> {
   const url = buildCommitsByPathUrl(username, repo, branch, path);
   const response: { data: { sha: string }[] } = await axios({
     url,
-    ...createAxiosRequestConfig(token)
+    ...createAxiosRequestConfig(token),
   });
 
-  return response.data[0].sha
+  if (response.data[0]) {
+    response.data[0].sha;
+  }
+
+  return undefined;
 }
 
 export async function isRepoPrivate(
@@ -309,15 +322,14 @@ export async function fetchRights(
   const url = buildRepoApiUrl(username, repo);
 
   try {
-
     const response: { data: RightsResponse } = await axios({
       url,
-      ...createAxiosRequestConfig(token)
+      ...createAxiosRequestConfig(token),
     });
 
     // No token
     if (!response.data.permissions) {
-      return "none"
+      return "none";
     }
 
     if (response.data.permissions.admin) {
@@ -374,7 +386,7 @@ export async function createPr(
       base: base.branch,
       head: `${base.username === head.username ? "" : head.username + ":"}${
         head.branch
-        }`,
+      }`,
       title,
       body,
       maintainer_can_modify: true,
@@ -488,10 +500,7 @@ export async function updateReference(
   token: string
 ) {
   const response: { data: IUpdateReferenceResponse } = await axios.patch(
-    `${buildRepoApiUrl(
-      username,
-      repo
-    )}/git/refs/heads/${branch}`,
+    `${buildRepoApiUrl(username, repo)}/git/refs/heads/${branch}`,
     { sha: commitSha, force: true },
     createAxiosRequestConfig(token)
   );
@@ -650,14 +659,13 @@ export async function fetchRepoInfo(
 
       const headers: { "If-None-Match"?: string } = {};
 
-
       const etagCacheResponse = etagCache.get(cacheId);
       if (etagCacheResponse) {
         // Use an ETag header so duplicate requests don't count towards the limit
         headers["If-None-Match"] = etagCacheResponse.etag;
       }
 
-      const defaultConfig = createAxiosRequestConfig(userToken)
+      const defaultConfig = createAxiosRequestConfig(userToken);
       const response = await axios({
         url,
         validateStatus: function (status) {
@@ -667,8 +675,8 @@ export async function fetchRepoInfo(
         ...defaultConfig,
         headers: {
           ...defaultConfig.headers,
-          ...headers
-        }
+          ...headers,
+        },
       });
 
       if (response.status === 304 && etagCacheResponse) {
@@ -737,10 +745,9 @@ export async function fetchPullInfo(
   const url = buildPullApiUrl(username, repo, pull);
 
   try {
-
     const response = await axios({
       url,
-      ...createAxiosRequestConfig(userToken)
+      ...createAxiosRequestConfig(userToken),
     });
 
     const data = response.data;
@@ -777,12 +784,14 @@ export async function downloadZip(
 ) {
   const repoUrl = buildRepoApiUrl(gitInfo.username, gitInfo.repo);
   const url = `${repoUrl}/zipball/${commitSha}`;
-  const Accept = 'application/vnd.github.v3+json'
+  const Accept = "application/vnd.github.v3+json";
   const buffer: Buffer = await fetch(url, {
     headers: {
-      Authorization: userToken ? `Bearer ${userToken}` : `Basic ${encode(`${GITHUB_CLIENT_ID}:${GITHUB_CLIENT_SECRET}`)}`,
-      Accept
-    }
+      Authorization: userToken
+        ? `Bearer ${userToken}`
+        : `Basic ${encode(`${GITHUB_CLIENT_ID}:${GITHUB_CLIENT_SECRET}`)}`,
+      Accept,
+    },
   }).then((res) => {
     if (+res.headers.get("Content-Length") > MAX_ZIP_SIZE) {
       throw new Error("This repo is too big to import");
