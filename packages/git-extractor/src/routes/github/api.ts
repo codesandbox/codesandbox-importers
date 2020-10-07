@@ -49,15 +49,15 @@ function createAxiosRequestConfig(token?: string): AxiosRequestConfig {
   const Accept = "application/vnd.github.v3+json";
   return token
     ? {
-        headers: { Accept, Authorization: `Bearer ${token}` },
-      }
+      headers: { Accept, Authorization: `Bearer ${token}` },
+    }
     : {
-        auth: {
-          username: GITHUB_CLIENT_ID!,
-          password: GITHUB_CLIENT_SECRET!,
-        },
-        headers: { Accept },
-      };
+      auth: {
+        username: GITHUB_CLIENT_ID!,
+        password: GITHUB_CLIENT_SECRET!,
+      },
+      headers: { Accept },
+    };
 }
 
 function buildContentsUrl(
@@ -287,7 +287,7 @@ export async function getLatestCommitShaOfFile(
   });
 
   if (response.data[0]) {
-    response.data[0].sha;
+    return response.data[0].sha;
   }
 
   return undefined;
@@ -384,9 +384,8 @@ export async function createPr(
     `${buildRepoApiUrl(base.username, base.repo)}/pulls`,
     {
       base: base.branch,
-      head: `${base.username === head.username ? "" : head.username + ":"}${
-        head.branch
-      }`,
+      head: `${base.username === head.username ? "" : head.username + ":"}${head.branch
+        }`,
       title,
       body,
       maintainer_can_modify: true,
