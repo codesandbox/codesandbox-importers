@@ -118,6 +118,24 @@ Object {
       "title": "index.js",
       "uploadId": undefined,
     },
+    Object {
+      "code": "hello4",
+      "directoryShortid": "dir4",
+      "isBinary": false,
+      "sha": undefined,
+      "shortid": "3",
+      "title": "template.md",
+      "uploadId": undefined,
+    },
+    Object {
+      "code": "hello5",
+      "directoryShortid": "dir5",
+      "isBinary": false,
+      "sha": undefined,
+      "shortid": "4",
+      "title": "config.yml",
+      "uploadId": undefined,
+    },
   ],
 }
 `;
