@@ -7,15 +7,15 @@ export function getDirectoryPaths(directories: ISandboxDirectory[]) {
     prevPath: string,
     directoryShortid: string | undefined
   ) => {
-    const dir = directories.find(
-      (d) => d.directoryShortid === directoryShortid && d.title === d.title
+    const dirs = directories.filter(
+      (d) => d.directoryShortid === directoryShortid
     );
 
-    if (dir) {
+    dirs.forEach((dir) => {
       const dirPath = prevPath + "/" + dir.title;
       paths[dirPath] = dir;
       addDirectory(dirPath, dir.shortid);
-    }
+    })
   };
 
   directories
