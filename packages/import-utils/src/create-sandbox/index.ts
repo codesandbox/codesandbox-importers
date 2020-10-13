@@ -71,7 +71,7 @@ export default async function createSandbox(
     console.log(`Creating sandbox with template '${template}'`);
   }
 
-  packageJsonPackage = { main: "/index.html" };
+  packageJsonPackage = packageJsonPackage || { main: "/index.html" };
 
   const mainFileUnix = findMainFile(
     directory,
