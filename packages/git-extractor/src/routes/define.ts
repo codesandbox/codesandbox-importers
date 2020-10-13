@@ -2,13 +2,18 @@ import { Context } from "koa";
 import createSandbox from "codesandbox-import-utils/lib/create-sandbox";
 import { INormalizedModules, IModule } from "codesandbox-import-util-types";
 
-export const define = async (ctx: Context, next: () => Promise<any>) => {
-  const { files } = ctx.request.body;
-
+export const createSandboxFromDefine = async (files: any) => {
   const normalizedFiles: INormalizedModules = files
-    .map((file: IModule) => {
+    .map((file: IModule & { path: string }) => {
+      if (file.path[0] === "/") {
+        // Remove the leading slash
+        const p = file.path.split("");
+        p.shift();
+        file.path = p.join("");
+      }
+
       if (typeof file.content === "object") {
-        return { ...file, content: JSON.stringify(file.content, null, 2) };
+        file.content = JSON.stringify(file.content, null, 2);
       }
 
       return file;
@@ -16,7 +21,7 @@ export const define = async (ctx: Context, next: () => Promise<any>) => {
     .reduce(
       (total: INormalizedModules, next: IModule & { path: string }) => ({
         ...total,
-        [next.path]: next
+        [next.path]: next,
       }),
       {}
     );
@@ -35,9 +40,15 @@ export const define = async (ctx: Context, next: () => Promise<any>) => {
   } catch (e) {
     /* nothing */
   }
-  const sandbox = await createSandbox(normalizedFiles);
 
+  return createSandbox(normalizedFiles);
+};
+
+export const define = async (ctx: Context, next: () => Promise<any>) => {
+  const { files } = ctx.request.body;
+
+  const sandbox = await createSandboxFromDefine(files);
   ctx.body = {
-    sandbox
+    sandbox,
   };
 };
