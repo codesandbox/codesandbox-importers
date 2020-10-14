@@ -44,6 +44,7 @@
     "ts-node": "^8.10.1"
   },
   "dependencies": {
+    "@appsignal/nodejs": "^1.0.1",
     "@sentry/node": "5.13.2",
     "acorn": "^5.1.2",
     "acorn-dynamic-import": "^2.0.2",
