@@ -58,7 +58,11 @@ app.use(router.routes()).use(router.allowedMethods());
 log(`Listening on ${DEFAULT_PORT}`);
 app.listen(DEFAULT_PORT);
 
-log(`AppSignal ${appsignal.VERSION}, active: ${appsignal.isActive}`);
+console.log(
+  JSON.stringify({
+    message: `AppSignal ${appsignal.VERSION}, active: ${appsignal.isActive}`,
+  })
+);
 
 app.on("error", (err, ctx) => {
   const span = appsignal.tracer().currentSpan();

@@ -4,7 +4,6 @@ import * as zip from "jszip";
 import * as LRU from "lru-cache";
 import fetch from "node-fetch";
 import { encode } from "base-64";
-import log from "../../utils/log";
 import { IGitInfo, ITree } from "./push";
 
 const API_URL = "https://api.github.com";
