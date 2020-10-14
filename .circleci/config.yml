@@ -6,15 +6,15 @@ version: 2
 jobs:
   build-dependencies:
     docker:
-      - image: circleci/node:10
+      - image: circleci/node:14
     working_directory: ~/codesandbox
     steps:
       - checkout
       - restore_cache:
           keys:
-            - v1-dependencies-{{ checksum "yarn.lock" }}
+            - v2-dependencies-{{ checksum "yarn.lock" }}
             # fallback to using the latest cache if no exact match is found
-            - v1-dependencies-
+            - v2-dependencies-
 
       - run: yarn install
 
@@ -22,16 +22,16 @@ jobs:
           paths:
             - node_modules
             - packages/cli/node_modules
-            - packages/git-extractors/node_modules
+            - packages/git-extractor/node_modules
             - packages/import-utils/node_modules
-          key: v1-dependencies-{{ checksum "yarn.lock" }}
+          key: v2-dependencies-{{ checksum "yarn.lock" }}
 
       # run tests!
       - run: yarn build
       - run: yarn test
 
       - save_cache:
-          key: v1-repo-{{ .Environment.CIRCLE_SHA1 }}
+          key: v2-repo-{{ .Environment.CIRCLE_SHA1 }}
           paths:
             - ~/codesandbox
   create-docker-image:
@@ -39,7 +39,7 @@ jobs:
     working_directory: ~/codesandbox
     steps:
       - restore_cache:
-          key: v1-repo-{{ .Environment.CIRCLE_SHA1 }}
+          key: v2-repo-{{ .Environment.CIRCLE_SHA1 }}
       - run:
           name: Docker Sign In
           command: "if [ -n $DOCKER_USER ]; then echo $DOCKER_PWD | docker login -u $DOCKER_USER --password-stdin; else exit 0; fi"
@@ -47,9 +47,12 @@ jobs:
           name: Create Dockerfile
           command: |
             cat > Dockerfile <<EOF
-            FROM node:9.11.1
+            FROM node:14.13.1
             WORKDIR /app
             COPY . /app
+
+            ENV NODE_ENV=production
+
             CMD ["node", "./packages/git-extractor/dist/index.js"]
             EOF
       - run:

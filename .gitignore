@@ -9,5 +9,4 @@ temp
 jest
 .aws
 dist
-
-
+lerna-debug.log

@@ -1,17 +1,19 @@
 import * as Sentry from "@sentry/node";
 import * as Koa from "koa";
 import * as bodyParser from "koa-bodyparser";
-import * as Router from "koa-router";
+import * as Router from "@koa/router";
 
 import camelize from "./middleware/camelize";
 import decamelize from "./middleware/decamelize";
 import errorHandler from "./middleware/error-handler";
+import appSignalMiddleware from "./middleware/appsignal";
 // MIDDLEWARE
 import logger from "./middleware/logger";
 import notFound from "./middleware/not-found";
 import * as define from "./routes/define";
 // ROUTES
 import * as github from "./routes/github";
+import { appsignal } from "./utils/appsignal";
 import log from "./utils/log";
 
 Sentry.init({
@@ -28,6 +30,7 @@ app.use(bodyParser({ jsonLimit: "50mb" }));
 app.use(camelize);
 app.use(decamelize);
 app.use(notFound);
+app.use(appSignalMiddleware);
 
 router
   .get(
@@ -55,7 +58,18 @@ app.use(router.routes()).use(router.allowedMethods());
 log(`Listening on ${DEFAULT_PORT}`);
 app.listen(DEFAULT_PORT);
 
+console.log(
+  JSON.stringify({
+    message: `AppSignal ${appsignal.VERSION}, active: ${appsignal.isActive}`,
+  })
+);
+
 app.on("error", (err, ctx) => {
+  const span = appsignal.tracer().currentSpan();
+  if (span) {
+    span.addError(err);
+  }
+
   Sentry.withScope(function (scope) {
     scope.addEventProcessor(function (event) {
       return Sentry.Handlers.parseRequest(event, ctx.request);
