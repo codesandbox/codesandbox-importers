@@ -1,7 +1,7 @@
 import * as Sentry from "@sentry/node";
 import * as Koa from "koa";
 import * as bodyParser from "koa-bodyparser";
-import * as Router from "koa-router";
+import * as Router from "@koa/router";
 
 import camelize from "./middleware/camelize";
 import decamelize from "./middleware/decamelize";
@@ -32,6 +32,7 @@ app.use(bodyParser({ jsonLimit: "50mb" }));
 app.use(camelize);
 app.use(decamelize);
 app.use(notFound);
+app.use(appSignalMiddleware);
 
 router
   .get(
@@ -55,8 +56,6 @@ router
   .post("/define", define.define);
 
 app.use(router.routes()).use(router.allowedMethods());
-
-app.use(appSignalMiddleware);
 
 log(`Listening on ${DEFAULT_PORT}`);
 app.listen(DEFAULT_PORT);

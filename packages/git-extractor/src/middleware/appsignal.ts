@@ -6,7 +6,6 @@ const appSignal = async (ctx: Context, next: () => Promise<any>) => {
   const rootSpan = tracer.currentSpan();
 
   if (!rootSpan) {
-    console.log("No root span, returning");
     return next();
   }
 
@@ -18,23 +17,22 @@ const appSignal = async (ctx: Context, next: () => Promise<any>) => {
   rootSpan.setCategory("process_request.koa");
 
   tracer.withSpan(rootSpan, async (span) => {
-    const { method, params, query, _matchedRouteName } = ctx;
-    console.log(JSON.stringify({ method, params, query, _matchedRouteName }));
-
-    if (_matchedRouteName) {
-      span.setName(`${method} ${_matchedRouteName}`);
-    }
-
-    // set route params (if parsed by express correctly)
-    span.setSampleData("params", { ...params, ...query });
-
     try {
       await next();
+
+      const { method, params, query, routerPath } = ctx;
+
+      // set route params (if parsed by express correctly)
+      span.setSampleData("params", { ...params, ...query });
+      if (routerPath) {
+        span.setName(`${method} ${routerPath}`);
+      }
+
+      span.close();
     } catch (e) {
       span.addError(e);
-      throw e;
-    } finally {
       span.close();
+      throw e;
     }
   });
 };
