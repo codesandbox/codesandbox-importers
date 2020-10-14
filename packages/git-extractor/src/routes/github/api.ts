@@ -5,6 +5,7 @@ import * as LRU from "lru-cache";
 import fetch from "node-fetch";
 import { encode } from "base-64";
 import { IGitInfo, ITree } from "./push";
+import { appsignal } from "../../utils/appsignal";
 
 const API_URL = "https://api.github.com";
 const REPO_BASE_URL = API_URL + "/repos";
@@ -647,6 +648,7 @@ export async function fetchRepoInfo(
   skipCache: boolean = false,
   userToken?: string
 ): Promise<CommitResponse> {
+  let span: import("@appsignal/nodejs").Span | undefined;
   try {
     const cacheId = username + repo + branch + path;
     // We cache the latest retrieved sha for a limited time, so we don't spam the
@@ -654,6 +656,11 @@ export async function fetchRepoInfo(
     let latestSha = shaCache.get(cacheId) as string;
 
     if (!latestSha || skipCache) {
+      const tracer = appsignal.tracer();
+      span = tracer.createSpan(undefined, tracer.currentSpan());
+      span.setCategory("api.github");
+      span.setName("GET api.github.com/info");
+
       const url = buildCommitsUrl(username, repo, branch, path);
 
       const headers: { "If-None-Match"?: string } = {};
@@ -678,6 +685,9 @@ export async function fetchRepoInfo(
         },
       });
 
+      span.setSampleData("cache", {
+        etagCacheUsed: response.status === 304 && etagCacheResponse,
+      });
       if (response.status === 304 && etagCacheResponse) {
         latestSha = etagCacheResponse.sha;
       } else {
@@ -732,6 +742,10 @@ export async function fetchRepoInfo(
     Sentry.captureException(e);
 
     throw e;
+  } finally {
+    if (span) {
+      span.close();
+    }
   }
 }
 
