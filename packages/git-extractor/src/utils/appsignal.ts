@@ -1,7 +1,7 @@
 import { Appsignal } from "@appsignal/nodejs";
 
 export const appsignal = new Appsignal({
-  active: true,
+  active: process.env.NODE_ENV === "production",
   name: "Importers",
   environment: String(process.env.ENVIRONMENT),
 });
