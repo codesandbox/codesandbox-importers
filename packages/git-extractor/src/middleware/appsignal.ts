@@ -6,6 +6,7 @@ const appSignal = async (ctx: Context, next: () => Promise<any>) => {
   const rootSpan = tracer.currentSpan();
 
   if (!rootSpan) {
+    console.log("No root span, returning");
     return next();
   }
 
@@ -18,7 +19,7 @@ const appSignal = async (ctx: Context, next: () => Promise<any>) => {
 
   tracer.withSpan(rootSpan, async (span) => {
     const { method, params, query, _matchedRouteName } = ctx;
-    console.log({ method, params, query, _matchedRouteName });
+    console.log(JSON.stringify({ method, params, query, _matchedRouteName }));
 
     if (_matchedRouteName) {
       span.setName(`${method} ${_matchedRouteName}`);
