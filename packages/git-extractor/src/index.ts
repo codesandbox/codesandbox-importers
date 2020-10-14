@@ -6,6 +6,7 @@ import * as Router from "koa-router";
 import camelize from "./middleware/camelize";
 import decamelize from "./middleware/decamelize";
 import errorHandler from "./middleware/error-handler";
+import appSignalMiddleware from "./middleware/appsignal";
 // MIDDLEWARE
 import logger from "./middleware/logger";
 import notFound from "./middleware/not-found";
@@ -54,6 +55,8 @@ router
   .post("/define", define.define);
 
 app.use(router.routes()).use(router.allowedMethods());
+
+app.use(appSignalMiddleware);
 
 log(`Listening on ${DEFAULT_PORT}`);
 app.listen(DEFAULT_PORT);
