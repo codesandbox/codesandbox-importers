@@ -12,6 +12,7 @@ import notFound from "./middleware/not-found";
 import * as define from "./routes/define";
 // ROUTES
 import * as github from "./routes/github";
+import { appsignal } from "./utils/appsignal";
 import log from "./utils/log";
 
 Sentry.init({
@@ -21,6 +22,8 @@ Sentry.init({
 const DEFAULT_PORT = process.env.PORT || 2000;
 const app = new Koa();
 const router = new Router();
+
+console.log(appsignal);
 
 app.use(errorHandler);
 app.use(logger);
