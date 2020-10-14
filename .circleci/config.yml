@@ -12,9 +12,9 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - v1-dependencies-{{ checksum "yarn.lock" }}
+            - v2-dependencies-{{ checksum "yarn.lock" }}
             # fallback to using the latest cache if no exact match is found
-            - v1-dependencies-
+            - v2-dependencies-
 
       - run: yarn install
 
@@ -24,14 +24,14 @@ jobs:
             - packages/cli/node_modules
             - packages/git-extractor/node_modules
             - packages/import-utils/node_modules
-          key: v1-dependencies-{{ checksum "yarn.lock" }}
+          key: v2-dependencies-{{ checksum "yarn.lock" }}
 
       # run tests!
       - run: yarn build
       - run: yarn test
 
       - save_cache:
-          key: v1-repo-{{ .Environment.CIRCLE_SHA1 }}
+          key: v2-repo-{{ .Environment.CIRCLE_SHA1 }}
           paths:
             - ~/codesandbox
   create-docker-image:
@@ -39,7 +39,7 @@ jobs:
     working_directory: ~/codesandbox
     steps:
       - restore_cache:
-          key: v1-repo-{{ .Environment.CIRCLE_SHA1 }}
+          key: v2-repo-{{ .Environment.CIRCLE_SHA1 }}
       - run:
           name: Docker Sign In
           command: "if [ -n $DOCKER_USER ]; then echo $DOCKER_PWD | docker login -u $DOCKER_USER --password-stdin; else exit 0; fi"
