@@ -50,6 +50,9 @@ jobs:
             FROM node:14.13.1
             WORKDIR /app
             COPY . /app
+
+            ENV NODE_ENV=production
+
             CMD ["node", "./packages/git-extractor/dist/index.js"]
             EOF
       - run:
