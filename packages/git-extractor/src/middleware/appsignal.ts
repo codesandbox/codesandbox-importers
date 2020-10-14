@@ -16,23 +16,19 @@ const appSignal = async (ctx: Context, next: () => Promise<any>) => {
   // identifies the span in the stacked graphs
   rootSpan.setCategory("process_request.koa");
 
-  tracer.withSpan(rootSpan, async (span) => {
+  return tracer.withSpan(rootSpan, async (span) => {
     try {
       await next();
+    } finally {
+      const { method, params = {}, query = {}, routerPath } = ctx;
 
-      const { method, params, query, routerPath } = ctx;
-
-      // set route params (if parsed by express correctly)
+      // set route params (if parsed by koa correctly)
       span.setSampleData("params", { ...params, ...query });
       if (routerPath) {
         span.setName(`${method} ${routerPath}`);
       }
 
       span.close();
-    } catch (e) {
-      span.addError(e);
-      span.close();
-      throw e;
     }
   });
 };

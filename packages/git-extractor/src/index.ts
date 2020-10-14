@@ -24,8 +24,6 @@ const DEFAULT_PORT = process.env.PORT || 2000;
 const app = new Koa();
 const router = new Router();
 
-console.log(appsignal);
-
 app.use(errorHandler);
 app.use(logger);
 app.use(bodyParser({ jsonLimit: "50mb" }));
@@ -61,6 +59,11 @@ log(`Listening on ${DEFAULT_PORT}`);
 app.listen(DEFAULT_PORT);
 
 app.on("error", (err, ctx) => {
+  const span = appsignal.tracer().currentSpan();
+  if (span) {
+    span.addError(err);
+  }
+
   Sentry.withScope(function (scope) {
     scope.addEventProcessor(function (event) {
       return Sentry.Handlers.parseRequest(event, ctx.request);
