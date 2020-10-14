@@ -42,20 +42,22 @@ function requestAxios(
 ): AxiosPromise {
   const tracer = appsignal.tracer();
   const span = tracer.createSpan(undefined, tracer.currentSpan());
-  span.setCategory("api.github");
-  span.setName(requestName);
+  return tracer.withSpan(span, (span) => {
+    span.setCategory("api.github");
+    span.setName(requestName);
 
-  return axios(requestObject)
-    .then((res) => {
-      span.close();
-      return res;
-    })
-    .catch((e) => {
-      span.addError(e);
-      span.close();
+    return axios(requestObject)
+      .then((res) => {
+        span.close();
+        return res;
+      })
+      .catch((e) => {
+        span.addError(e);
+        span.close();
 
-      return Promise.reject(e);
-    });
+        return Promise.reject(e);
+      });
+  });
 }
 
 function buildCompareApiUrl(
