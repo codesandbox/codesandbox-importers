@@ -1,5 +1,5 @@
 import * as Sentry from "@sentry/node";
-import axios, { AxiosRequestConfig } from "axios";
+import axios, { AxiosPromise, AxiosRequestConfig } from "axios";
 import * as zip from "jszip";
 import * as LRU from "lru-cache";
 import fetch from "node-fetch";
@@ -34,6 +34,28 @@ function buildTreesApiUrl(username: string, repo: string, treeSha: string) {
 
 function buildContentsApiUrl(username: string, repo: string, path: string) {
   return `${REPO_BASE_URL}/${username}/${repo}/contents/${path}`;
+}
+
+function requestAxios(
+  requestName: string,
+  requestObject: AxiosRequestConfig
+): AxiosPromise {
+  const tracer = appsignal.tracer();
+  const span = tracer.createSpan(undefined, tracer.currentSpan());
+  span.setCategory("api.github");
+  span.setName(requestName);
+
+  return axios(requestObject)
+    .then((res) => {
+      span.close();
+      return res;
+    })
+    .catch((e) => {
+      span.addError(e);
+      span.close();
+
+      return Promise.reject(e);
+    });
 }
 
 function buildCompareApiUrl(
@@ -166,19 +188,25 @@ export async function getComparison(
 ) {
   const url = buildCompareApiUrl(username, repo, baseRef, headRef);
 
-  const response: { data: ICompareResponse } = await axios({
-    url,
-    ...createAxiosRequestConfig(token),
-  });
+  const response: { data: ICompareResponse } = await requestAxios(
+    "Get Comparison",
+    {
+      url,
+      ...createAxiosRequestConfig(token),
+    }
+  );
 
   return response.data;
 }
 
 export async function getContent(url: string, token: string) {
-  const response: { data: IContentResponse } = await axios({
-    url,
-    ...createAxiosRequestConfig(token),
-  });
+  const response: { data: IContentResponse } = await requestAxios(
+    "Get Content",
+    {
+      url,
+      ...createAxiosRequestConfig(token),
+    }
+  );
 
   return response.data;
 }
@@ -186,7 +214,7 @@ export async function getContent(url: string, token: string) {
 export async function getRepo(username: string, repo: string, token?: string) {
   const url = buildRepoApiUrl(username, repo);
 
-  const response: { data: IRepoResponse } = await axios({
+  const response: { data: IRepoResponse } = await requestAxios("Get Repo", {
     url,
     ...createAxiosRequestConfig(token),
   });
@@ -205,7 +233,7 @@ export async function getTreeWithDeletedFiles(
   async function fetchTree(sha: string) {
     const url = buildTreesApiUrl(username, repo, sha);
 
-    const response: { data: ITreeResponse } = await axios({
+    const response: { data: ITreeResponse } = await requestAxios("Get Tree", {
       url,
       ...createAxiosRequestConfig(token),
     });
@@ -265,10 +293,13 @@ export async function getCommitTreeSha(
 ) {
   const url = buildCommitApiUrl(username, repo, commitSha);
 
-  const response: { data: ICommitResponse } = await axios({
-    url,
-    ...createAxiosRequestConfig(token),
-  });
+  const response: { data: ICommitResponse } = await requestAxios(
+    "Get CommitTreeSha",
+    {
+      url,
+      ...createAxiosRequestConfig(token),
+    }
+  );
 
   return response.data.commit.tree.sha;
 }
@@ -281,10 +312,13 @@ export async function getLatestCommitShaOfFile(
   token?: string
 ): Promise<string | undefined> {
   const url = buildCommitsByPathUrl(username, repo, branch, path);
-  const response: { data: { sha: string }[] } = await axios({
-    url,
-    ...createAxiosRequestConfig(token),
-  });
+  const response: { data: { sha: string }[] } = await requestAxios(
+    "Get Commits of File",
+    {
+      url,
+      ...createAxiosRequestConfig(token),
+    }
+  );
 
   if (response.data[0]) {
     return response.data[0].sha;
@@ -322,10 +356,13 @@ export async function fetchRights(
   const url = buildRepoApiUrl(username, repo);
 
   try {
-    const response: { data: RightsResponse } = await axios({
-      url,
-      ...createAxiosRequestConfig(token),
-    });
+    const response: { data: RightsResponse } = await requestAxios(
+      "Get Rights",
+      {
+        url,
+        ...createAxiosRequestConfig(token),
+      }
+    );
 
     // No token
     if (!response.data.permissions) {
@@ -380,9 +417,10 @@ export async function createPr(
   body: string,
   token: string
 ): Promise<IPrResponse> {
-  const { data } = await axios.post(
-    `${buildRepoApiUrl(base.username, base.repo)}/pulls`,
-    {
+  const { data } = await requestAxios("Create PR", {
+    method: "post",
+    url: `${buildRepoApiUrl(base.username, base.repo)}/pulls`,
+    data: {
       base: base.branch,
       head: `${base.username === head.username ? "" : head.username + ":"}${
         head.branch
@@ -391,8 +429,8 @@ export async function createPr(
       body,
       maintainer_can_modify: true,
     },
-    createAxiosRequestConfig(token)
-  );
+    ...createAxiosRequestConfig(token),
+  });
 
   return {
     number: data.number,
@@ -420,11 +458,12 @@ export async function createBlob(
   encoding: "utf-8" | "base64",
   token: string
 ) {
-  const response: { data: IBlobResponse } = await axios.post(
-    `${buildRepoApiUrl(username, repo)}/git/blobs`,
-    { content: content, encoding },
-    createAxiosRequestConfig(token)
-  );
+  const response: { data: IBlobResponse } = await requestAxios("Create Blob", {
+    method: "post",
+    url: `${buildRepoApiUrl(username, repo)}/git/blobs`,
+    data: { content: content, encoding },
+    ...createAxiosRequestConfig(token),
+  });
 
   return response.data;
 }
@@ -442,10 +481,14 @@ export async function createTree(
   baseTreeSha: string | null,
   token: string
 ) {
-  const response: { data: ICreateTreeResponse } = await axios.post(
-    `${buildRepoApiUrl(username, repo)}/git/trees`,
-    { base_tree: baseTreeSha, tree },
-    createAxiosRequestConfig(token)
+  const response: { data: ICreateTreeResponse } = await requestAxios(
+    "Create Tree",
+    {
+      method: "post",
+      url: `${buildRepoApiUrl(username, repo)}/git/trees`,
+      data: { base_tree: baseTreeSha, tree },
+      ...createAxiosRequestConfig(token),
+    }
   );
 
   return response.data;
@@ -478,10 +521,14 @@ export async function createCommit(
   message: string,
   token: string
 ) {
-  const response: { data: ICreateCommitResponse } = await axios.post(
-    `${buildRepoApiUrl(username, repo)}/git/commits`,
-    { tree: treeSha, message, parents: parentCommitShas },
-    createAxiosRequestConfig(token)
+  const response: { data: ICreateCommitResponse } = await requestAxios(
+    "Create Commit",
+    {
+      method: "post",
+      url: `${buildRepoApiUrl(username, repo)}/git/commits`,
+      data: { tree: treeSha, message, parents: parentCommitShas },
+      ...createAxiosRequestConfig(token),
+    }
   );
 
   return response.data;
@@ -499,10 +546,14 @@ export async function updateReference(
   commitSha: string,
   token: string
 ) {
-  const response: { data: IUpdateReferenceResponse } = await axios.patch(
-    `${buildRepoApiUrl(username, repo)}/git/refs/heads/${branch}`,
-    { sha: commitSha, force: true },
-    createAxiosRequestConfig(token)
+  const response: { data: IUpdateReferenceResponse } = await requestAxios(
+    "Update Reference",
+    {
+      method: "patch",
+      url: `${buildRepoApiUrl(username, repo)}/git/refs/heads/${branch}`,
+      data: { sha: commitSha, force: true },
+      ...createAxiosRequestConfig(token),
+    }
   );
 
   return response.data;
@@ -525,11 +576,14 @@ export async function createReference(
   refSha: string,
   token: string
 ) {
-  const response: { data: ICreateReferenceResponse } = await axios.post(
-    `${buildRepoApiUrl(username, repo)}/git/refs`,
-    { ref: `refs/heads/${branch}`, sha: refSha },
-    createAxiosRequestConfig(token)
-  );
+  const response: {
+    data: ICreateReferenceResponse;
+  } = await requestAxios("Create Reference", {
+    method: "post",
+    url: `${buildRepoApiUrl(username, repo)}/git/refs`,
+    data: { ref: `refs/heads/${branch}`, sha: refSha },
+    ...createAxiosRequestConfig(token),
+  });
 
   return response.data;
 }
@@ -547,10 +601,14 @@ export async function createFork(
   repo: string,
   token: string
 ) {
-  const response: { data: ICreateForkResponse } = await axios.post(
-    `${buildRepoApiUrl(username, repo)}/forks`,
-    {},
-    createAxiosRequestConfig(token)
+  const response: { data: ICreateForkResponse } = await requestAxios(
+    "Create Fork",
+    {
+      method: "post",
+      url: `${buildRepoApiUrl(username, repo)}/forks`,
+      data: {},
+      ...createAxiosRequestConfig(token),
+    }
   );
 
   return response.data;
@@ -582,16 +640,20 @@ export async function createRepo(
   token: string,
   privateRepo: boolean = false
 ) {
-  const response: { data: ICreateRepoResponse } = await axios.post(
-    `${API_URL}/user/repos`,
+  const response: { data: ICreateRepoResponse } = await requestAxios(
+    "Create Repo",
     {
-      name: repo,
-      description: "Created with CodeSandbox",
-      homepage: `https://codesandbox.io/s/github/${username}/${repo}`,
-      auto_init: true,
-      private: privateRepo,
-    },
-    createAxiosRequestConfig(token)
+      method: "post",
+      url: `${API_URL}/user/repos`,
+      data: {
+        name: repo,
+        description: "Created with CodeSandbox",
+        homepage: `https://codesandbox.io/s/github/${username}/${repo}`,
+        auto_init: true,
+        private: privateRepo,
+      },
+      ...createAxiosRequestConfig(token),
+    }
   );
 
   return response.data;
@@ -602,10 +664,11 @@ export async function createRepo(
  */
 export async function doesRepoExist(username: string, repo: string) {
   try {
-    const response = await axios.get(
-      buildRepoApiUrl(username, repo),
-      createAxiosRequestConfig()
-    );
+    const response = await requestAxios("Repo Exists", {
+      method: "get",
+      url: buildRepoApiUrl(username, repo),
+      ...createAxiosRequestConfig(),
+    });
 
     return true;
   } catch (e) {
@@ -672,7 +735,7 @@ export async function fetchRepoInfo(
       }
 
       const defaultConfig = createAxiosRequestConfig(userToken);
-      const response = await axios({
+      const response = await requestAxios("Get Repo Info", {
         url,
         validateStatus: function (status) {
           // Axios sees 304 (Not Modified) as an error. We don't want that.
@@ -758,7 +821,7 @@ export async function fetchPullInfo(
   const url = buildPullApiUrl(username, repo, pull);
 
   try {
-    const response = await axios({
+    const response = await requestAxios("Get Pull Info", {
       url,
       ...createAxiosRequestConfig(userToken),
     });

@@ -4,4 +4,5 @@ export const appsignal = new Appsignal({
   active: process.env.NODE_ENV === "production",
   name: "Importers",
   environment: String(process.env.ENVIRONMENT),
+  ignoreActions: ["GET https://api.github.com"],
 });
