@@ -406,9 +406,10 @@
   version "9.4.4"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-9.4.4.tgz#4cad4305d1ec84eab2dc2bda97dfb6a5f652cccb"
 
-"@types/node@^8.0.1", "@types/node@^8.0.50":
-  version "8.9.2"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-8.9.2.tgz#94bb08914ea1aebbb18ecff4c27dc0930e512934"
+"@types/node@^9":
+  version "9.6.59"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-9.6.59.tgz#76eabeeb8d87ce05e232e5680feaef38ee9eae90"
+  integrity sha512-TX/dHK9lFrXoMFtHdF3oyEw6EpfYfu+8AZ1zP6Oj3rOiQGbit2rgQlJzvBRx712b9ReaCfkSNPRXYzZDYI4YSw==
 
 "@types/ora@^0.3.31":
   version "0.3.32"
@@ -8322,9 +8323,10 @@ typedarray@^0.0.6:
   version "0.0.6"
   resolved "https://registry.yarnpkg.com/typedarray/-/typedarray-0.0.6.tgz#867ac74e3864187b1d3d47d996a78ec5c8830777"
 
-typescript@^3.5.3:
-  version "3.5.3"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.5.3.tgz#c830f657f93f1ea846819e929092f5fe5983e977"
+typescript@^4.0.3:
+  version "4.0.3"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.0.3.tgz#153bbd468ef07725c1df9c77e8b453f8d36abba5"
+  integrity sha512-tEu6DGxGgRJPb/mVPIZ48e69xCn2yRmCgYmDugAVwmJ6o+0u1RI18eO7E7WBTLYLaEVVOhwQmcdhQHweux/WPg==
 
 uglify-js@^2.6:
   version "2.8.29"
