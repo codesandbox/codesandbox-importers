@@ -6,7 +6,7 @@ version: 2
 jobs:
   build-dependencies:
     docker:
-      - image: circleci/node:10
+      - image: circleci/node:14
     working_directory: ~/codesandbox
     steps:
       - checkout
@@ -47,7 +47,7 @@ jobs:
           name: Create Dockerfile
           command: |
             cat > Dockerfile <<EOF
-            FROM node:9.11.1
+            FROM node:14.13.1
             WORKDIR /app
             COPY . /app
             CMD ["node", "./packages/git-extractor/dist/index.js"]
