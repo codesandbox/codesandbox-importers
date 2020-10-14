@@ -43,7 +43,7 @@ function requestAxios(
   const tracer = appsignal.tracer();
   const span = tracer.createSpan(undefined, tracer.currentSpan());
   return tracer.withSpan(span, (span) => {
-    span.setCategory("api.github");
+    span.setCategory("request-api.github");
     span.setName(requestName);
 
     return axios(requestObject)
@@ -723,7 +723,7 @@ export async function fetchRepoInfo(
     if (!latestSha || skipCache) {
       const tracer = appsignal.tracer();
       span = tracer.createSpan(undefined, tracer.currentSpan());
-      span.setCategory("api.github");
+      span.setCategory("request-api.github");
       span.setName("GET api.github.com/info");
 
       const url = buildCommitsUrl(username, repo, branch, path);
