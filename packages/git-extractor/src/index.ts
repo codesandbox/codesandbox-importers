@@ -36,22 +36,22 @@ app.use(appSignalMiddleware);
 
 router
   .get(
-    "/git/github/data/:username/:repo/:branch(.*)/commit/:commitSha/path/:path(.*)",
+    "/git/github/data/:username/:repo/:branch*/commit/:commitSha/path/:path*",
     github.data
   )
   .get("/git/github/rights/:username/:repo", github.getRights)
-  .get("/git/github/info/:username/:repo/tree/:branch/:path(.*)", github.info) // allow tree urls
-  .get("/git/github/info/:username/:repo/blob/:branch/:path(.*)", github.info) // allow blob urls
+  .get("/git/github/info/:username/:repo/tree/:branch/:path*", github.info) // allow tree urls
+  .get("/git/github/info/:username/:repo/blob/:branch/:path*", github.info) // allow blob urls
   .get("/git/github/info/:username/:repo/commit/:branch", github.info) // allow commit urls
   .get("/git/github/info/:username/:repo", github.info) // For when tree isn't in path (root path)
   .get("/git/github/info/:username/:repo/pull/:pull", github.pullInfo) // allow pull urls
   .post("/git/github/compare/:username/:repo", github.compare) // Compare changes between branches and commits
   // Push
   .post(
-    "/git/github/commit/:username/:repo/:branch(.*)/path/:path(.*)",
+    "/git/github/commit/:username/:repo/:branch*/path/:path*",
     github.commit
   )
-  .post("/git/github/pr/:username/:repo/:branch(.*)/path/:path(.*)", github.pr)
+  .post("/git/github/pr/:username/:repo/:branch*/path/:path*", github.pr)
   .post("/git/github/repo/:username/:repo", github.repo)
   .post("/define", define.define);
 
