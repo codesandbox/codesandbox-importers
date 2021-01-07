@@ -175,7 +175,7 @@ export function getTemplate(
   if (totalDependencies.indexOf("@sveltech/routify") > -1) {
     return "node";
   }
-  
+
   if (totalDependencies.indexOf("vite") > -1) {
     return "node";
   }
@@ -199,6 +199,7 @@ export function getTemplate(
     "ts-node",
     "@tensorflow/tfjs-node",
     "webpack-dev-server",
+    "snowpack",
   ];
   if (totalDependencies.some((dep) => nodeDeps.indexOf(dep) > -1)) {
     return "node";
