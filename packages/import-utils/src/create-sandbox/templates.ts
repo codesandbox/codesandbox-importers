@@ -130,6 +130,10 @@ export function getTemplate(
     return "quasar";
   }
 
+  if (totalDependencies.indexOf("docusaurus") > -1) {
+    return "docusaurus";
+  }
+
   // CLIENT
 
   if (moduleNames.some((m) => m.endsWith(".re"))) {
