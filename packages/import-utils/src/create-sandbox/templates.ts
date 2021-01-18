@@ -130,7 +130,7 @@ export function getTemplate(
     return "quasar";
   }
 
-  if (totalDependencies.indexOf("docusaurus") > -1) {
+  if (totalDependencies.indexOf("@docusaurus/core") > -1) {
     return "docusaurus";
   }
 
