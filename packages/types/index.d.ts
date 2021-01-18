@@ -60,6 +60,7 @@ export type ITemplate =
   | "vuepress"
   | "mdx-deck"
   | "quasar"
+  | "docusaurus"
   | "node";
 
 export interface ISandbox {
