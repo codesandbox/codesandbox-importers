@@ -875,7 +875,15 @@ export async function downloadZip(
       throw new Error("This repo is too big to import");
     }
 
-    return res.buffer();
+    if (!res.ok) {
+      return res.text().then((text) => {
+        throw new Error(
+          `Could not import repo from GitHub, error from GitHub. Status code: ${res.status}, error: ${text}`
+        );
+      });
+    } else {
+      return res.buffer();
+    }
   });
 
   const loadedZip = await zip.loadAsync(buffer);
