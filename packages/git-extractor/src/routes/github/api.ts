@@ -713,7 +713,7 @@ export async function fetchRepoInfo(
   skipCache: boolean = false,
   userToken?: string
 ): Promise<CommitResponse> {
-  let span: import("@appsignal/nodejs").Span | undefined;
+  let span: import("@appsignal/types").NodeSpan | undefined;
   try {
     const cacheId = username + repo + branch + path;
     // We cache the latest retrieved sha for a limited time, so we don't spam the
