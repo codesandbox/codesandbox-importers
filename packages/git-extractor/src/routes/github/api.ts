@@ -765,7 +765,7 @@ export async function fetchRepoInfo(
         },
       });
 
-      span.setSampleData("cache", {
+      span.setSampleData("custom_data", {
         etagCacheUsed: response.status === 304 && etagCacheResponse,
       });
       if (response.status === 304 && etagCacheResponse) {
