@@ -30,7 +30,7 @@
     "codesandbox-import-util-types": "^2.2.1",
     "codesandbox-import-utils": "^2.2.2",
     "commander": "^2.9.0",
-    "datauri": "^1.1.0",
+    "datauri": "^3.0.0",
     "filesize": "^3.6.1",
     "fs-extra": "^3.0.1",
     "git-branch": "^1.0.0",
