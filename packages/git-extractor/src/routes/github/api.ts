@@ -877,9 +877,16 @@ export async function downloadZip(
 
     if (!res.ok) {
       return res.text().then((text) => {
-        throw new Error(
+        const error = new Error(
           `Could not import repo from GitHub, error from GitHub. Status code: ${res.status}, error: ${text}`
         );
+
+        // Forward the error status from GitHub, eg. if GH returns 404 we return that as well.
+        // This is handled in error-handler.ts middleware.
+        // @ts-ignore
+        error.status = res.status;
+
+        throw error;
       });
     } else {
       return res.buffer();
