@@ -184,6 +184,10 @@ export function getTemplate(
     return "node";
   }
 
+  if (totalDependencies.indexOf("@frontity/core") > -1) {
+    return "node";
+  }
+
   if (totalDependencies.indexOf("svelte") > -1) {
     return "svelte";
   }
