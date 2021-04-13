@@ -768,9 +768,14 @@ export async function fetchRepoInfo(
       span.setSampleData("custom_data", {
         etagCacheUsed: response.status === 304 && etagCacheResponse,
       });
+      const meter = appsignal.metrics();
       if (response.status === 304 && etagCacheResponse) {
+        meter.incrementCounter("github_cache_hit", 1);
+
         latestSha = etagCacheResponse.sha;
       } else {
+        meter.incrementCounter("github_cache_miss", 1);
+
         latestSha = response.data.sha;
 
         const etag = response.headers.etag;
