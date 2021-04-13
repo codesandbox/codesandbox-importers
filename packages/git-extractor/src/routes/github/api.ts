@@ -642,6 +642,17 @@ export async function createRepo(
   token: string,
   privateRepo: boolean = false
 ) {
+  const repoExists = await doesRepoExist(username, repo, token);
+  if (repoExists) {
+    const error = new Error(
+      `The repository ${username}/${repo} already exists.`
+    );
+    // @ts-ignore
+    error.status = 422;
+
+    throw error;
+  }
+
   const response: { data: ICreateRepoResponse } = await requestAxios(
     "Create Repo",
     {
@@ -664,12 +675,16 @@ export async function createRepo(
 /**
  * Check if repository exists
  */
-export async function doesRepoExist(username: string, repo: string) {
+export async function doesRepoExist(
+  username: string,
+  repo: string,
+  userToken?: string
+) {
   try {
-    const response = await requestAxios("Repo Exists", {
+    await requestAxios("Repo Exists", {
       method: "get",
       url: buildRepoApiUrl(username, repo),
-      ...createAxiosRequestConfig(),
+      ...createAxiosRequestConfig(userToken),
     });
 
     return true;
