@@ -73,7 +73,7 @@
     "koa-bodyparser": "^4.2.0",
     "lodash.pickby": "^4.6.0",
     "lru-cache": "^4.1.1",
-    "node-fetch": "^1.7.3",
+    "node-fetch": "^2.6.1",
     "pacote": "^2.7.31",
     "redis": "^2.7.1",
     "rimraf": "^2.6.1",
