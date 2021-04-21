@@ -17,7 +17,7 @@ function compress(input: string) {
 
 export function getParameters(parameters: {
   files: IFiles;
-  template: ITemplate;
+  template?: ITemplate;
 }) {
   return compress(JSON.stringify(parameters));
 }
