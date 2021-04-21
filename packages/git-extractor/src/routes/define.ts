@@ -1,10 +1,16 @@
 import { Context } from "koa";
 import createSandbox from "codesandbox-import-utils/lib/create-sandbox";
-import { INormalizedModules, IModule } from "codesandbox-import-util-types";
+import {
+  INormalizedModules,
+  IModule,
+  ITemplate,
+} from "codesandbox-import-util-types";
 
-export const createSandboxFromDefine = async (files: any) => {
+export const createSandboxFromDefine = async (
+  files: Array<IModule & { path: string }>
+) => {
   const normalizedFiles: INormalizedModules = files
-    .map((file: IModule & { path: string }) => {
+    .map((file) => {
       if (file.path[0] === "/") {
         // Remove the leading slash
         const p = file.path.split("");
@@ -19,7 +25,7 @@ export const createSandboxFromDefine = async (files: any) => {
       return file;
     })
     .reduce(
-      (total: INormalizedModules, next: IModule & { path: string }) => ({
+      (total: INormalizedModules, next) => ({
         ...total,
         [next.path]: next,
       }),
@@ -44,10 +50,15 @@ export const createSandboxFromDefine = async (files: any) => {
   return createSandbox(normalizedFiles);
 };
 
-export const define = async (ctx: Context, next: () => Promise<any>) => {
-  const { files } = ctx.request.body;
+export const define = async (ctx: Context, _next: () => Promise<any>) => {
+  const { files, template } = ctx.request.body;
 
   const sandbox = await createSandboxFromDefine(files);
+
+  if (template) {
+    sandbox.template = template as ITemplate;
+  }
+
   ctx.body = {
     sandbox,
   };
