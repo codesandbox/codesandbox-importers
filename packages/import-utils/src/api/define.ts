@@ -1,3 +1,4 @@
+import { ITemplate } from "codesandbox-import-util-types";
 import * as LZString from "lz-string";
 
 export interface IFiles {
@@ -14,6 +15,9 @@ function compress(input: string) {
     .replace(/=+$/, ``); // Remove ending '='
 }
 
-export function getParameters(parameters: { files: IFiles }) {
+export function getParameters(parameters: {
+  files: IFiles;
+  template?: ITemplate;
+}) {
   return compress(JSON.stringify(parameters));
 }
