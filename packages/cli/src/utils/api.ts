@@ -12,7 +12,7 @@ import {
 } from "./url";
 
 // tslint:disable-next-line:no-var-requires
-const DatauriParser = require('datauri/parser');
+const DatauriParser = require("datauri/parser");
 
 const callApi = async (options: AxiosRequestConfig) => {
   try {

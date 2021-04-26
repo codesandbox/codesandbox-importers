@@ -12,7 +12,7 @@ function log({ method, url, duration, error }: ILogParams) {
     method,
     path: url,
     duration,
-    error
+    error,
   };
   console.log(JSON.stringify(log));
 }

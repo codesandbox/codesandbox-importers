@@ -15,6 +15,7 @@
   "devDependencies": {
     "jest": "^23.6.0",
     "lerna": "^2.4.0",
+    "prettier": "^2.2.1",
     "rimraf": "^2.6.2",
     "ts-jest": "^23.10.4",
     "typescript": "^4.0.3"

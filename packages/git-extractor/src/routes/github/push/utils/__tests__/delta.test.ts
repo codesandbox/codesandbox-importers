@@ -11,7 +11,7 @@ describe("commit", () => {
         sha: "15adfdc710ca89d2c427dcbb6716943e1029c73a",
         size: 341,
         url:
-          "https://api.github.com/repos/CompuIves/codesandbox-test-git-app/git/blobs/15adfdc710ca89d2c427dcbb6716943e1029c73a"
+          "https://api.github.com/repos/CompuIves/codesandbox-test-git-app/git/blobs/15adfdc710ca89d2c427dcbb6716943e1029c73a",
       },
       {
         path: "src/App.js",
@@ -20,8 +20,8 @@ describe("commit", () => {
         sha: "d7d52a7f38a321668d4fa83409a7c47d1bfccd7c",
         size: 496,
         url:
-          "https://api.github.com/repos/CompuIves/codesandbox-test-git-app/git/blobs/d7d52a7f38a321668d4fa83409a7c47d1bfccd7c"
-      }
+          "https://api.github.com/repos/CompuIves/codesandbox-test-git-app/git/blobs/d7d52a7f38a321668d4fa83409a7c47d1bfccd7c",
+      },
     ];
 
     const SAMPLE_MODULES: INormalizedModules = {
@@ -51,7 +51,7 @@ describe("commit", () => {
   to { transform: rotate(360deg); }
 }
 `,
-        isBinary: false
+        isBinary: false,
       },
       "src/App.js": {
         content: `import React, { Component } from 'react';
@@ -76,54 +76,54 @@ class App extends Component {
 
 export default App;
 `,
-        isBinary: false
-      }
+        isBinary: false,
+      },
     };
 
     it("detects no change", () => {
       expect(getDelta(SAMPLE_TREE, SAMPLE_MODULES)).toEqual({
         added: [],
         deleted: [],
-        modified: []
+        modified: [],
       });
     });
 
     it("detects added files", () => {
       const newModules = {
         ...SAMPLE_MODULES,
-        "test.js": { content: "Hey", isBinary: false }
+        "test.js": { content: "Hey", isBinary: false },
       };
 
       expect(getDelta(SAMPLE_TREE, newModules)).toEqual({
         added: ["test.js"],
         deleted: [],
-        modified: []
+        modified: [],
       });
     });
 
     it("detects modified files", () => {
       const newModules = {
         ...SAMPLE_MODULES,
-        "src/App.js": { content: "Hey", isBinary: false }
+        "src/App.js": { content: "Hey", isBinary: false },
       };
 
       expect(getDelta(SAMPLE_TREE, newModules)).toEqual({
         added: [],
         deleted: [],
-        modified: ["src/App.js"]
+        modified: ["src/App.js"],
       });
     });
 
     it("detects deleted files", () => {
       const newModules = {
         ...SAMPLE_MODULES,
-        "src/App.js": null
+        "src/App.js": null,
       };
 
       expect(getDelta(SAMPLE_TREE, newModules)).toEqual({
         added: [],
         deleted: ["src/App.js"],
-        modified: []
+        modified: [],
       });
     });
   });

@@ -15,7 +15,7 @@ export function getDirectoryPaths(directories: ISandboxDirectory[]) {
       const dirPath = prevPath + "/" + dir.title;
       paths[dirPath] = dir;
       addDirectory(dirPath, dir.shortid);
-    })
+    });
   };
 
   directories

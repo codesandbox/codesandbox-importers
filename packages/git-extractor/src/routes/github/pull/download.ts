@@ -4,7 +4,11 @@ import { isText } from "codesandbox-import-utils/lib/is-text";
 import { INormalizedModules } from "codesandbox-import-util-types";
 
 import { IGitInfo } from "../push/index";
-import { downloadZip, getLatestCommitShaOfFile, getDefaultBranch } from "../api";
+import {
+  downloadZip,
+  getLatestCommitShaOfFile,
+  getDefaultBranch,
+} from "../api";
 
 const getFolderName = (zip: JSZip) =>
   `${Object.keys(zip.files)[0].split("/")[0]}/`;
@@ -13,10 +17,14 @@ const getFolderName = (zip: JSZip) =>
  * We use https://rawgit.com/ as urls, since they change the content-type corresponding
  * to the file. Github always uses text/plain
  */
-export const rawGitUrl = (gitInfo: IGitInfo, filePath: string, commitSha?: string) => {
-  let url = `https://rawcdn.githack.com/${gitInfo.username}/${
-    gitInfo.repo
-    }/${commitSha || gitInfo.branch}/`;
+export const rawGitUrl = (
+  gitInfo: IGitInfo,
+  filePath: string,
+  commitSha?: string
+) => {
+  let url = `https://rawcdn.githack.com/${gitInfo.username}/${gitInfo.repo}/${
+    commitSha || gitInfo.branch
+  }/`;
   if (gitInfo.path) {
     url += gitInfo.path + "/";
   }
@@ -41,7 +49,7 @@ export async function downloadRepository(
   const result: INormalizedModules = {};
 
   await Promise.all(
-    Object.keys(zip.files).map(async path => {
+    Object.keys(zip.files).map(async (path) => {
       if (path.startsWith(folderName)) {
         const relativePath = path.replace(folderName, "");
 
@@ -56,24 +64,33 @@ export async function downloadRepository(
               result[relativePath] = {
                 binaryContent: bufferContents.toString("base64"),
                 content: "",
-                isBinary: true
+                isBinary: true,
               };
             } else {
-              let branch = gitInfo.branch
+              let branch = gitInfo.branch;
               if (!branch) {
-                branch = await getDefaultBranch(gitInfo.username, gitInfo.repo, userToken)
+                branch = await getDefaultBranch(
+                  gitInfo.username,
+                  gitInfo.repo,
+                  userToken
+                );
               }
-              const fileSha = await getLatestCommitShaOfFile(gitInfo.username, gitInfo.repo, gitInfo.branch, relativePath)
+              const fileSha = await getLatestCommitShaOfFile(
+                gitInfo.username,
+                gitInfo.repo,
+                gitInfo.branch,
+                relativePath
+              );
               result[relativePath] = {
                 content: rawGitUrl(gitInfo, relativePath, fileSha),
-                isBinary: true
+                isBinary: true,
               };
             }
           } else {
             const contents = await file.async("text");
             result[relativePath] = {
               content: contents || "",
-              isBinary: false
+              isBinary: false,
             };
           }
         }

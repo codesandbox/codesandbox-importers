@@ -13,9 +13,13 @@ describe("denormalize", () => {
 
   it("can denormalize", () => {
     const paths = {
-      "/index.js": { content: "hello", isBinary: false, },
+      "/index.js": { content: "hello", isBinary: false },
       "/world/index.js": { content: "hello2", isBinary: false },
-      "/world/hello/index.js": { content: "hello3", isBinary: false, uploadId: "123" },
+      "/world/hello/index.js": {
+        content: "hello3",
+        isBinary: false,
+        uploadId: "123",
+      },
     };
 
     expect(denormalize(paths)).toMatchSnapshot();
@@ -47,7 +51,10 @@ describe("denormalize", () => {
       "index.js": { content: "hello", isBinary: false },
       "world/index.js": { content: "hello2", isBinary: false },
       "world/hello/index.js": { content: "hello3", isBinary: false },
-      ".github/ISSUE_TEMPLATES/template.md": { content: "hello4", isBinary: false },
+      ".github/ISSUE_TEMPLATES/template.md": {
+        content: "hello4",
+        isBinary: false,
+      },
       ".github/workflows/config.yml": { content: "hello5", isBinary: false },
     };
 
