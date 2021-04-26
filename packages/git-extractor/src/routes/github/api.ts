@@ -213,13 +213,47 @@ export async function getContent(url: string, token: string) {
   return response.data;
 }
 
+type RepoInfoCache = {
+  etag: string;
+  response: IRepoResponse;
+};
+const repoInfoCache = new LRU<string, RepoInfoCache>({
+  max: 50 * 1024 * 1024, // 50 MB
+});
+
 export async function getRepo(username: string, repo: string, token?: string) {
   const url = buildRepoApiUrl(username, repo);
+  const cacheIdentifier = [username, repo, token].filter(Boolean).join("::");
+  let etagCache: RepoInfoCache | undefined = repoInfoCache.get(cacheIdentifier);
 
-  const response: { data: IRepoResponse } = await requestAxios("Get Repo", {
+  const config = {
     url,
     ...createAxiosRequestConfig(token),
-  });
+  };
+
+  if (etagCache) {
+    config.headers["If-None-Match"] = etagCache.etag;
+    config.validateStatus = function (status: number) {
+      // Axios sees 304 (Not Modified) as an error. We don't want that.
+      return status < 400; // Reject only if the status code is greater than or equal to 400
+    };
+  }
+
+  const response: {
+    data: IRepoResponse;
+    status: number;
+    headers: any;
+  } = await requestAxios("Get Repo", config);
+
+  if (response.status === 304) {
+    return etagCache!.response;
+  } else {
+    const etag = response.headers.etag;
+    repoInfoCache.set(cacheIdentifier, {
+      etag,
+      response: response.data,
+    });
+  }
 
   return response.data;
 }
