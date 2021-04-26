@@ -26,7 +26,11 @@ export const info = async (ctx: Context, next: () => Promise<any>) => {
   let branch = ctx.params.branch;
 
   if (!branch) {
-    branch = await api.getDefaultBranch(ctx.params.username, ctx.params.repo, userToken)
+    branch = await api.getDefaultBranch(
+      ctx.params.username,
+      ctx.params.repo,
+      userToken
+    );
   }
 
   const response = await api.fetchRepoInfo(
@@ -117,13 +121,12 @@ export const data = async (ctx: Context, next: () => Promise<any>) => {
 
   let isPrivate = false;
 
-
   if (userToken) {
     isPrivate = await api.isRepoPrivate(username, repo, userToken);
   }
 
   if (!branch) {
-    branch = await api.getDefaultBranch(username, repo, userToken)
+    branch = await api.getDefaultBranch(username, repo, userToken);
   }
 
   const downloadedFiles = await downloadRepository(
@@ -178,20 +181,29 @@ export const compare = async (ctx: Context) => {
   if (includeContents) {
     const files = await Promise.all(
       comparison.files.map(
-        ({ additions, changes, contents_url, deletions, filename, status, patch, sha }) => {
+        ({
+          additions,
+          changes,
+          contents_url,
+          deletions,
+          filename,
+          status,
+          patch,
+          sha,
+        }) => {
           return api.getContent(contents_url, token).then((content) => {
             const data = content.content;
             const buffer = Buffer.from(data, content.encoding);
 
-            let stringContent: string
+            let stringContent: string;
 
             // If patch it is a text file, if not it is a binary
             if (patch) {
-              stringContent = buffer.toString("utf-8")
+              stringContent = buffer.toString("utf-8");
             } else {
               // When we include binary files, we include them as base64. This will allow a "merge commit", related to
               // a PR being out of sync with its source branch (ex. "master"), to add binary files
-              stringContent = buffer.toString("base64")
+              stringContent = buffer.toString("base64");
             }
 
             return {
@@ -201,7 +213,7 @@ export const compare = async (ctx: Context) => {
               filename,
               status,
               content: stringContent,
-              isBinary: !patch
+              isBinary: !patch,
             };
           });
         }
