@@ -317,7 +317,7 @@ export async function getLatestCommitShaOfFile(
   const response: { data: { sha: string }[] } = await requestAxios(
     "Get Commits of File",
     {
-      url,
+      url: encodeURI(url),
       ...createAxiosRequestConfig(token),
     }
   );
