@@ -67,14 +67,6 @@ export async function downloadRepository(
                 isBinary: true,
               };
             } else {
-              let branch = gitInfo.branch;
-              if (!branch) {
-                branch = await getDefaultBranch(
-                  gitInfo.username,
-                  gitInfo.repo,
-                  userToken
-                );
-              }
               const fileSha = await getLatestCommitShaOfFile(
                 gitInfo.username,
                 gitInfo.repo,

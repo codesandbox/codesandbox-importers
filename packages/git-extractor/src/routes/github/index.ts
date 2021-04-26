@@ -5,7 +5,7 @@ import { Context } from "koa";
 
 import * as api from "./api";
 import { getComparison } from "./api";
-import { downloadRepository, rawGitUrl } from "./pull/download";
+import { downloadRepository } from "./pull/download";
 import * as push from "./push";
 import { IChanges, IGitInfo } from "./push";
 
@@ -101,7 +101,7 @@ export const getRights = async (ctx: Context) => {
 export const data = async (ctx: Context, next: () => Promise<any>) => {
   // We get branch, etc from here because there could be slashes in a branch name,
   // we can retrieve if this is the case from this method
-  let { username, repo, branch, commitSha, currentUsername } = ctx.params;
+  let { username, repo, branch, commitSha } = ctx.params;
   const userToken = getUserToken(ctx);
 
   Sentry.setContext("repo", {
