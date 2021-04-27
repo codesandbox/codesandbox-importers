@@ -193,7 +193,7 @@ export async function getComparison(
   const response: { data: ICompareResponse } = await requestAxios(
     "Get Comparison",
     {
-      url,
+      url: encodeURI(url),
       ...createAxiosRequestConfig(token),
     }
   );
@@ -205,7 +205,7 @@ export async function getContent(url: string, token: string) {
   const response: { data: IContentResponse } = await requestAxios(
     "Get Content",
     {
-      url,
+      url: encodeURI(url),
       ...createAxiosRequestConfig(token),
     }
   );
@@ -227,7 +227,7 @@ export async function getRepo(username: string, repo: string, token?: string) {
   let etagCache: RepoInfoCache | undefined = repoInfoCache.get(cacheIdentifier);
 
   const config = {
-    url,
+    url: encodeURI(url),
     ...createAxiosRequestConfig(token),
   };
 
@@ -270,7 +270,7 @@ export async function getTreeWithDeletedFiles(
     const url = buildTreesApiUrl(username, repo, sha);
 
     const response: { data: ITreeResponse } = await requestAxios("Get Tree", {
-      url,
+      url: encodeURI(url),
       ...createAxiosRequestConfig(token),
     });
 
@@ -332,7 +332,7 @@ export async function getCommitTreeSha(
   const response: { data: ICommitResponse } = await requestAxios(
     "Get CommitTreeSha",
     {
-      url,
+      url: encodeURI(url),
       ...createAxiosRequestConfig(token),
     }
   );
@@ -395,7 +395,7 @@ export async function fetchRights(
     const response: { data: RightsResponse } = await requestAxios(
       "Get Rights",
       {
-        url,
+        url: encodeURI(url),
         ...createAxiosRequestConfig(token),
       }
     );
@@ -455,12 +455,11 @@ export async function createPr(
 ): Promise<IPrResponse> {
   const { data } = await requestAxios("Create PR", {
     method: "post",
-    url: `${buildRepoApiUrl(base.username, base.repo)}/pulls`,
+    url: encodeURI(`${buildRepoApiUrl(base.username, base.repo)}/pulls`),
     data: {
       base: base.branch,
-      head: `${base.username === head.username ? "" : head.username + ":"}${
-        head.branch
-      }`,
+      head: `${base.username === head.username ? "" : head.username + ":"}${head.branch
+        }`,
       title,
       body,
       maintainer_can_modify: true,
@@ -496,7 +495,7 @@ export async function createBlob(
 ) {
   const response: { data: IBlobResponse } = await requestAxios("Create Blob", {
     method: "post",
-    url: `${buildRepoApiUrl(username, repo)}/git/blobs`,
+    url: encodeURI(`${buildRepoApiUrl(username, repo)}/git/blobs`),
     data: { content: content, encoding },
     ...createAxiosRequestConfig(token),
   });
@@ -521,7 +520,7 @@ export async function createTree(
     "Create Tree",
     {
       method: "post",
-      url: `${buildRepoApiUrl(username, repo)}/git/trees`,
+      url: encodeURI(`${buildRepoApiUrl(username, repo)}/git/trees`),
       data: { base_tree: baseTreeSha, tree },
       ...createAxiosRequestConfig(token),
     }
@@ -561,7 +560,7 @@ export async function createCommit(
     "Create Commit",
     {
       method: "post",
-      url: `${buildRepoApiUrl(username, repo)}/git/commits`,
+      url: encodeURI(`${buildRepoApiUrl(username, repo)}/git/commits`),
       data: { tree: treeSha, message, parents: parentCommitShas },
       ...createAxiosRequestConfig(token),
     }
@@ -586,7 +585,7 @@ export async function updateReference(
     "Update Reference",
     {
       method: "patch",
-      url: `${buildRepoApiUrl(username, repo)}/git/refs/heads/${branch}`,
+      url: encodeURI(`${buildRepoApiUrl(username, repo)}/git/refs/heads/${branch}`),
       data: { sha: commitSha, force: true },
       ...createAxiosRequestConfig(token),
     }
@@ -616,7 +615,7 @@ export async function createReference(
     data: ICreateReferenceResponse;
   } = await requestAxios("Create Reference", {
     method: "post",
-    url: `${buildRepoApiUrl(username, repo)}/git/refs`,
+    url: encodeURI(`${buildRepoApiUrl(username, repo)}/git/refs`),
     data: { ref: `refs/heads/${branch}`, sha: refSha },
     ...createAxiosRequestConfig(token),
   });
@@ -641,7 +640,7 @@ export async function createFork(
     "Create Fork",
     {
       method: "post",
-      url: `${buildRepoApiUrl(username, repo)}/forks`,
+      url: encodeURI(`${buildRepoApiUrl(username, repo)}/forks`),
       data: {},
       ...createAxiosRequestConfig(token),
     }
@@ -691,7 +690,7 @@ export async function createRepo(
     "Create Repo",
     {
       method: "post",
-      url: `${API_URL}/user/repos`,
+      url: encodeURI(`${API_URL}/user/repos`),
       data: {
         name: repo,
         description: "Created with CodeSandbox",
@@ -717,7 +716,7 @@ export async function doesRepoExist(
   try {
     await requestAxios("Repo Exists", {
       method: "get",
-      url: buildRepoApiUrl(username, repo),
+      url: encodeURI(buildRepoApiUrl(username, repo)),
       ...createAxiosRequestConfig(userToken),
     });
 
@@ -787,7 +786,7 @@ export async function fetchRepoInfo(
 
       const defaultConfig = createAxiosRequestConfig(userToken);
       const response = await requestAxios("Get Repo Info", {
-        url,
+        url: encodeURI(url),
         validateStatus: function (status) {
           // Axios sees 304 (Not Modified) as an error. We don't want that.
           return status < 400; // Reject only if the status code is greater than or equal to 400
@@ -884,7 +883,7 @@ export async function fetchPullInfo(
 
   try {
     const response = await requestAxios("Get Pull Info", {
-      url,
+      url: encodeURI(url),
       ...createAxiosRequestConfig(userToken),
     });
 
@@ -921,7 +920,7 @@ export async function downloadZip(
   userToken?: string
 ) {
   const repoUrl = buildRepoApiUrl(gitInfo.username, gitInfo.repo);
-  const url = `${repoUrl}/zipball/${commitSha}`;
+  const url = encodeURI(`${repoUrl}/zipball/${commitSha}`);
   const Accept = "application/vnd.github.v3+json";
   const buffer: Buffer = await fetch(url, {
     headers: {
