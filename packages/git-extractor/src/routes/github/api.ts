@@ -858,7 +858,7 @@ export async function fetchRepoInfo(
       e.message = NOT_FOUND_MESSAGE;
     }
 
-    if (e.response && e.response.status === 429) {
+    if (e.response && e.response.status === 403) {
       const meter = appsignal.metrics();
       meter.incrementCounter("github_rate_limit", 1);
     }
