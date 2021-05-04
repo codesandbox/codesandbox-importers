@@ -458,8 +458,9 @@ export async function createPr(
     url: encodeURI(`${buildRepoApiUrl(base.username, base.repo)}/pulls`),
     data: {
       base: base.branch,
-      head: `${base.username === head.username ? "" : head.username + ":"}${head.branch
-        }`,
+      head: `${base.username === head.username ? "" : head.username + ":"}${
+        head.branch
+      }`,
       title,
       body,
       maintainer_can_modify: true,
@@ -585,7 +586,9 @@ export async function updateReference(
     "Update Reference",
     {
       method: "patch",
-      url: encodeURI(`${buildRepoApiUrl(username, repo)}/git/refs/heads/${branch}`),
+      url: encodeURI(
+        `${buildRepoApiUrl(username, repo)}/git/refs/heads/${branch}`
+      ),
       data: { sha: commitSha, force: true },
       ...createAxiosRequestConfig(token),
     }
@@ -858,7 +861,7 @@ export async function fetchRepoInfo(
       e.message = NOT_FOUND_MESSAGE;
     }
 
-    if (e.response && e.response.status === 403) {
+    if (e.response && e.response.status === 403 && userToken == null) {
       const meter = appsignal.metrics();
       meter.incrementCounter("github_rate_limit", 1);
     }
