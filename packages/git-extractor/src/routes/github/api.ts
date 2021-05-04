@@ -45,6 +45,18 @@ function requestAxios(
   return tracer.withSpan(span, (span) => {
     span.setCategory("request-api.github");
     span.setName(requestName);
+    const meter = appsignal.metrics();
+
+    const snakeCaseRequestName = requestName.toLowerCase().replace(/\s/g, "_");
+    meter.incrementCounter(`github_request_${snakeCaseRequestName}`, 1);
+
+    if (requestObject.auth) {
+      // In the case we're using not the user token, let's log that as well!
+      meter.incrementCounter(
+        `github_unauthorized_request_${snakeCaseRequestName}`,
+        1
+      );
+    }
 
     return axios(requestObject)
       .then((res) => {
