@@ -117,6 +117,10 @@ export function getTemplate(
   if (totalDependencies.indexOf("ember-cli") > -1) {
     return "ember";
   }
+  
+  if (totalDependencies.indexOf("@feathersjs/feathers") > -1) {
+    return "node";
+  }
 
   if (totalDependencies.indexOf("sapper") > -1) {
     return "sapper";
