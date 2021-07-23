@@ -45,6 +45,18 @@ function requestAxios(
   return tracer.withSpan(span, (span) => {
     span.setCategory("request-api.github");
     span.setName(requestName);
+    const meter = appsignal.metrics();
+
+    const snakeCaseRequestName = requestName.toLowerCase().replace(/\s/g, "_");
+    meter.incrementCounter(`github_request_${snakeCaseRequestName}`, 1);
+
+    if (requestObject.auth) {
+      // In the case we're using not the user token, let's log that as well!
+      meter.incrementCounter(
+        `github_unauthorized_request_${snakeCaseRequestName}`,
+        1
+      );
+    }
 
     return axios(requestObject)
       .then((res) => {
@@ -193,7 +205,7 @@ export async function getComparison(
   const response: { data: ICompareResponse } = await requestAxios(
     "Get Comparison",
     {
-      url,
+      url: encodeURI(url),
       ...createAxiosRequestConfig(token),
     }
   );
@@ -205,7 +217,7 @@ export async function getContent(url: string, token: string) {
   const response: { data: IContentResponse } = await requestAxios(
     "Get Content",
     {
-      url,
+      url: encodeURI(url),
       ...createAxiosRequestConfig(token),
     }
   );
@@ -213,13 +225,47 @@ export async function getContent(url: string, token: string) {
   return response.data;
 }
 
+type RepoInfoCache = {
+  etag: string;
+  response: IRepoResponse;
+};
+const repoInfoCache = new LRU<string, RepoInfoCache>({
+  max: 50 * 1024 * 1024, // 50 MB
+});
+
 export async function getRepo(username: string, repo: string, token?: string) {
   const url = buildRepoApiUrl(username, repo);
+  const cacheIdentifier = [username, repo, token].filter(Boolean).join("::");
+  let etagCache: RepoInfoCache | undefined = repoInfoCache.get(cacheIdentifier);
 
-  const response: { data: IRepoResponse } = await requestAxios("Get Repo", {
-    url,
+  const config = {
+    url: encodeURI(url),
     ...createAxiosRequestConfig(token),
-  });
+  };
+
+  if (etagCache) {
+    config.headers["If-None-Match"] = etagCache.etag;
+    config.validateStatus = function (status: number) {
+      // Axios sees 304 (Not Modified) as an error. We don't want that.
+      return status < 400; // Reject only if the status code is greater than or equal to 400
+    };
+  }
+
+  const response: {
+    data: IRepoResponse;
+    status: number;
+    headers: any;
+  } = await requestAxios("Get Repo", config);
+
+  if (response.status === 304) {
+    return etagCache!.response;
+  } else {
+    const etag = response.headers.etag;
+    repoInfoCache.set(cacheIdentifier, {
+      etag,
+      response: response.data,
+    });
+  }
 
   return response.data;
 }
@@ -236,7 +282,7 @@ export async function getTreeWithDeletedFiles(
     const url = buildTreesApiUrl(username, repo, sha);
 
     const response: { data: ITreeResponse } = await requestAxios("Get Tree", {
-      url,
+      url: encodeURI(url),
       ...createAxiosRequestConfig(token),
     });
 
@@ -298,7 +344,7 @@ export async function getCommitTreeSha(
   const response: { data: ICommitResponse } = await requestAxios(
     "Get CommitTreeSha",
     {
-      url,
+      url: encodeURI(url),
       ...createAxiosRequestConfig(token),
     }
   );
@@ -317,7 +363,7 @@ export async function getLatestCommitShaOfFile(
   const response: { data: { sha: string }[] } = await requestAxios(
     "Get Commits of File",
     {
-      url,
+      url: encodeURI(url),
       ...createAxiosRequestConfig(token),
     }
   );
@@ -361,7 +407,7 @@ export async function fetchRights(
     const response: { data: RightsResponse } = await requestAxios(
       "Get Rights",
       {
-        url,
+        url: encodeURI(url),
         ...createAxiosRequestConfig(token),
       }
     );
@@ -421,7 +467,7 @@ export async function createPr(
 ): Promise<IPrResponse> {
   const { data } = await requestAxios("Create PR", {
     method: "post",
-    url: `${buildRepoApiUrl(base.username, base.repo)}/pulls`,
+    url: encodeURI(`${buildRepoApiUrl(base.username, base.repo)}/pulls`),
     data: {
       base: base.branch,
       head: `${base.username === head.username ? "" : head.username + ":"}${
@@ -462,7 +508,7 @@ export async function createBlob(
 ) {
   const response: { data: IBlobResponse } = await requestAxios("Create Blob", {
     method: "post",
-    url: `${buildRepoApiUrl(username, repo)}/git/blobs`,
+    url: encodeURI(`${buildRepoApiUrl(username, repo)}/git/blobs`),
     data: { content: content, encoding },
     ...createAxiosRequestConfig(token),
   });
@@ -487,7 +533,7 @@ export async function createTree(
     "Create Tree",
     {
       method: "post",
-      url: `${buildRepoApiUrl(username, repo)}/git/trees`,
+      url: encodeURI(`${buildRepoApiUrl(username, repo)}/git/trees`),
       data: { base_tree: baseTreeSha, tree },
       ...createAxiosRequestConfig(token),
     }
@@ -527,7 +573,7 @@ export async function createCommit(
     "Create Commit",
     {
       method: "post",
-      url: `${buildRepoApiUrl(username, repo)}/git/commits`,
+      url: encodeURI(`${buildRepoApiUrl(username, repo)}/git/commits`),
       data: { tree: treeSha, message, parents: parentCommitShas },
       ...createAxiosRequestConfig(token),
     }
@@ -552,7 +598,9 @@ export async function updateReference(
     "Update Reference",
     {
       method: "patch",
-      url: `${buildRepoApiUrl(username, repo)}/git/refs/heads/${branch}`,
+      url: encodeURI(
+        `${buildRepoApiUrl(username, repo)}/git/refs/heads/${branch}`
+      ),
       data: { sha: commitSha, force: true },
       ...createAxiosRequestConfig(token),
     }
@@ -582,7 +630,7 @@ export async function createReference(
     data: ICreateReferenceResponse;
   } = await requestAxios("Create Reference", {
     method: "post",
-    url: `${buildRepoApiUrl(username, repo)}/git/refs`,
+    url: encodeURI(`${buildRepoApiUrl(username, repo)}/git/refs`),
     data: { ref: `refs/heads/${branch}`, sha: refSha },
     ...createAxiosRequestConfig(token),
   });
@@ -607,7 +655,7 @@ export async function createFork(
     "Create Fork",
     {
       method: "post",
-      url: `${buildRepoApiUrl(username, repo)}/forks`,
+      url: encodeURI(`${buildRepoApiUrl(username, repo)}/forks`),
       data: {},
       ...createAxiosRequestConfig(token),
     }
@@ -642,11 +690,22 @@ export async function createRepo(
   token: string,
   privateRepo: boolean = false
 ) {
+  const repoExists = await doesRepoExist(username, repo, token);
+  if (repoExists) {
+    const error = new Error(
+      `The repository ${username}/${repo} already exists.`
+    );
+    // @ts-ignore
+    error.status = 422;
+
+    throw error;
+  }
+
   const response: { data: ICreateRepoResponse } = await requestAxios(
     "Create Repo",
     {
       method: "post",
-      url: `${API_URL}/user/repos`,
+      url: encodeURI(`${API_URL}/user/repos`),
       data: {
         name: repo,
         description: "Created with CodeSandbox",
@@ -664,12 +723,16 @@ export async function createRepo(
 /**
  * Check if repository exists
  */
-export async function doesRepoExist(username: string, repo: string) {
+export async function doesRepoExist(
+  username: string,
+  repo: string,
+  userToken?: string
+) {
   try {
-    const response = await requestAxios("Repo Exists", {
+    await requestAxios("Repo Exists", {
       method: "get",
-      url: buildRepoApiUrl(username, repo),
-      ...createAxiosRequestConfig(),
+      url: encodeURI(buildRepoApiUrl(username, repo)),
+      ...createAxiosRequestConfig(userToken),
     });
 
     return true;
@@ -713,7 +776,7 @@ export async function fetchRepoInfo(
   skipCache: boolean = false,
   userToken?: string
 ): Promise<CommitResponse> {
-  let span: import("@appsignal/nodejs").Span | undefined;
+  let span: import("@appsignal/types").NodeSpan | undefined;
   try {
     const cacheId = username + repo + branch + path;
     // We cache the latest retrieved sha for a limited time, so we don't spam the
@@ -738,7 +801,7 @@ export async function fetchRepoInfo(
 
       const defaultConfig = createAxiosRequestConfig(userToken);
       const response = await requestAxios("Get Repo Info", {
-        url,
+        url: encodeURI(url),
         validateStatus: function (status) {
           // Axios sees 304 (Not Modified) as an error. We don't want that.
           return status < 400; // Reject only if the status code is greater than or equal to 400
@@ -750,12 +813,17 @@ export async function fetchRepoInfo(
         },
       });
 
-      span.setSampleData("cache", {
+      span.setSampleData("custom_data", {
         etagCacheUsed: response.status === 304 && etagCacheResponse,
       });
+      const meter = appsignal.metrics();
       if (response.status === 304 && etagCacheResponse) {
+        meter.incrementCounter("github_cache_hit", 1);
+
         latestSha = etagCacheResponse.sha;
       } else {
+        meter.incrementCounter("github_cache_miss", 1);
+
         latestSha = response.data.sha;
 
         const etag = response.headers.etag;
@@ -804,6 +872,12 @@ export async function fetchRepoInfo(
 
       e.message = NOT_FOUND_MESSAGE;
     }
+
+    if (e.response && e.response.status === 403 && userToken == null) {
+      const meter = appsignal.metrics();
+      meter.incrementCounter("github_rate_limit", 1);
+    }
+
     Sentry.captureException(e);
 
     throw e;
@@ -824,7 +898,7 @@ export async function fetchPullInfo(
 
   try {
     const response = await requestAxios("Get Pull Info", {
-      url,
+      url: encodeURI(url),
       ...createAxiosRequestConfig(userToken),
     });
 
@@ -861,7 +935,7 @@ export async function downloadZip(
   userToken?: string
 ) {
   const repoUrl = buildRepoApiUrl(gitInfo.username, gitInfo.repo);
-  const url = `${repoUrl}/zipball/${commitSha}`;
+  const url = encodeURI(`${repoUrl}/zipball/${commitSha}`);
   const Accept = "application/vnd.github.v3+json";
   const buffer: Buffer = await fetch(url, {
     headers: {
@@ -875,7 +949,22 @@ export async function downloadZip(
       throw new Error("This repo is too big to import");
     }
 
-    return res.buffer();
+    if (!res.ok) {
+      return res.text().then((text) => {
+        const error = new Error(
+          `Could not import repo from GitHub, error from GitHub. Status code: ${res.status}, error: ${text}`
+        );
+
+        // Forward the error status from GitHub, eg. if GH returns 404 we return that as well.
+        // This is handled in error-handler.ts middleware.
+        // @ts-ignore
+        error.status = res.status;
+
+        throw error;
+      });
+    } else {
+      return res.buffer();
+    }
   });
 
   const loadedZip = await zip.loadAsync(buffer);

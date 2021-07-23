@@ -23,7 +23,7 @@ export default function getDelta(
   const modified: string[] = [];
   const deleted: string[] = [];
 
-  tree.forEach(file => {
+  tree.forEach((file) => {
     const equivalentModule = modules[file.path];
 
     if (!equivalentModule) {
@@ -39,8 +39,8 @@ export default function getDelta(
     }
   });
 
-  Object.keys(modules).forEach(path => {
-    if (!tree.find(t => t.path === path)) {
+  Object.keys(modules).forEach((path) => {
+    if (!tree.find((t) => t.path === path)) {
       added.push(path);
     }
   });

@@ -4,11 +4,12 @@ it("can infer title and description", async () => {
   const payload = [
     {
       path: "package.json",
-      content: {
+      content: JSON.stringify({
         title: "test",
         description: "test description",
         dependencies: {},
-      },
+      }),
+      isBinary: false,
     },
   ];
 
@@ -22,11 +23,12 @@ it("works with leading slashes", async () => {
   const payload = [
     {
       path: "/package.json",
-      content: {
+      content: JSON.stringify({
         title: "test",
         description: "test description",
         dependencies: {},
-      },
+      }),
+      isBinary: false,
     },
   ];
 

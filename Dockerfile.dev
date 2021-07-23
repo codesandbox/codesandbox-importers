@@ -3,5 +3,8 @@ MAINTAINER Ives van Hoorne
 
 ADD .git /workspace/.git
 
+RUN apt-get update
+RUN apt-get install -y zsh vim
+
 WORKDIR /workspace
 RUN git reset --hard

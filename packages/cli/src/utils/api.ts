@@ -12,7 +12,7 @@ import {
 } from "./url";
 
 // tslint:disable-next-line:no-var-requires
-const Datauri = require("datauri");
+const DatauriParser = require("datauri/parser");
 
 const callApi = async (options: AxiosRequestConfig) => {
   try {
@@ -75,10 +75,10 @@ export async function verifyUser(token: string) {
 }
 
 export async function createUpload(filename: string, buffer: Buffer) {
-  const datauri = new Datauri();
+  const parser = new DatauriParser();
 
-  datauri.format(filename, buffer);
-  const uri = datauri.content;
+  parser.format(filename, buffer);
+  const uri = parser.content;
 
   const token = await getToken();
 
