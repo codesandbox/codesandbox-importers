@@ -92,9 +92,11 @@ export async function downloadRepository(
    * request because when the first 403 rate limit comes through, it rejects everything, and
    * it wastes even more rate limit tries.
    */
-  const canRequest = await checkRemainingRateLimit(requestsToMake);
-  if (!canRequest) {
-    throw new Error("Can't make axios requests, not enough rate limit remaining")
+  if (!userToken) {
+    const canRequest = await checkRemainingRateLimit(requestsToMake);
+    if (!canRequest) {
+      throw new Error("Can't make axios requests, not enough rate limit remaining")
+    }
   }
 
   // Then we can request the SHAs of binary files if there is enough rate limit left.
@@ -104,6 +106,7 @@ export async function downloadRepository(
       gitInfo.repo,
       gitInfo.branch,
       relativePath,
+      userToken
     );
 
     result[relativePath] = {
