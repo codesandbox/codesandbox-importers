@@ -65,6 +65,7 @@ console.log(
 );
 
 app.on("error", (err, ctx) => {
+  console.log("APP ERROR!")
   const span = appsignal.tracer().currentSpan();
   if (span) {
     span.addError(err);

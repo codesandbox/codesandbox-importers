@@ -15,6 +15,7 @@ import {
 const DatauriParser = require("datauri/parser");
 
 const callApi = async (options: AxiosRequestConfig) => {
+  console.log("CALLING API")
   try {
     const response = await axios(options);
     return response.data.data;
