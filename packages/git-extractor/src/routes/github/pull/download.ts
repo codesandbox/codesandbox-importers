@@ -1,5 +1,4 @@
 import * as JSZip from "jszip";
-import { CancelToken } from "axios";
 
 import { isText } from "codesandbox-import-utils/lib/is-text";
 import { INormalizedModules } from "codesandbox-import-util-types";
@@ -38,12 +37,9 @@ export async function downloadRepository(
   commitSha: string,
   isPrivate: boolean,
   userToken?: string,
-  axiosCancelToken?: CancelToken,
 ): Promise<INormalizedModules> {
   const zip = await downloadZip(gitInfo, commitSha, userToken);
   let folderName = getFolderName(zip);
-
-  console.log("FOLDER NAME IS ", folderName)
 
   if (gitInfo.path) {
     folderName += gitInfo.path + "/";
@@ -51,19 +47,15 @@ export async function downloadRepository(
 
   const result: INormalizedModules = {};
 
-  //console.log(zip.files)
+  const pathArray = <string[]>[];
 
-  const shaArray = <string[]>[];
-
-  // First process non-binary files
+  // First process non-binary files, and save paths of binary files to request
   await Promise.all(
     Object.keys(zip.files).map(async (path) => {
       if (path.startsWith(folderName)) {
         const relativePath = path.replace(folderName, "");
 
         const file = zip.files[path];
-
-        console.log(file.name)
 
         if (!file.dir) {
           const bufferContents = await file.async("nodebuffer");
@@ -77,19 +69,7 @@ export async function downloadRepository(
                 isBinary: true,
               };
             } else {
-              console.log(`FILE ${file} IS NOT TEXT AND IS NOT PRIVATE - GETTING LATEST COMMIT SHA OF FILE`)
-              shaArray.push(relativePath)
-              // const fileSha = await getLatestCommitShaOfFile(
-              //   gitInfo.username,
-              //   gitInfo.repo,
-              //   gitInfo.branch,
-              //   relativePath
-              // );
-              // console.log("FILE SHA IS: ", fileSha)
-              // result[relativePath] = {
-              //   content: rawGitUrl(gitInfo, relativePath, fileSha),
-              //   isBinary: true,
-              // };
+              pathArray.push(relativePath)
             }
           } else {
             const contents = await file.async("text");
@@ -103,39 +83,33 @@ export async function downloadRepository(
     })
   );
 
-  //console.log("result so far", result)
 
-  console.log("shaArray", shaArray)
+  const requestsToMake = pathArray.length
 
-  const requestsToMake = shaArray.length
-
+  /**
+   * Check if there is enough of our CodeSandbox Github token rate limit left to be able to
+   * request all the files we need to. If there isn't, then we shouldn't make the Promise.all
+   * request because when the first 403 rate limit comes through, it rejects everything, and
+   * it wastes even more rate limit tries.
+   */
   const canRequest = await checkRemainingRateLimit(requestsToMake);
   if (!canRequest) {
-    console.log("Can't make axios requests, not enough rate limit remaining")
     throw new Error("Can't make axios requests, not enough rate limit remaining")
   }
 
-  console.log("got past requests")
-
   // Then we can request the SHAs of binary files if there is enough rate limit left.
-  await Promise.all(shaArray.map(async (relativePath) => {
-    console.log("getting commit for: ", relativePath)
+  await Promise.all(pathArray.map(async (relativePath) => {
     const fileSha = await getLatestCommitShaOfFile(
       gitInfo.username,
       gitInfo.repo,
       gitInfo.branch,
       relativePath,
-      undefined,
-      axiosCancelToken
     );
-
-    console.log("FILE SHA IS: ", fileSha)
 
     result[relativePath] = {
       content: rawGitUrl(gitInfo, relativePath, fileSha),
       isBinary: true,
     };
-
   }));
 
   return result;

@@ -2,16 +2,12 @@ import * as Sentry from "@sentry/node";
 import { IModule, INormalizedModules } from "codesandbox-import-util-types";
 import createSandbox from "codesandbox-import-utils/lib/create-sandbox";
 import { Context } from "koa";
-import { emit } from "process";
-import axios from "axios";
 
 import * as api from "./api";
 import { getComparison } from "./api";
 import { downloadRepository } from "./pull/download";
 import * as push from "./push";
 import { IChanges, IGitInfo } from "./push";
-
-const source = axios.CancelToken.source();
 
 const getUserToken = (ctx: Context) => {
   const header = ctx.header.authorization;
@@ -29,8 +25,6 @@ export const info = async (ctx: Context, next: () => Promise<any>) => {
   const userToken = getUserToken(ctx);
   let branch = ctx.params.branch;
 
-  console.log("get rights user token is: ", userToken)
-
   if (!branch) {
     branch = await api.getDefaultBranch(
       ctx.params.username,
@@ -38,8 +32,6 @@ export const info = async (ctx: Context, next: () => Promise<any>) => {
       userToken
     );
   }
-
-  console.log("FETCHIN REPO INFO!!!!!")
 
   const response = await api.fetchRepoInfo(
     ctx.params.username,
@@ -49,8 +41,6 @@ export const info = async (ctx: Context, next: () => Promise<any>) => {
     false,
     userToken
   );
-
-  console.log("DONE FETCHIN REPO INFO!!!!")
 
   ctx.body = response;
 };
@@ -91,7 +81,6 @@ export const pullInfo = async (ctx: Context, next: () => Promise<any>) => {
 
 export const getRights = async (ctx: Context) => {
   const userToken = getUserToken(ctx);
-  console.log("get rights user token is: ", userToken)
 
   const rights = await api.fetchRights(
     ctx.params.username,
@@ -111,7 +100,6 @@ export const getRights = async (ctx: Context) => {
  */
 export const data = async (ctx: Context, next: () => Promise<any>) => {
   try {
-
     // We get branch, etc from here because there could be slashes in a branch name,
     // we can retrieve if this is the case from this method
     let { username, repo, branch, commitSha } = ctx.params;
@@ -125,8 +113,6 @@ export const data = async (ctx: Context, next: () => Promise<any>) => {
     });
 
     const path = ctx.params.path && ctx.params.path.replace("+", " ");
-
-    console.log(`GETTING DATA FOR: ${username}/${repo}/${branch}/commit/${commitSha}/path/${path}`)
 
     let title = `${username}/${repo}`;
     if (path) {
@@ -144,8 +130,6 @@ export const data = async (ctx: Context, next: () => Promise<any>) => {
       branch = await api.getDefaultBranch(username, repo, userToken);
     }
 
-    console.log(`DOWNLOADING FILES!!!! for: ${username}/${repo}/${branch}/${path}`)
-
     const downloadedFiles = await downloadRepository(
       {
         username,
@@ -156,13 +140,7 @@ export const data = async (ctx: Context, next: () => Promise<any>) => {
       commitSha,
       isPrivate,
       userToken,
-      source.token
     );
-
-    console.log("DOWNLOADED FILES!")
-    console.log("COMMIT SHA!!!!!: ", commitSha)
-    //console.log(downloadedFiles)
-
 
     if (isPrivate) {
       api.resetShaCache({ branch, username, repo, path });
@@ -186,14 +164,13 @@ export const data = async (ctx: Context, next: () => Promise<any>) => {
     };
 
   } catch (e) {
-    source.cancel("Error in promise.all, cancelling requests");
+    // Here we catch our false, preemptive rate limit and give it a proper error status code for the server.
     if (e.message == "Can't make axios requests, not enough rate limit remaining") {
       ctx.body = {
         error:
           "Can't make axios requests, not enough rate limit remaining",
       };
       ctx.status = 403;
-      console.log("status", ctx.status, "message", ctx.body.error)
     } else {
       throw e
     }

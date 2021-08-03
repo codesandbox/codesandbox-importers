@@ -1,12 +1,11 @@
 import * as Sentry from "@sentry/node";
-import axios, { AxiosPromise, AxiosRequestConfig, CancelToken } from "axios";
+import axios, { AxiosPromise, AxiosRequestConfig } from "axios";
 import * as zip from "jszip";
 import * as LRU from "lru-cache";
 import fetch from "node-fetch";
 import { encode } from "base-64";
 import { IGitInfo, ITree } from "./push";
 import { appsignal } from "../../utils/appsignal";
-import { request } from "http";
 
 const API_URL = "https://api.github.com";
 const REPO_BASE_URL = API_URL + "/repos";
@@ -51,12 +50,6 @@ function requestAxios(
     const snakeCaseRequestName = requestName.toLowerCase().replace(/\s/g, "_");
     meter.incrementCounter(`github_request_${snakeCaseRequestName}`, 1);
 
-    // console.log(`req object auth for ${snakeCaseRequestName}`)
-
-    // console.log(requestObject)
-
-    requestObject.auth = undefined
-
     if (requestObject.auth) {
       // In the case we're using not the user token, let's log that as well!
       meter.incrementCounter(
@@ -67,19 +60,12 @@ function requestAxios(
 
     return axios(requestObject)
       .then((res) => {
-        console.log("GOT RES")
         span.close();
         return res;
       })
       .catch((e) => {
         span.addError(e);
         span.close();
-
-        if (axios.isCancel(e)) {
-          console.log('Request canceled with cancel token!!!!');
-        }
-
-        console.log("REJECTINGs")
 
         return Promise.reject(e);
       });
@@ -95,12 +81,11 @@ function buildCompareApiUrl(
   return `${buildRepoApiUrl(username, repo)}/compare/${baseRef}...${headRef}`;
 }
 
-function createAxiosRequestConfig(token?: string, cancelToken?: CancelToken): AxiosRequestConfig {
+function createAxiosRequestConfig(token?: string): AxiosRequestConfig {
   const Accept = "application/vnd.github.v3+json";
   return token
     ? {
       headers: { Accept, Authorization: `Bearer ${token}` },
-      cancelToken: cancelToken,
     }
     : {
       auth: {
@@ -108,7 +93,6 @@ function createAxiosRequestConfig(token?: string, cancelToken?: CancelToken): Ax
         password: GITHUB_CLIENT_SECRET!,
       },
       headers: { Accept },
-      cancelToken: cancelToken,
     };
 }
 
@@ -374,15 +358,13 @@ export async function getLatestCommitShaOfFile(
   branch: string,
   path: string,
   token?: string,
-  axiosCancelToken?: CancelToken,
 ): Promise<string | undefined> {
   const url = buildCommitsByPathUrl(username, repo, branch, path);
-  console.log("GETTING COMMIT SHA FOR: ", url)
   const response: { data: { sha: string }[] } = await requestAxios(
     "Get Commits of File",
     {
       url: encodeURI(url),
-      ...createAxiosRequestConfig(token, axiosCancelToken),
+      ...createAxiosRequestConfig(token),
     },
   );
 
@@ -420,8 +402,6 @@ export async function fetchRights(
   token?: string
 ): Promise<"admin" | "write" | "read" | "none"> {
   const url = buildRepoApiUrl(username, repo);
-
-  console.log("fetchRights token: ", token || "null")
 
   try {
     const response: { data: RightsResponse } = await requestAxios(
@@ -698,7 +678,6 @@ export async function getDefaultBranch(
   repo: string,
   token?: string
 ) {
-  console.log("fetchRights token: ", token || "null")
   const data = await getRepo(username, repo, token);
 
   return data.default_branch;
@@ -798,7 +777,6 @@ export async function fetchRepoInfo(
 ): Promise<CommitResponse> {
   let span: import("@appsignal/types").NodeSpan | undefined;
   try {
-    console.log("INSIDE FETCH REPO INFO!")
     const cacheId = username + repo + branch + path;
     // We cache the latest retrieved sha for a limited time, so we don't spam the
     // GitHub API for every request
@@ -810,11 +788,7 @@ export async function fetchRepoInfo(
       span.setCategory("request-api.github");
       span.setName("GET api.github.com/info");
 
-      console.log("BUILDING COMMITS URL")
-
       const url = buildCommitsUrl(username, repo, branch, path);
-
-      console.log("URL IS: ", url)
 
       const headers: { "If-None-Match"?: string } = {};
 
@@ -874,7 +848,6 @@ export async function fetchRepoInfo(
       path,
     };
   } catch (e) {
-    console.log("INSIDE ERROR")
     // There is a chance that the branch contains slashes, we try to fix this
     // by requesting again with the first part of the path appended to the branch
     // when a request fails (404)
@@ -882,7 +855,6 @@ export async function fetchRepoInfo(
       e.response &&
       (e.response.status === 404 || e.response.status === 422)
     ) {
-      console.log("TRYING BC BRANCH MIGHT CONTAIN SLASHES")
       const [branchAddition, ...newPath] = path.split("/");
       const newBranch = `${branch}/${branchAddition}`;
 
@@ -901,7 +873,6 @@ export async function fetchRepoInfo(
     }
 
     if (e.response && e.response.status === 403 && userToken == null) {
-      console.log("RATE LIMITED!!!!!!!!!!!!")
       const meter = appsignal.metrics();
       meter.incrementCounter("github_rate_limit", 1);
     }
@@ -963,7 +934,6 @@ export async function downloadZip(
   userToken?: string
 ) {
   const repoUrl = buildRepoApiUrl(gitInfo.username, gitInfo.repo);
-  console.log("DOWNLOADING ZIP: ", repoUrl)
   const url = encodeURI(`${repoUrl}/zipball/${commitSha}`);
   const Accept = "application/vnd.github.v3+json";
   const buffer: Buffer = await fetch(url, {
@@ -1015,7 +985,6 @@ export async function checkRemainingRateLimit(
   let remaining = 0
 
   if (response.data) {
-    console.log("returning remaining rate limit: ", response.data.resources.core.remaining)
     remaining = response.data.resources.core.remaining
   }
 
