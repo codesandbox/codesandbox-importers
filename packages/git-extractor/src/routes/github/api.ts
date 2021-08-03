@@ -38,7 +38,7 @@ function buildContentsApiUrl(username: string, repo: string, path: string) {
 
 function requestAxios(
   requestName: string,
-  requestObject: AxiosRequestConfig,
+  requestObject: AxiosRequestConfig
 ): AxiosPromise {
   const tracer = appsignal.tracer();
   const span = tracer.createSpan(undefined, tracer.currentSpan());
@@ -49,6 +49,11 @@ function requestAxios(
 
     const snakeCaseRequestName = requestName.toLowerCase().replace(/\s/g, "_");
     meter.incrementCounter(`github_request_${snakeCaseRequestName}`, 1);
+
+    // To keep track of how many binary files we are actually trying to request SHAs for
+    if (snakeCaseRequestName === "checking_remaining_rate_limit" && requestObject?.params?.numberOfRequests) {
+      meter.incrementCounter("number_of_binary_files", requestObject.params.numberOfRequests);
+    }
 
     if (requestObject.auth) {
       // In the case we're using not the user token, let's log that as well!
@@ -357,7 +362,7 @@ export async function getLatestCommitShaOfFile(
   repo: string,
   branch: string,
   path: string,
-  token?: string,
+  token?: string
 ): Promise<string | undefined> {
   const url = buildCommitsByPathUrl(username, repo, branch, path);
   const response: { data: { sha: string }[] } = await requestAxios(
@@ -365,7 +370,7 @@ export async function getLatestCommitShaOfFile(
     {
       url: encodeURI(url),
       ...createAxiosRequestConfig(token),
-    },
+    }
   );
 
   if (response.data[0]) {
@@ -979,6 +984,9 @@ export async function checkRemainingRateLimit(
     "Checking Remaining Rate Limit",
     {
       url: encodeURI(url),
+      params: {
+        numberOfRequests: numberOfRequests
+      }
     }
   );
 

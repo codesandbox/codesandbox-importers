@@ -36,7 +36,7 @@ export async function downloadRepository(
   gitInfo: IGitInfo,
   commitSha: string,
   isPrivate: boolean,
-  userToken?: string,
+  userToken?: string
 ): Promise<INormalizedModules> {
   const zip = await downloadZip(gitInfo, commitSha, userToken);
   let folderName = getFolderName(zip);
