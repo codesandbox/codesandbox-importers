@@ -99,68 +99,82 @@ export const getRights = async (ctx: Context) => {
  * Data contains all files, directories and package.json info
  */
 export const data = async (ctx: Context, next: () => Promise<any>) => {
-  // We get branch, etc from here because there could be slashes in a branch name,
-  // we can retrieve if this is the case from this method
-  let { username, repo, branch, commitSha } = ctx.params;
-  const userToken = getUserToken(ctx);
+  try {
+    // We get branch, etc from here because there could be slashes in a branch name,
+    // we can retrieve if this is the case from this method
+    let { username, repo, branch, commitSha } = ctx.params;
+    const userToken = getUserToken(ctx);
 
-  Sentry.setContext("repo", {
-    username,
-    repo,
-    branch,
-    commitSha,
-  });
-
-  const path = ctx.params.path && ctx.params.path.replace("+", " ");
-
-  let title = `${username}/${repo}`;
-  if (path) {
-    const splittedPath = path.split("/");
-    title = title + `: ${splittedPath[splittedPath.length - 1]}`;
-  }
-
-  let isPrivate = false;
-
-  if (userToken) {
-    isPrivate = await api.isRepoPrivate(username, repo, userToken);
-  }
-
-  if (!branch) {
-    branch = await api.getDefaultBranch(username, repo, userToken);
-  }
-
-  const downloadedFiles = await downloadRepository(
-    {
+    Sentry.setContext("repo", {
       username,
       repo,
       branch,
-      path,
-    },
-    commitSha,
-    isPrivate,
-    userToken
-  );
+      commitSha,
+    });
 
-  if (isPrivate) {
-    api.resetShaCache({ branch, username, repo, path });
+    const path = ctx.params.path && ctx.params.path.replace("+", " ");
+
+    let title = `${username}/${repo}`;
+    if (path) {
+      const splittedPath = path.split("/");
+      title = title + `: ${splittedPath[splittedPath.length - 1]}`;
+    }
+
+    let isPrivate = false;
+
+    if (userToken) {
+      isPrivate = await api.isRepoPrivate(username, repo, userToken);
+    }
+
+    if (!branch) {
+      branch = await api.getDefaultBranch(username, repo, userToken);
+    }
+
+    const downloadedFiles = await downloadRepository(
+      {
+        username,
+        repo,
+        branch,
+        path,
+      },
+      commitSha,
+      isPrivate,
+      userToken,
+    );
+
+    if (isPrivate) {
+      api.resetShaCache({ branch, username, repo, path });
+    }
+
+    console.log(
+      `Creating sandbox for ${username}/${repo}, branch: ${branch}, path: ${path}`
+    );
+
+    const sandboxParams = await createSandbox(downloadedFiles);
+
+    const finalTitle = sandboxParams.title || title;
+
+    ctx.body = {
+      ...sandboxParams,
+      // If no title is set in package.json, go for this one
+      title: finalTitle,
+
+      // Privacy 2 is private, privacy 0 is public
+      privacy: isPrivate ? 2 : 0,
+    };
+
+  } catch (e) {
+    // Here we catch our false, preemptive rate limit and give it a proper error status code for the server.
+    if (e.message == "Can't make axios requests, not enough rate limit remaining") {
+      ctx.body = {
+        error:
+          "Can't make axios requests, not enough rate limit remaining",
+      };
+      ctx.status = 403;
+    } else {
+      throw e
+    }
   }
-
-  console.log(
-    `Creating sandbox for ${username}/${repo}, branch: ${branch}, path: ${path}`
-  );
-
-  const sandboxParams = await createSandbox(downloadedFiles);
-
-  const finalTitle = sandboxParams.title || title;
-
-  ctx.body = {
-    ...sandboxParams,
-    // If no title is set in package.json, go for this one
-    title: finalTitle,
-
-    // Privacy 2 is private, privacy 0 is public
-    privacy: isPrivate ? 2 : 0,
-  };
 };
 
 /*
