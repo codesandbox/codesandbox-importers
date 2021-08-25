@@ -47,7 +47,7 @@ export async function downloadRepository(
 
   const result: INormalizedModules = {};
 
-  const pathArray = <string[]>[];
+  const pathArray: string[] = [];
 
   // First process non-binary files, and save paths of binary files to request
   await Promise.all(
