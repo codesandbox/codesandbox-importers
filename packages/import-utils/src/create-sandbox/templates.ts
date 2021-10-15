@@ -177,6 +177,7 @@ export function getTemplate(
   }
 
   if (
+    totalDependencies.indexOf("@feathersjs/feathers") > -1 ||
     totalDependencies.indexOf("@sveltech/routify") > -1 ||
     totalDependencies.indexOf("@roxi/routify") > -1
   ) {
