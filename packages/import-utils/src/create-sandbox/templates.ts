@@ -29,6 +29,7 @@ export function getMainFile(template: ITemplate) {
     case "reason":
     case "sapper":
     case "nest":
+    case "remix":
     case "vuepress":
     case "styleguidist":
       return "package.json";
@@ -205,6 +206,10 @@ export function getTemplate(
 
   if (totalDependencies.indexOf("cx") > -1) {
     return "cxjs";
+  }
+
+  if (totalDependencies.indexOf("remix") > -1) {
+    return "remix";
   }
 
   const nodeDeps = [
