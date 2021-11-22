@@ -29,6 +29,7 @@ export function getMainFile(template: ITemplate) {
     case "reason":
     case "sapper":
     case "nest":
+    case "remix":
     case "vuepress":
     case "styleguidist":
       return "package.json";
