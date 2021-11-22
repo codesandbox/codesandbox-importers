@@ -135,6 +135,14 @@ export function getTemplate(
     return "docusaurus";
   }
 
+  if (totalDependencies.indexOf("remix") > -1) {
+    return "remix";
+  }
+
+  if (totalDependencies.indexOf("astro") > -1) {
+    return "node";
+  }
+
   // CLIENT
 
   if (moduleNames.some((m) => m.endsWith(".re"))) {
@@ -188,10 +196,6 @@ export function getTemplate(
     return "node";
   }
 
-  if (totalDependencies.indexOf("astro") > -1) {
-    return "node";
-  }
-
   if (totalDependencies.indexOf("@frontity/core") > -1) {
     return "node";
   }
@@ -206,10 +210,6 @@ export function getTemplate(
 
   if (totalDependencies.indexOf("cx") > -1) {
     return "cxjs";
-  }
-
-  if (totalDependencies.indexOf("remix") > -1) {
-    return "remix";
   }
 
   const nodeDeps = [
