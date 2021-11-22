@@ -207,6 +207,10 @@ export function getTemplate(
     return "cxjs";
   }
 
+  if (totalDependencies.indexOf("remix") > -1) {
+    return "remix";
+  }
+
   const nodeDeps = [
     "express",
     "koa",
