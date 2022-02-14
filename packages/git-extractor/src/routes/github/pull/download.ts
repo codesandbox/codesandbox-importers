@@ -7,7 +7,7 @@ import { IGitInfo } from "../push/index";
 import {
   downloadZip,
   getLatestCommitShaOfFile,
-  getDefaultBranch,
+  checkRemainingRateLimit
 } from "../api";
 
 const getFolderName = (zip: JSZip) =>
@@ -22,9 +22,8 @@ export const rawGitUrl = (
   filePath: string,
   commitSha?: string
 ) => {
-  let url = `https://rawcdn.githack.com/${gitInfo.username}/${gitInfo.repo}/${
-    commitSha || gitInfo.branch
-  }/`;
+  let url = `https://rawcdn.githack.com/${gitInfo.username}/${gitInfo.repo}/${commitSha || gitInfo.branch
+    }/`;
   if (gitInfo.path) {
     url += gitInfo.path + "/";
   }
@@ -48,6 +47,9 @@ export async function downloadRepository(
 
   const result: INormalizedModules = {};
 
+  const pathArray: string[] = [];
+
+  // First process non-binary files, and save paths of binary files to request
   await Promise.all(
     Object.keys(zip.files).map(async (path) => {
       if (path.startsWith(folderName)) {
@@ -67,16 +69,7 @@ export async function downloadRepository(
                 isBinary: true,
               };
             } else {
-              const fileSha = await getLatestCommitShaOfFile(
-                gitInfo.username,
-                gitInfo.repo,
-                gitInfo.branch,
-                relativePath
-              );
-              result[relativePath] = {
-                content: rawGitUrl(gitInfo, relativePath, fileSha),
-                isBinary: true,
-              };
+              pathArray.push(relativePath)
             }
           } else {
             const contents = await file.async("text");
@@ -89,6 +82,38 @@ export async function downloadRepository(
       }
     })
   );
+
+
+  const requestsToMake = pathArray.length
+
+  /**
+   * Check if there is enough of our CodeSandbox Github token rate limit left to be able to
+   * request all the files we need to. If there isn't, then we shouldn't make the Promise.all
+   * request because when the first 403 rate limit comes through, it rejects everything, and
+   * it wastes even more rate limit tries.
+   */
+  if (!userToken) {
+    const canRequest = await checkRemainingRateLimit(requestsToMake);
+    if (!canRequest) {
+      throw new Error("Can't make axios requests, not enough rate limit remaining")
+    }
+  }
+
+  // Then we can request the SHAs of binary files if there is enough rate limit left.
+  await Promise.all(pathArray.map(async (relativePath) => {
+    const fileSha = await getLatestCommitShaOfFile(
+      gitInfo.username,
+      gitInfo.repo,
+      gitInfo.branch,
+      relativePath,
+      userToken
+    );
+
+    result[relativePath] = {
+      content: rawGitUrl(gitInfo, relativePath, fileSha),
+      isBinary: true,
+    };
+  }));
 
   return result;
 }

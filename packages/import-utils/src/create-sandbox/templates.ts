@@ -29,6 +29,7 @@ export function getMainFile(template: ITemplate) {
     case "reason":
     case "sapper":
     case "nest":
+    case "remix":
     case "vuepress":
     case "styleguidist":
       return "package.json";
@@ -132,6 +133,14 @@ export function getTemplate(
 
   if (totalDependencies.indexOf("@docusaurus/core") > -1) {
     return "docusaurus";
+  }
+
+  if (totalDependencies.indexOf("remix") > -1) {
+    return "remix";
+  }
+
+  if (totalDependencies.indexOf("astro") > -1) {
+    return "node";
   }
 
   // CLIENT

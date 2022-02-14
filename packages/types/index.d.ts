@@ -61,6 +61,7 @@ export type ITemplate =
   | "mdx-deck"
   | "quasar"
   | "docusaurus"
+  | "remix"
   | "node";
 
 export interface ISandbox {
