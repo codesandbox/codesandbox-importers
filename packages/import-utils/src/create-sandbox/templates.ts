@@ -86,6 +86,10 @@ export function getTemplate(
     return "nuxt";
   }
 
+  if (totalDependencies.indexOf("next") > -1) {
+    return "next";
+  }
+
   const apollo = [
     "apollo-server",
     "apollo-server-express",
