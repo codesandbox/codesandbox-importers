@@ -29,6 +29,20 @@ describe("template detection", () => {
     ).toEqual("nuxt");
   });
 
+  it("detects a nuxt template when using nuxt3", () => {
+    expect(
+      getTemplate(
+        {
+          dependencies: {},
+          devDependencies: {
+            nuxt3: "latest",
+          },
+        },
+        {}
+      )
+    ).toEqual("nuxt");
+  });
+
   it("detects an apollo template", () => {
     expect(
       getTemplate(
