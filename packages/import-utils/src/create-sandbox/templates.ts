@@ -80,7 +80,7 @@ export function getTemplate(
     return "adonis";
   }
 
-  const nuxt = ["nuxt", "nuxt-edge", "nuxt-ts", "nuxt-ts-edge"];
+  const nuxt = ["nuxt", "nuxt-edge", "nuxt-ts", "nuxt-ts-edge", "nuxt3"];
 
   if (totalDependencies.some((dep) => nuxt.indexOf(dep) > -1)) {
     return "nuxt";
