@@ -8,6 +8,7 @@ describe("template detection", () => {
           dependencies: {},
           devDependencies: {
             "react-scripts": "latest",
+            "@fork/react-scripts": "latest",
           },
         },
         {}
