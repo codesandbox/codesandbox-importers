@@ -8,6 +8,19 @@ describe("template detection", () => {
           dependencies: {},
           devDependencies: {
             "react-scripts": "latest",
+          },
+        },
+        {}
+      )
+    ).toEqual("create-react-app");
+  });
+
+  it("detects a react template from forked create-react-app", () => {
+    expect(
+      getTemplate(
+        {
+          dependencies: {},
+          devDependencies: {
             "@fork/react-scripts": "latest",
           },
         },
