@@ -169,7 +169,11 @@ export function getTemplate(
     return "styleguidist";
   }
 
-  if (totalDependencies.indexOf("react-scripts") > -1) {
+  if (
+    totalDependencies.some((dependency) =>
+      /^(@[\w-]+\/)?react-scripts$/.test(dependency)
+    )
+  ) {
     return "create-react-app";
   }
 
