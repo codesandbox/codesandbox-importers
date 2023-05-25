@@ -143,6 +143,10 @@ export function getTemplate(
     return "node";
   }
 
+  if (totalDependencies.indexOf("vite") > -1) {
+    return "node";
+  }
+
   // CLIENT
 
   if (moduleNames.some((m) => m.endsWith(".re"))) {
