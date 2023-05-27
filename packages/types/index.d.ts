@@ -67,10 +67,12 @@ export type ITemplate =
 export interface ISandbox {
   title: string;
   description: string;
-  tags: string;
+  tags: string[];
   modules: ISandboxFile[];
   directories: ISandboxDirectory[];
   externalResources: string[];
   template: ITemplate;
   entry: string;
+  v2?: boolean;
+  iconUrl?: string;
 }

@@ -44,6 +44,72 @@ function findMainFile(
   return mainFile || getMainFile(template);
 }
 
+const CLOUD_TEMPLATES = [
+  "adonis",
+  "vue-cli",
+  "svelte",
+  "create-react-app-typescript",
+  "create-react-app",
+  "angular-cli",
+  "cxjs",
+  "gatsby",
+  "nuxt",
+  "next",
+  "reason",
+  "apollo",
+  "sapper",
+  "ember",
+  "nest",
+  "styleguidist",
+  "gridsome",
+  "vuepress",
+  "mdx-deck",
+  "quasar",
+  "docusaurus",
+  "remix",
+  "node",
+];
+function isCloudTemplate(template: ITemplate): boolean {
+  return CLOUD_TEMPLATES.indexOf(template) > -1;
+}
+
+function getSandboxMetadata(
+  directory: INormalizedModules
+): {
+  title: string;
+  description: string;
+  tags: string[];
+  iconUrl?: string;
+} {
+  const packageJson = directory["package.json"];
+  if (packageJson && packageJson.type === "directory") {
+    throw new Error("package.json is a directory");
+  }
+
+  let packageJsonPackage = packageJson ? JSON.parse(packageJson.content) : null;
+
+  const packageJsonInfo = {
+    title: packageJsonPackage.title || packageJsonPackage.name,
+    description: packageJsonPackage.description,
+    tags: packageJsonPackage.keywords || [],
+    iconUrl: packageJsonPackage.iconUrl,
+  };
+
+  const templateInfo = directory[".codesandbox/template.json"];
+  if (templateInfo && templateInfo.type === "file") {
+    const content = JSON.parse(templateInfo.content);
+
+    return {
+      title: content.title || packageJsonInfo.title,
+      description: content.description || packageJsonInfo.description,
+      tags: content.tags || packageJsonInfo.tags,
+      iconUrl: content.iconUrl || packageJsonInfo.iconUrl,
+    };
+  }
+
+  return packageJsonInfo;
+}
+
 /**
  * Creates all relevant data for create a sandbox, like dependencies and which
  * files are in a sandbox
@@ -85,17 +151,20 @@ export default async function createSandbox(
 
   // Give the sandboxModules to getDependencies to fetch which devDependencies
   // are used in the code
+  const metadata = getSandboxMetadata(directory);
 
   const { modules, directories } = denormalize(directory);
 
   return {
-    title: packageJsonPackage.title || packageJsonPackage.name,
-    description: packageJsonPackage.description,
-    tags: packageJsonPackage.keywords || [],
+    title: metadata.title,
+    description: metadata.description,
+    tags: metadata.tags,
     modules,
     directories,
     externalResources: [],
     template,
     entry: mainFile,
+    v2: isCloudTemplate(template),
+    iconUrl: metadata.iconUrl,
   };
 }
