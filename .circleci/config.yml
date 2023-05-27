@@ -37,21 +37,12 @@ jobs:
   create-docker-image:
     machine: true
     working_directory: ~/codesandbox
-    parameters:
-      user:
-        type: string
-        default: '$DOCKER_USER'
-      password:
-        type: string
-        default: '$DOCKER_PWD'
     steps:
       - restore_cache:
           key: v2-repo-{{ .Environment.CIRCLE_SHA1 }}
       - run:
           name: Docker Sign In
-          command:
-            '[ -n "<< parameters.user >>" ] && echo << parameters.password >> |
-            docker login -u << parameters.user >> --password-stdin || true'
+          command: "if [ -n $DOCKER_USER ]; then echo $DOCKER_PWD | docker login -u $DOCKER_USER --password-stdin; else exit 0; fi"
       - run:
           name: Create Dockerfile
           command: |
@@ -66,14 +57,10 @@ jobs:
             EOF
       - run:
           name: Create Image
-          command:
-            '[ -n "<< parameters.user >>" ] && docker build -t
-            codesandbox/importers:${CIRCLE_SHA1:0:7} . || true'
-      - run:
+          command: docker build -t codesandbox/importers:${CIRCLE_SHA1:0:7} .
+      - deploy:
           name: Push Image
-          command:
-            '[ -n "<< parameters.user >>" ] && docker push
-            codesandbox/importers:${CIRCLE_SHA1:0:7} || true'
+          command: "if [ -n $DOCKER_USER ]; then docker push codesandbox/importers:${CIRCLE_SHA1:0:7}; else exit 0; fi"
 
   deploy-to-staging:
     requires:
