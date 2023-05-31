@@ -48,8 +48,6 @@ const CLOUD_TEMPLATES = [
   "adonis",
   "vue-cli",
   "svelte",
-  "create-react-app-typescript",
-  "create-react-app",
   "angular-cli",
   "cxjs",
   "gatsby",
