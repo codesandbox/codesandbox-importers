@@ -74,12 +74,6 @@ export function getTemplate(
   ];
   const moduleNames = Object.keys(modules);
 
-  if (totalDependencies.indexOf("@tanstack/react-table") > -1) {
-    // Temporary solution, to make the synced templates on the tan stack
-    // get a better experience.
-    return "create-react-app";
-  }
-
   const adonis = ["@adonisjs/framework", "@adonisjs/core"];
 
   if (totalDependencies.some((dep) => adonis.indexOf(dep) > -1)) {
