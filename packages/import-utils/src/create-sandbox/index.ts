@@ -87,10 +87,10 @@ function getSandboxMetadata(
   let packageJsonPackage = packageJson ? JSON.parse(packageJson.content) : null;
 
   const packageJsonInfo = {
-    title: packageJsonPackage.title || packageJsonPackage.name,
-    description: packageJsonPackage.description,
-    tags: packageJsonPackage.keywords || [],
-    iconUrl: packageJsonPackage.iconUrl,
+    title: packageJsonPackage?.title || packageJsonPackage?.name,
+    description: packageJsonPackage?.description,
+    tags: packageJsonPackage?.keywords || [],
+    iconUrl: packageJsonPackage?.iconUrl,
   };
 
   const templateInfo = directory[".codesandbox/template.json"];
