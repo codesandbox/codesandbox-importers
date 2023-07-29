@@ -74,7 +74,7 @@ export function getTemplate(
   ];
   const moduleNames = Object.keys(modules);
 
-  if (moduleNames.indexOf(".codesandbox/Dockerfile") > -1) {
+  if (".codesandbox/Dockerfile" in modules) {
     // We should return "cloud" here, once the server supports it.
     return "node";
   }
