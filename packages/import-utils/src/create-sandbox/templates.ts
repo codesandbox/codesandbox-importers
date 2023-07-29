@@ -74,6 +74,11 @@ export function getTemplate(
   ];
   const moduleNames = Object.keys(modules);
 
+  if (moduleNames.indexOf(".codesandbox/Dockerfile") > -1) {
+    // We should return "cloud" here, once the server supports it.
+    return "node";
+  }
+
   const adonis = ["@adonisjs/framework", "@adonisjs/core"];
 
   if (totalDependencies.some((dep) => adonis.indexOf(dep) > -1)) {
