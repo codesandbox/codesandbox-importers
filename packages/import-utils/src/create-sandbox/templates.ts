@@ -62,6 +62,11 @@ export function getTemplate(
     } catch (e) {}
   }
 
+  if (".codesandbox/Dockerfile" in modules) {
+    // We should return "cloud" here, once the server supports it.
+    return "node";
+  }
+
   if (!pkg) {
     return "static";
   }
@@ -73,11 +78,6 @@ export function getTemplate(
     ...Object.keys(devDependencies),
   ];
   const moduleNames = Object.keys(modules);
-
-  if (".codesandbox/Dockerfile" in modules) {
-    // We should return "cloud" here, once the server supports it.
-    return "node";
-  }
 
   const adonis = ["@adonisjs/framework", "@adonisjs/core"];
 
