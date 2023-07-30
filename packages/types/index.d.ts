@@ -74,5 +74,7 @@ export interface ISandbox {
   template: ITemplate;
   entry: string;
   v2?: boolean;
-  iconUrl?: string;
+  templateParams?: {
+    iconUrl?: string;
+  };
 }
