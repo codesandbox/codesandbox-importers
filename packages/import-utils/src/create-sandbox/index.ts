@@ -94,7 +94,7 @@ function getSandboxMetadata(
   };
 
   const templateInfo = directory[".codesandbox/template.json"];
-  if (templateInfo && templateInfo.type === "file") {
+  if (templateInfo && "content" in templateInfo) {
     const content = JSON.parse(templateInfo.content);
 
     return {
