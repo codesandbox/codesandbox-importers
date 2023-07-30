@@ -163,6 +163,10 @@ export default async function createSandbox(
     template,
     entry: mainFile,
     v2: isCloudTemplate(template),
-    iconUrl: metadata.iconUrl,
+    templateParams: metadata.iconUrl
+      ? {
+          iconUrl: metadata.iconUrl,
+        }
+      : undefined,
   };
 }
