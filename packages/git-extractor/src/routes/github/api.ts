@@ -51,8 +51,14 @@ function requestAxios(
     meter.incrementCounter(`github_request_${snakeCaseRequestName}`, 1);
 
     // To keep track of how many binary files we are actually trying to request SHAs for
-    if (snakeCaseRequestName === "checking_remaining_rate_limit" && requestObject?.params?.numberOfRequests) {
-      meter.incrementCounter("number_of_binary_files", requestObject.params.numberOfRequests);
+    if (
+      snakeCaseRequestName === "checking_remaining_rate_limit" &&
+      requestObject?.params?.numberOfRequests
+    ) {
+      meter.incrementCounter(
+        "number_of_binary_files",
+        requestObject.params.numberOfRequests
+      );
     }
 
     if (requestObject.auth) {
@@ -90,15 +96,15 @@ function createAxiosRequestConfig(token?: string): AxiosRequestConfig {
   const Accept = "application/vnd.github.v3+json";
   return token
     ? {
-      headers: { Accept, Authorization: `Bearer ${token}` },
-    }
+        headers: { Accept, Authorization: `Bearer ${token}` },
+      }
     : {
-      auth: {
-        username: GITHUB_CLIENT_ID!,
-        password: GITHUB_CLIENT_SECRET!,
-      },
-      headers: { Accept },
-    };
+        auth: {
+          username: GITHUB_CLIENT_ID!,
+          password: GITHUB_CLIENT_SECRET!,
+        },
+        headers: { Accept },
+      };
 }
 
 function buildContentsUrl(
@@ -475,8 +481,9 @@ export async function createPr(
     url: encodeURI(`${buildRepoApiUrl(base.username, base.repo)}/pulls`),
     data: {
       base: base.branch,
-      head: `${base.username === head.username ? "" : head.username + ":"}${head.branch
-        }`,
+      head: `${base.username === head.username ? "" : head.username + ":"}${
+        head.branch
+      }`,
       title,
       body,
       maintainer_can_modify: true,
@@ -713,7 +720,7 @@ export async function createRepo(
       data: {
         name: repo,
         description: "Created with CodeSandbox",
-        homepage: `https://codesandbox.io/s/github/${username}/${repo}`,
+        homepage: `https://codesandbox.io/p/github/${username}/${repo}`,
         auto_init: true,
         private: privateRepo,
       },
@@ -977,23 +984,22 @@ export async function downloadZip(
 }
 
 export async function checkRemainingRateLimit(
-  numberOfRequests: number,
+  numberOfRequests: number
 ): Promise<boolean> {
   const url = "https://api.github.com/rate_limit";
-  const response: { data: { resources: { core: { remaining: number } } } } = await requestAxios(
-    "Checking Remaining Rate Limit",
-    {
-      url: encodeURI(url),
-      params: {
-        numberOfRequests: numberOfRequests
-      }
-    }
-  );
+  const response: {
+    data: { resources: { core: { remaining: number } } };
+  } = await requestAxios("Checking Remaining Rate Limit", {
+    url: encodeURI(url),
+    params: {
+      numberOfRequests: numberOfRequests,
+    },
+  });
 
-  let remaining = 0
+  let remaining = 0;
 
   if (response.data) {
-    remaining = response.data.resources.core.remaining
+    remaining = response.data.resources.core.remaining;
   }
 
   return numberOfRequests < remaining;
