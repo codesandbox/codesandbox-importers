@@ -13,12 +13,12 @@
   },
   "author": "",
   "devDependencies": {
-    "jest": "^23.6.0",
-    "lerna": "^2.4.0",
+    "jest": "^29.6.2",
+    "lerna": "^7.1.5",
     "prettier": "^2.2.1",
     "rimraf": "^2.6.2",
-    "ts-jest": "^23.10.4",
-    "typescript": "^4.0.3"
+    "ts-jest": "^29.1.1",
+    "typescript": "^4.3.0"
   },
   "workspaces": [
     "packages/cli",

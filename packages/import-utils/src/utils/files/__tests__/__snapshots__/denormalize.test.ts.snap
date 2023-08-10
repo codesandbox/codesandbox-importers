@@ -1,16 +1,16 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`denormalize can create nested directories 1`] = `
-Object {
-  "directories": Array [
-    Object {
+{
+  "directories": [
+    {
       "directoryShortid": "GXOoy",
       "shortid": "0",
       "title": "test",
     },
   ],
-  "modules": Array [
-    Object {
+  "modules": [
+    {
       "code": "",
       "directoryShortid": "0",
       "isBinary": false,
@@ -24,39 +24,39 @@ Object {
 `;
 
 exports[`denormalize can create only directory 1`] = `
-Object {
-  "directories": Array [
-    Object {
+{
+  "directories": [
+    {
       "directoryShortid": "GXOoy",
       "shortid": "0",
       "title": "test",
     },
-    Object {
+    {
       "directoryShortid": "0",
       "shortid": "1",
       "title": "test2",
     },
   ],
-  "modules": Array [],
+  "modules": [],
 }
 `;
 
 exports[`denormalize can denormalize 1`] = `
-Object {
-  "directories": Array [
-    Object {
+{
+  "directories": [
+    {
       "directoryShortid": undefined,
       "shortid": "0",
       "title": "world",
     },
-    Object {
+    {
       "directoryShortid": "0",
       "shortid": "1",
       "title": "hello",
     },
   ],
-  "modules": Array [
-    Object {
+  "modules": [
+    {
       "code": "hello",
       "directoryShortid": undefined,
       "isBinary": false,
@@ -65,7 +65,7 @@ Object {
       "title": "index.js",
       "uploadId": undefined,
     },
-    Object {
+    {
       "code": "hello2",
       "directoryShortid": "0",
       "isBinary": false,
@@ -74,7 +74,7 @@ Object {
       "title": "index.js",
       "uploadId": undefined,
     },
-    Object {
+    {
       "code": "hello3",
       "directoryShortid": "1",
       "isBinary": false,
@@ -88,10 +88,10 @@ Object {
 `;
 
 exports[`denormalize can filter out existing directories 1`] = `
-Object {
-  "directories": Array [],
-  "modules": Array [
-    Object {
+{
+  "directories": [],
+  "modules": [
+    {
       "code": "hello",
       "directoryShortid": undefined,
       "isBinary": false,
@@ -100,7 +100,7 @@ Object {
       "title": "index.js",
       "uploadId": undefined,
     },
-    Object {
+    {
       "code": "hello2",
       "directoryShortid": "dir1",
       "isBinary": false,
@@ -109,7 +109,7 @@ Object {
       "title": "index.js",
       "uploadId": undefined,
     },
-    Object {
+    {
       "code": "hello3",
       "directoryShortid": "dir2",
       "isBinary": false,
@@ -118,7 +118,7 @@ Object {
       "title": "index.js",
       "uploadId": undefined,
     },
-    Object {
+    {
       "code": "hello4",
       "directoryShortid": "dir4",
       "isBinary": false,
@@ -127,7 +127,7 @@ Object {
       "title": "template.md",
       "uploadId": undefined,
     },
-    Object {
+    {
       "code": "hello5",
       "directoryShortid": "dir5",
       "isBinary": false,
