@@ -62,7 +62,10 @@ export function getTemplate(
     } catch (e) {}
   }
 
-  if (".codesandbox/Dockerfile" in modules) {
+  if (
+    ".codesandbox/Dockerfile" in modules ||
+    ".devcontainer/devcontainer.json" in modules
+  ) {
     // We should return "cloud" here, once the server supports it.
     return "node";
   }
