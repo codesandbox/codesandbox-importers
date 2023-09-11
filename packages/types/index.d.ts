@@ -62,7 +62,8 @@ export type ITemplate =
   | "quasar"
   | "docusaurus"
   | "remix"
-  | "node";
+  | "node"
+  | "tramvai";
 
 export interface ISandbox {
   title: string;
