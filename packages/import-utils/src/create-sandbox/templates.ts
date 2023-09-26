@@ -155,6 +155,14 @@ export function getTemplate(
     return "node";
   }
 
+  if (totalDependencies.indexOf("vanjs-core") > -1) {
+    return "node";
+  }
+
+  if (totalDependencies.indexOf("mini-van-plate") > -1) {
+    return "node";
+  }
+
   // CLIENT
 
   if (moduleNames.some((m) => m.endsWith(".re"))) {
