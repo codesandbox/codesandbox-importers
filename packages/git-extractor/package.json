@@ -70,7 +70,6 @@
     "lodash.pickby": "^4.6.0",
     "lru-cache": "^4.1.1",
     "node-fetch": "^2.6.7",
-    "pacote": "^2.7.31",
     "redis": "^3.1.1",
     "rimraf": "^2.6.1",
     "shortid": "^2.2.8"
