@@ -63,7 +63,7 @@
     "debug": "^2.6.8",
     "gitignore-parser": "^0.0.2",
     "humps": "CompuIves/humps",
-    "istextorbinary": "^2.1.0",
+    "istextorbinary": "^6.0.0",
     "jszip": "^3.5.0",
     "koa": "^2.2.0",
     "koa-bodyparser": "^4.2.0",

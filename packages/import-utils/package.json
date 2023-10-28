@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "codesandbox-import-util-types": "^2.2.3",
-    "istextorbinary": "^2.2.1",
+    "istextorbinary": "^6.0.0",
     "lz-string": "^1.4.4"
   },
   "jest": {
