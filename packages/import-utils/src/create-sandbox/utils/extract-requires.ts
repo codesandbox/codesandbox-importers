@@ -1,6 +1,6 @@
 import * as acorn from "acorn";
-import * as babel from "babel-core";
-import traverse from "babel-traverse";
+import * as babel from "@babel/core";
+import traverse from "@babel/traverse";
 import { ImportDeclaration, CallExpression, Literal } from "estree";
 const walk = require("acorn/dist/walk");
 
@@ -24,7 +24,7 @@ const config = {
 export default function exportRequires(code: string) {
   const requires: string[] = [];
   try {
-    const { ast } = babel.transform(code, config);
+    const { ast } = babel.transformSync(code, config)!;
 
     if (ast) {
       traverse(ast, {
