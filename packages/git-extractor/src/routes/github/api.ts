@@ -764,12 +764,12 @@ interface CommitResponse {
   path: string;
 }
 
-const shaCache = LRU({
+const shaCache = new LRU({
   max: 500,
   maxAge: 1000 * 5, // 5 seconds
 });
 
-const etagCache = LRU<string, { etag: string; sha: string }>({
+const etagCache = new LRU<string, { etag: string; sha: string }>({
   max: 50000,
 });
 
@@ -787,7 +787,7 @@ export async function fetchRepoInfo(
   skipCache: boolean = false,
   userToken?: string
 ): Promise<CommitResponse> {
-  let span: import("@appsignal/types").NodeSpan | undefined;
+  let span;
   try {
     const cacheId = username + repo + branch + path;
     // We cache the latest retrieved sha for a limited time, so we don't spam the
@@ -956,7 +956,7 @@ export async function downloadZip(
       Accept,
     },
   }).then((res) => {
-    if (+res.headers.get("Content-Length") > MAX_ZIP_SIZE) {
+    if (Number(res.headers.get("Content-Length")) > MAX_ZIP_SIZE) {
       throw new Error("This repo is too big to import");
     }
 
