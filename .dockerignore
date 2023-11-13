@@ -1,0 +1,9 @@
+.git
+.gitignore
+README.md
+docker-compose.yml
+node_modules
+Dockerfile
+dist
+# Ignore generated credentials from google-github-actions/auth
+gha-creds-*.json
