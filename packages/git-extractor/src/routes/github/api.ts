@@ -255,6 +255,7 @@ export async function getRepo(username: string, repo: string, token?: string) {
   };
 
   if (etagCache) {
+    config.headers = config.headers = {};
     config.headers["If-None-Match"] = etagCache.etag;
     config.validateStatus = function (status: number) {
       // Axios sees 304 (Not Modified) as an error. We don't want that.
