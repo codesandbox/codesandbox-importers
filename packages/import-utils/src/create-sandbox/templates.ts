@@ -39,6 +39,7 @@ export function getMainFile(template: ITemplate) {
 }
 
 const SANDBOX_CONFIG = "sandbox.config.json";
+const TEMPLATE_CONFIG = ".codesandbox/template.json";
 const MAX_CLIENT_DEPENDENCY_COUNT = 50;
 
 type Dependencies = { [name: string]: string };
@@ -58,6 +59,18 @@ export function getTemplate(
 
       if (config.template) {
         return config.template;
+      }
+    } catch (e) {}
+  }
+
+  const templateConfig =
+    modules[TEMPLATE_CONFIG] || modules[`/${TEMPLATE_CONFIG}`];
+  if (templateConfig && templateConfig.type !== "directory") {
+    try {
+      const config = JSON.parse(templateConfig.content);
+
+      if (config.runtime) {
+        return config.runtime;
       }
     } catch (e) {}
   }
