@@ -1,0 +1,21 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: github-importer
+  description: All importers & exporters for CodeSandbox 
+  annotations:
+    github.com/project-slug: codesandbox/codesandbox-importers
+    backstage.io/kubernetes-namespace: default
+    backstage.io/kubernetes-label-selector: app.kubernetes.io/name=codesandbox,component=github-importers
+    codesandbox/deploy-image: codesandbox/importers
+    codesandbox/deploy-gitops-repo: codesandbox/codesandbox-gitops
+    codesandbox/deploy-gitops-yaml-key: "githubImporters.image.tag"
+    codesandbox/deploy-image-tag-regex-production: ".*"
+    codesandbox/deploy-gitops-file-production: codesandbox-core/codesandbox/production/helm-chart-values/values.yaml
+    codesandbox/deploy-image-tag-regex-staging: ".*"
+    codesandbox/deploy-gitops-file-staging: codesandbox-core/codesandbox/staging/helm-chart-values/values.yaml
+    codesandbox/deploy-gitops-version-type: tag
+spec:
+  type: service
+  lifecycle: production
+  owner: infra
