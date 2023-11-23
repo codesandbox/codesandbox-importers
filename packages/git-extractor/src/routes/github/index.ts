@@ -139,7 +139,7 @@ export const data = async (ctx: Context, next: () => Promise<any>) => {
       },
       commitSha,
       isPrivate,
-      userToken,
+      userToken
     );
 
     if (isPrivate) {
@@ -162,17 +162,17 @@ export const data = async (ctx: Context, next: () => Promise<any>) => {
       // Privacy 2 is private, privacy 0 is public
       privacy: isPrivate ? 2 : 0,
     };
-
   } catch (e) {
     // Here we catch our false, preemptive rate limit and give it a proper error status code for the server.
-    if (e.message == "Can't make axios requests, not enough rate limit remaining") {
+    if (
+      e.message == "Can't make axios requests, not enough rate limit remaining"
+    ) {
       ctx.body = {
-        error:
-          "Can't make axios requests, not enough rate limit remaining",
+        error: "Can't make axios requests, not enough rate limit remaining",
       };
       ctx.status = 403;
     } else {
-      throw e
+      throw e;
     }
   }
 };

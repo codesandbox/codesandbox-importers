@@ -7,7 +7,7 @@ import { IGitInfo } from "../push/index";
 import {
   downloadZip,
   getLatestCommitShaOfFile,
-  checkRemainingRateLimit
+  checkRemainingRateLimit,
 } from "../api";
 
 const getFolderName = (zip: JSZip) =>
@@ -22,8 +22,9 @@ export const rawGitUrl = (
   filePath: string,
   commitSha?: string
 ) => {
-  let url = `https://rawcdn.githack.com/${gitInfo.username}/${gitInfo.repo}/${commitSha || gitInfo.branch
-    }/`;
+  let url = `https://rawcdn.githack.com/${gitInfo.username}/${gitInfo.repo}/${
+    commitSha || gitInfo.branch
+  }/`;
   if (gitInfo.path) {
     url += gitInfo.path + "/";
   }
@@ -69,7 +70,7 @@ export async function downloadRepository(
                 isBinary: true,
               };
             } else {
-              pathArray.push(relativePath)
+              pathArray.push(relativePath);
             }
           } else {
             const contents = await file.async("text");
@@ -83,8 +84,7 @@ export async function downloadRepository(
     })
   );
 
-
-  const requestsToMake = pathArray.length
+  const requestsToMake = pathArray.length;
 
   /**
    * Check if there is enough of our CodeSandbox Github token rate limit left to be able to
@@ -95,25 +95,29 @@ export async function downloadRepository(
   if (!userToken) {
     const canRequest = await checkRemainingRateLimit(requestsToMake);
     if (!canRequest) {
-      throw new Error("Can't make axios requests, not enough rate limit remaining")
+      throw new Error(
+        "Can't make axios requests, not enough rate limit remaining"
+      );
     }
   }
 
   // Then we can request the SHAs of binary files if there is enough rate limit left.
-  await Promise.all(pathArray.map(async (relativePath) => {
-    const fileSha = await getLatestCommitShaOfFile(
-      gitInfo.username,
-      gitInfo.repo,
-      gitInfo.branch,
-      relativePath,
-      userToken
-    );
+  await Promise.all(
+    pathArray.map(async (relativePath) => {
+      const fileSha = await getLatestCommitShaOfFile(
+        gitInfo.username,
+        gitInfo.repo,
+        gitInfo.branch,
+        relativePath,
+        userToken
+      );
 
-    result[relativePath] = {
-      content: rawGitUrl(gitInfo, relativePath, fileSha),
-      isBinary: true,
-    };
-  }));
+      result[relativePath] = {
+        content: rawGitUrl(gitInfo, relativePath, fileSha),
+        isBinary: true,
+      };
+    })
+  );
 
   return result;
 }
