@@ -165,6 +165,16 @@ export function getTemplate(
   }
 
   if (totalDependencies.indexOf("vite") > -1) {
+    if (totalDependencies.indexOf("react-redux") > -1) {
+      // Pretty bad hack to ensure that the examples of Redux
+      // still run in the old embed: https://github.com/codesandbox/codesandbox-client/issues/8282
+      //
+      // We should remove this once either:
+      // 1. the existing embed works with VMs
+      // 2. our new embeds support all query params
+      return "create-react-app";
+    }
+
     return "node";
   }
 
@@ -226,20 +236,6 @@ export function getTemplate(
     totalDependencies.indexOf("@sveltech/routify") > -1 ||
     totalDependencies.indexOf("@roxi/routify") > -1
   ) {
-    return "node";
-  }
-
-  if (totalDependencies.indexOf("vite") > -1) {
-    if (totalDependencies.indexOf("react-redux") > -1) {
-      // Pretty bad hack to ensure that the examples of Redux
-      // still run in the old embed: https://github.com/codesandbox/codesandbox-client/issues/8282
-      //
-      // We should remove this once either:
-      // 1. the existing embed works with VMs
-      // 2. our new embeds support all query params
-      return "create-react-app";
-    }
-
     return "node";
   }
 
