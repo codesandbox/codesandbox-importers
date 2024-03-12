@@ -139,3 +139,29 @@ exports[`denormalize can filter out existing directories 1`] = `
   ],
 }
 `;
+
+exports[`denormalize works with directories starting with a dot 1`] = `
+Object {
+  "directories": Array [
+    Object {
+      "directoryShortid": undefined,
+      "shortid": "0",
+      "title": ".github",
+    },
+    Object {
+      "directoryShortid": "0",
+      "shortid": "1",
+      "title": "workflows",
+    },
+  ],
+  "modules": Array [
+    Object {
+      "code": "test",
+      "directoryShortid": "1",
+      "isBinary": false,
+      "shortid": "2",
+      "title": "test.yml",
+    },
+  ],
+}
+`;
