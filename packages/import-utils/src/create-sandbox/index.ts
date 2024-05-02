@@ -5,6 +5,7 @@ import {
   ITemplate,
 } from "codesandbox-import-util-types";
 import denormalize from "../utils/files/denormalize";
+import { parse as parseEnv } from "envfile";
 
 import parseHTML from "./html-parser";
 import { getMainFile, getTemplate } from "./templates";
@@ -71,9 +72,7 @@ function isCloudTemplate(template: ITemplate): boolean {
   return CLOUD_TEMPLATES.indexOf(template) > -1;
 }
 
-function getSandboxMetadata(
-  directory: INormalizedModules
-): {
+function getSandboxMetadata(directory: INormalizedModules): {
   title: string;
   description: string;
   tags: string[];
@@ -106,6 +105,20 @@ function getSandboxMetadata(
   }
 
   return packageJsonInfo;
+}
+
+/**
+ * Gets the prefilled environment variables by parsing either /.env.example
+ * or /.env.
+ */
+function getEnvironmentVariables(directory: INormalizedModules) {
+  const envFile = directory[".env"] || directory[".env.example"];
+
+  if (!envFile || envFile.type !== "file") {
+    return {};
+  }
+
+  return parseEnv(envFile.content);
 }
 
 /**
@@ -160,6 +173,7 @@ export default async function createSandbox(
     modules,
     directories,
     externalResources: [],
+    environmentVariables: getEnvironmentVariables(directory),
     template,
     entry: mainFile,
     v2: isCloudTemplate(template),

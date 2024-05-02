@@ -73,6 +73,7 @@ export interface ISandbox {
   externalResources: string[];
   template: ITemplate;
   entry: string;
+  environmentVariables: Record<string, string>;
   v2?: boolean;
   templateParams?: {
     iconUrl?: string;
