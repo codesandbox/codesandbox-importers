@@ -3,7 +3,7 @@ import * as LZString from "lz-string";
 
 export interface IFiles {
   [key: string]: {
-    content: string;
+    content: string | Record<string, unknown>;
     isBinary: boolean;
   };
 }
