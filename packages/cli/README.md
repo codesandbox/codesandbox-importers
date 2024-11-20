@@ -28,7 +28,9 @@ codesandbox ./
 
 ## Current limitations
 
-- You need to be signed in to deploy, this is to prevent abuse
+- You need to be signed in to GitHub, this is to prevent abuse
+- Accounts without the GitHub integration setup cannot use this tool
+- You cannot sign in with Google
 
 ## Inspiration
 
