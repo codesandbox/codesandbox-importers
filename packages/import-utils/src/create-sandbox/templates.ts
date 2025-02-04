@@ -178,6 +178,10 @@ export function getTemplate(
     return "node";
   }
 
+  if (totalDependencies.indexOf("@tanstack/start") > -1) {
+    return "node";
+  }
+
   if (totalDependencies.indexOf("vanjs-core") > -1) {
     return "node";
   }
