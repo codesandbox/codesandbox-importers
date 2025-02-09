@@ -32,6 +32,7 @@ export function getMainFile(template: ITemplate) {
     case "remix":
     case "vuepress":
     case "styleguidist":
+    case "tramvai":
       return "package.json";
     default:
       return "src/index.js";
