@@ -179,10 +179,10 @@ export function getTemplate(
   }
 
   const tanstackDependencies = [
-    '@tanstack/start',
-    '@tanstack/solid-start',
-    '@tanstack/react-start'
-  ]
+    "@tanstack/start",
+    "@tanstack/solid-start",
+    "@tanstack/react-start",
+  ];
   if (totalDependencies.some((dep) => tanstackDependencies.indexOf(dep) > -1)) {
     return "node";
   }
