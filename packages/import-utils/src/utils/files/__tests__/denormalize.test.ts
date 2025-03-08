@@ -92,6 +92,17 @@ describe("denormalize", () => {
     expect(denormalized.directories).toEqual([]);
   });
 
+  it("works with directories starting with a dot", () => {
+    const paths = {
+      ".github/workflows/test.yml": { content: "test", isBinary: false },
+    };
+
+    const denormalized = denormalize(paths, []);
+
+    expect(denormalized).toMatchSnapshot();
+    expect(denormalized.directories.length).toBe(2);
+  });
+
   it("can create nested directories", () => {
     const paramFiles = {
       "/src/test/new-file.js": { isBinary: false, content: "" },
